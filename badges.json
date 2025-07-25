@@ -1,0 +1,23 @@
+{
+    "level % 10 == 0": "🎯 Every Ten Counts",
+  "overall_level % 10 == 0": "💎 Every Tenth Tier counts",
+  "overall_level == 5": "🎖️ Level 5 Unlocked",
+  "subject_xp % 1000 == 0": "🏆 1K Subject XP Master",
+  "total_xp % 1000 == 0": "🖤 Every K Counts",
+  "studied_6_days_in_a_week": "🥉 Weekly Streaker",
+  "total_xp >= 10000": "🌟 XP Titan",
+  "total_xp >= 50000": "🚀 Grindmaster General",
+  "subject_xp >= 5000": "📘 Subject Sage",
+  "total_xp % 5000 == 0": "⚙️ XP Gearturner",
+  "studied_7_days_in_a_week": "🔥 Unbroken Chain",
+  "studied_3_weeks_straight": "🏹 Habitual Hero",
+  "studied_at_3am": "🌙 Midnight Scholar",
+  "studied_before_6am": "🌄 Early Bird Badge",
+  "first_login": "🆕 The Journey Begins",
+  "first_streak": "🧱 First Brick Laid",
+  "completed_first_subject": "🎓 Subject Conqueror",
+  "studied_on_a_holiday": "🧨 Holiday Hustler",
+  "studied_42_hours_total": "💫 Meaning of Life",
+  "reached_level_33": "🕳️ The Initiate",
+  "completed_all_subjects_once": "🧠 The Polymath"
+}
