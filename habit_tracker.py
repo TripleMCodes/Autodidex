@@ -44,12 +44,6 @@ class CPTracker(QWidget):
         self.shadow.setColor(QColor(180, 150, 255, 120))
 
         self.thm_pref = Path(__file__).parent / "v tab files/dashboard_config.json"
-
-        # self.cpt_timer = QTimer(self)
-        # self.cpt_timer.setInterval(2000)  # 2000 ms = 2 seconds
-        # self.cpt_timer.timeout.connect(self.save_last_entered_habits)
-        # self.cpt_timer.start()
-
         
 #-----------------------------------------------------------------------StlyeSheets----------------------------------------------
         self.light_mode: Optional[str] = None
@@ -134,18 +128,14 @@ class CPTracker(QWidget):
         self.habit_tracker.setContextMenuPolicy(Qt.CustomContextMenu)
         self.habit_tracker.customContextMenuRequested.connect(self.show_subject_context_menu)
 
-
-
         layout.addWidget(self.habit_tracker)
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
 #------------------------------------------------------------------------Horizontal layout---------------------------------------
         h_layout = QHBoxLayout()
-
 #---------------------------------------------------------------Creating an input box for habits---------------------------------
         self.input = QLineEdit()
         self.input.setStyleSheet(self.light_mode)
-        self.input.setPlaceholderText("Enter habit here or double click Habit column...")
+        self.input.setPlaceholderText("Enter habit here ")
         self.input.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.input.returnPressed.connect(self.add_habit) 
         h_layout.addWidget(self.input)
@@ -158,19 +148,8 @@ class CPTracker(QWidget):
         self.enter_btn.setStyleSheet(self.light_mode)
         self.enter_btn.clicked.connect(self.add_habit)
         h_layout.addWidget(self.enter_btn)
-
-#----------------------------------------------------------------cell edit button------------------------------------------------
-        edit_icon = Path(__file__).parent / "Icons/icons8-edit-64.png"
-        self.edit_btn = QPushButton("")
-        self.edit_btn.setIcon(QIcon(str(edit_icon)))
-        self.edit_btn.setIconSize(QSize(30, 30))
-        self.edit_btn.setToolTip("edit cell")
-        self.edit_btn.setStyleSheet(self.light_mode)
-        self.edit_btn.clicked.connect(self.edit_cell)
-        h_layout.addWidget(self.edit_btn)
-
+    
         layout.addLayout(h_layout)
-
 #--------------------------------------------------------------Add Widgets to Main Layout----------------------------------------
         self.main_layout.addWidget(self.sidebar)
         self.main_layout.addWidget(self.toggle_btn)  # Sidebar toggle button
@@ -179,25 +158,14 @@ class CPTracker(QWidget):
         self.setLayout(self.main_layout)
         self.resize(600, 400)
         
-        
         self.enable_check_box_change = False #checking checkboxes again when loading the app
-        self.first_subject_checked = True #For taking the date when the first is logged
-        self.date_of_first_checked = datetime.datetime.fromtimestamp(1682531274, datetime.timezone.utc) #stores the date when the first subject is checked
         self.end_date = cp_table.get_reset_date()
-       
+#------------------------------------------------------------init wrapper------------------------------------------------------       
         self.init_wrapper()
-
+#==========================================================methods begin here==================================================
     def load_last_entered_habits(self):
-        file = Path(__file__).parent / "habit tracker files/last saved.txt"
+        """load the previously cerebral pursuits"""
         try:
-            # with open(file, 'r') as f:
-            #     habits = f.readlines()
-
-            #     habits = [habit.strip() for habit in habits]
-            #     for habit in habits:
-            #         logging.debug(habit)
-            #     logging.debug('Done removing new line')
-
             habits = cp_table.get_cerebral_pursuits() or []
             logging.debug(f"Subjects in the list - {habits}")
 
@@ -213,43 +181,9 @@ class CPTracker(QWidget):
         except FileNotFoundError:
             logging.deg("last saved.txt file not found")
             return
-    
-    def save_checkbox_states(self):
-        """Save the state and position of checkboxes in the QTable."""
-        self.enable_check_box_change = False
-        logging.debug("checkbox_changed() disabled")
-        file = Path(__file__).parent / "habit tracker files/last_saved_checkboxes.json"  
-
-        states = {}
-
-        for col in range(1, 8):
-            for row in range(0, 15):
-#--------------------------------------------------creates reference to the checkbox inside the QTable cell-----------------------
-                checkbox = self.habit_tracker.cellWidget(row, col)
-#---------------------------------------------------safe net: checks for cells with checkboxes------------------------------------
-                if isinstance(checkbox, QCheckBox):
-#----------------------------------------------------Save True/False for each position--------------------------------------------  
-                    states[f"{row},{col}"] = checkbox.isChecked()
-
-        with open(file, "w") as f:
-            json.dump(states, f)
-
-        logging.debug("✅ Checkbox states saved.")
-
-    
+        
     def load_checkbox_states(self):
         """Load and apply previously saved checkbox states."""
-        
-        # file = Path(__file__).parent / "habit tracker files/last_saved_checkboxes.json"
-        
-        # try:
-        #     with open(file, "r") as f:
-               
-        # except (FileNotFoundError, json.decoder.JSONDecodeError):
-        #     logging.debug("📂 No saved checkbox states found.")
-        #     self.enable_check_box_change = True
-        #     logging.debug("checkbox_changed() enabled")
-        #     return
 
         states = cp_table.get_check_marks()
         for col in range(1, 8):
@@ -262,26 +196,6 @@ class CPTracker(QWidget):
         self.enable_check_box_change = True
         logging.debug("checkbox_changed() enabled")
         logging.debug("✅ Checkbox states loaded.")
-
-
-    # def save_last_entered_habits(self):
-    #     file = Path(__file__).parent / "habit tracker files/last saved.txt"
-        
-    #     file.open("w").close()
-    #     self.counter = 0
-    #     while self.counter < 15:
-    #         item = self.habit_tracker.item(self.counter, 0)
-    #         if item is not None:
-    #             task = item.text().strip()
-    #             if task:  # Only save non-empty, non-whitespace habits
-    #                 with open(file, "a") as f:
-    #                     logging.debug(f'subject is {task}')
-    #                     f.write(task + "\n")
-    #                     logging.debug(f"wrote {task} to file")
-    #             self.counter += 1  # Always increment to avoid infinite loop
-    #         else:
-    #             break
-        
 
     def toggle_sidebar(self):
         """Toggle sidebar visibility."""
@@ -308,17 +222,6 @@ class CPTracker(QWidget):
             self.counter += 1
         else:
                 QMessageBox.warning(self, "WARNING", "Enter a valid habit")
-        self.save_last_entered_habits()
-       
-        
-
-    def edit_cell(self):
-        row = self.habit_tracker.currentRow()
-        col = self.habit_tracker.currentColumn()
-        
-        text = self.input.text()
-        self.habit_tracker.setItem(row, col, QTableWidgetItem(text))
-        self.input.clear()
 
     def show_subject_context_menu(self, pos):
         """Show right-click menu for subjects in column 0."""
@@ -361,33 +264,6 @@ class CPTracker(QWidget):
             QMessageBox.warning(self, "Warning", msg.get("message", "Failed to rename subject"))
             return
 
-        # update subject key in subject_tracker.json and weekly_progress.json if present
-        base = Path(__file__).parent / "habit tracker files"
-        st_file = base / "subject_tracker.json"
-        try:
-            if st_file.exists():
-                with st_file.open("r") as f:
-                    data = json.load(f)
-                if old_subject in data:
-                    data[new_subject] = data.pop(old_subject)
-                    with st_file.open("w") as f:
-                        json.dump(data, f, indent=4)
-        except Exception as e:
-            logging.debug(f"Failed to update subject_tracker.json: {e}")
-
-        # update weekly_progress.json
-        wp_file = base / "weekly_progress.json"
-        try:
-            if wp_file.exists():
-                with wp_file.open("r") as f:
-                    wp = json.load(f)
-                if old_subject in wp:
-                    wp[new_subject] = wp.pop(old_subject)
-                    with wp_file.open("w") as f:
-                        json.dump(wp, f, indent=4)
-        except Exception as e:
-            logging.debug(f"Failed to update weekly_progress.json: {e}")
-
         QMessageBox.information(self, "Success", msg.get("message", "Subject renamed"))
         # refresh visible list
         self.refresh_subjects()
@@ -404,33 +280,6 @@ class CPTracker(QWidget):
         if not msg.get("status"):
             QMessageBox.warning(self, "Warning", msg.get("message", "Failed to delete subject"))
             return
-
-        # remove keys from local JSON files if present
-        base = Path(__file__).parent / "habit tracker files"
-        st_file = base / "subject_tracker.json"
-        try:
-            if st_file.exists():
-                with st_file.open("r") as f:
-                    data = json.load(f)
-                if subject in data:
-                    data.pop(subject, None)
-                    with st_file.open("w") as f:
-                        json.dump(data, f, indent=4)
-        except Exception as e:
-            logging.debug(f"Failed to update subject_tracker.json during delete: {e}")
-
-        wp_file = base / "weekly_progress.json"
-        try:
-            if wp_file.exists():
-                with wp_file.open("r") as f:
-                    wp = json.load(f)
-                if subject in wp:
-                    wp.pop(subject, None)
-                    with wp_file.open("w") as f:
-                        json.dump(wp, f, indent=4)
-        except Exception as e:
-            logging.debug(f"Failed to update weekly_progress.json during delete: {e}")
-
         QMessageBox.information(self, "Deleted", msg.get("message", "Subject deleted"))
         self.refresh_subjects()
 
@@ -451,11 +300,7 @@ class CPTracker(QWidget):
 
         self.counter = len(subjects)
 
-
     def checkbox_changed(self, row, col, state):
-        h = self.habit_tracker.horizontalHeaderItem(col)
-        print(h.text())
-
         if not self.enable_check_box_change:
             logging.debug(f"checkbox save state not enabled, {self.enable_check_box_change}")
             return
@@ -474,170 +319,40 @@ class CPTracker(QWidget):
         cell_text = item.text()
         logging.debug(cell_text)
 
-        dt = QDate(date.today()).toString('dddd, MMMM d, yyyy')
-        logging.debug(f"Checkbox at ({row}, {col}) changed to {'checked' if state == 2 else 'unchecked'}")
+        # dt = QDate(date.today()).toString('dddd, MMMM d, yyyy')
+        # logging.debug(f"Checkbox at ({row}, {col}) changed to {'checked' if state == 2 else 'unchecked'}")
 
         if state != 2:
             return  # Only proceed if checked
 
-        state = "checked"
-        file = Path(__file__).parent / "habit tracker files/subject_tracker.json"
-        save_state_path = Path(__file__).parent / "habit tracker files/save_state.pkl"
-        end_date_file = Path(__file__).parent / "habit tracker files/end_date.pkl"
-
-#-----------------------------------------------------Load or initialize data----------------------------------------------------
-        if file.exists():
-            try:
-                with open(file, 'r') as f:
-                    data = json.load(f)
-            except json.JSONDecodeError:
-                data = {}
-        else:
-            data = {}
-
         key = cell_text
         logging.debug(f"Subject key: {key}")
         cp = key
-
-        if key not in data or not data[key]:
-            if self.first_subject_checked:
-                self.date_of_first_checked = datetime.datetime.today()
-                self.end_date = self.date_of_first_checked + datetime.timedelta(days=6)
-            data[key] = [{
-                "row": row,
-                "col": col,
-                "state": state,
-                "date": dt,
-                "streak": [True]
-            }]
-            with open(save_state_path, "wb") as f:
-                pickle.dump(self.date_of_first_checked, f)
-            logging.debug(f"First ✔️ for {key} — date saved.")
-
-            with open(end_date_file, "wb") as f:
-                pickle.dump(self.end_date, f)
-                logging.debug(f"First check on {self.date_of_first_checked}App reset date is {self.end_date}")
-        else:
-            if isinstance(data[key], list) and data[key]:
-                data[key][0]["streak"].append(True)
-                logging.debug(f"Added ✔️ to {key}, streak length now {len(data[key][0]['streak'])}")
-            else:
-                logging.warning(f"Unexpected structure for {key} in subject_tracker.json")
-
 #------------------------------------------------------------------Save data----------------------------------------------------
-        day =  h = self.habit_tracker.horizontalHeaderItem(col).text()
+        day = self.habit_tracker.horizontalHeaderItem(col).text()
         state = {f'{row},{col}': True}
         msg = cp_table.save_cp(row, state, cp, day)
         logging.debug(msg)
-        QMessageBox.information(self, "Message", msg["message"])
-        
-    def reset_app_state(self):
-
-#-----------------------------------------------------------------Define file paths----------------------------------------------
-        base_path = Path(__file__).parent / "habit tracker files"
-        subject_tracker_file = base_path / "subject_tracker.json"
-        last_checked_file = base_path / "last_saved_checkboxes.json"
-        save_state_file = base_path / "save_state.pkl"
-        subjects_file = base_path / "last saved.txt"
-        end_date_file = base_path /"end_date.pkl"
-
-#-----------------------------------------------------Initialize variables in case of early exception----------------------------
-        data = {}
-        checkbox_states = {}
-        subjects = []
-
-        try:
-            if subject_tracker_file.exists():
-                with subject_tracker_file.open('r') as f:
-                    data = json.load(f)
-
-            if save_state_file.exists() and os.path.getsize(save_state_file) > 0:
-                with save_state_file.open("rb") as f:
-                    self.date_of_first_checked = pickle.load(f)
-
-            if last_checked_file.exists():
-                with last_checked_file.open("r") as f:
-                    checkbox_states = json.load(f)
-
-            if subjects_file.exists():
-                with subjects_file.open("r") as f:
-                    subjects = f.readlines()
-                    
-            if end_date_file.exists():
-                with open(end_date_file, "rb") as f:
-                    self.end_date = pickle.load(f)
-
-        except (FileNotFoundError, json.decoder.JSONDecodeError, EOFError, pickle.PickleError) as e:
-            logging.debug(f"An error occurred while resetting: {e}")
-            return  # Exit early if critical data is missing or corrupted
-
-        logging.debug(f'Date of first checked: {self.date_of_first_checked}')
-
-        if subject_tracker_file.exists() and os.path.getsize(subject_tracker_file) > 0:
-            logging.debug(f"Subject tracker data: {data}")
-            logging.debug(f"Subjects: {subjects}")
-            logging.debug(f"Checkbox states: {checkbox_states}")
-
-            if subjects:
-                subject = subjects[0].strip()
-                if subject in data and isinstance(data[subject], list) and data[subject]:
-                    logging.debug(f"Streak for first subject '{subject}': {data[subject][0].get('streak')}")
-
-            if self.save_weekly_progress(data, subjects):
-                try:
-                    last_checked_file.write_text("")
-                    logging.debug("Cleared last checked file.")
-
-                    subject_tracker_file.write_text("")
-                    logging.debug("Cleared subject tracker file.")
-
-                    save_state_file.write_bytes(b"")
-                    logging.debug("Cleared save state file.")
-
-                except Exception as e:
-                    logging.error(f"Failed to clear files during reset: {e}")
-        return
+        QMessageBox.information(self, "Message", msg["message"])        
                         
     def init_wrapper(self):
-        base_path = Path(__file__).parent / "habit tracker files"
-        start_date_file = base_path / "save_state.pkl"
-        end_date_file = base_path / "end_date.pkl"
-
-        try:
-            with open(start_date_file, "rb") as f:
-                self.date_of_first_checked = pickle.load(f)
-
-            with open(end_date_file, "rb") as f:
-                self.end_date = pickle.load(f)
-
-        except (FileNotFoundError, EOFError):
-            logging.debug("start date in not found")
+        """Initailze necessary methods and check if app needs reset"""
             
-        # self.end_date = self.date_of_first_checked #for testing
         today = str(datetime.datetime.now().date())
         today = datetime.datetime.strptime(today, "%Y-%m-%d")
         # today = self.end_date
         try:
             if today >= self.end_date:
-                
-                self.reset_app_state()
                 self.load_last_entered_habits()
                 self.enable_check_box_change = True
                 logging.debug("app reset")
                 msg = cp_table.clear_cp_data()
                 if msg["status"]:
                     logging.debug(msg["message"])
-                self.save_reset_state("0")
                 logging.debug("App has been reset")
-                # else:
-                #     self.load_last_entered_habits()
-                #     self.load_checkbox_states()
-                #     self.enable_check_box_change = True
-                #     logging.debug("App already reset")
             else:
                 self.load_last_entered_habits()
                 self.load_checkbox_states()
-                self.save_reset_state("1")
                 logging.debug("App not reset")
         except TypeError:
             logging.debug("reset date not available yet")
@@ -645,48 +360,6 @@ class CPTracker(QWidget):
             self.enable_check_box_change = True
         self.load_themes()
         self.load_thm_pref()
-
-    def save_weekly_progress(self, data, subjects):
-        file = Path(__file__).parent / "habit tracker files/weekly_progress.json"
-        weekly_progress = {}
-        if file.exists():
-            logging.debug(f"weekly_progress.json file exists.")
-        else:
-            file.parent.mkdir(parents=True, exist_ok=True)  # ensure directory exists
-            with file.open("w") as f:
-                json.dump({}, f)
-            logging.debug("weekly_progress.json file created with empty dict.")
-            
-        i = 0
-        while i < len(subjects):
-            try:
-                progress = data[subjects[i].strip()][0]["streak"]
-                logging.debug(f"{subjects[i]} is {data[subjects[i].strip()][0]["streak"]}")
-                weekly_progress[subjects[i]] = progress
-            except KeyError:
-                logging.debug(f"{subjects[i]} has no streak")
-            i += 1
-
-        # Save new data
-        with file.open("w") as f:
-            json.dump(weekly_progress, f, indent=4)
-            logging.debug("Weekly progress saved")
-
-        return True
-    
-    def load_reset_state(self):
-        file = Path(__file__).parent / "habit tracker files/state.txt"
-        with open(file, 'r') as f:
-            self.reset_state = f.read()
-            logging.debug(f'The reset state is: {self.reset_state}')
-            self.reset_state = bool(int(self.reset_state))
-            logging.debug(f'The reset state is: {self.reset_state}')
-            return self.reset_state
-    
-    def save_reset_state(self, state):
-        file = Path(__file__).parent / "habit tracker files/state.txt"
-        with open(file, 'w') as f:
-            f.write(state)
 
     def _load_habit_data(self, filepath):
         with open(filepath, 'r') as file:
@@ -707,7 +380,7 @@ class CPTracker(QWidget):
 
         plt.figure(figsize=(10, 6))
         bars = plt.bar(habits, frequencies, color="mediumpurple", edgecolor="black")
-
+        
 #----------------------------------------------------------------Add count labels on top of bars---------------------------------
         for bar in bars:
             height = bar.get_height()
@@ -781,8 +454,6 @@ class CPTracker(QWidget):
         self.plot_habit_barchart(count)
 
     def exit_app(self):
-        self.save_checkbox_states()
-        # self.save_last_entered_habits()
         sys.exit()
 
 # ======================================================================Run Application===========================================
