@@ -16,22 +16,25 @@ from PySide6.QtGui import (QBrush, QColor, QFont, QIcon, QLinearGradient,
 from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox, QHBoxLayout,
                                QLabel, QLineEdit, QListWidget, QMainWindow,
                                QMessageBox, QPushButton, QVBoxLayout, QWidget)
-
-#=====================================================================logs enable/disable=======================================================
+from dash_board_db import Dashboard
+from cp_tracker_db import Cp_tracker
+cp_tracker = Cp_tracker()
+dashboard = Dashboard()
+#=====================================================================logs enable/disable======================================================
 logging.basicConfig(level=logging.DEBUG) 
 logging.disable(logging.DEBUG)
 #===============================================================================================================================================
 #***********************************************************************************************************************************************
-#========================================================================User INfo Class========================================================
+#========================================================================User INfo Class=======================================================
 class UserIfo:
 
     def __init__(self):
         self._name = self.load_username()
         # self._title = ""
         self._overAll_level = 0
-        self.subjects = {}
-#===============================================================================================================================================        
-#==================================================================================Getters======================================================
+        self.subjects = []
+#============================================================================================================================================= 
+#==================================================================================Getters=====================================================
     @property
     def name(self):
         return self._name
@@ -40,7 +43,7 @@ class UserIfo:
     @property
     def level(self):
         return self._overAll_level
-#===============================================================================================================================================
+#==============================================================================================================================================
 #===============================================================================Setters=========================================================
     @name.setter
     def name(self, name):
@@ -52,46 +55,12 @@ class UserIfo:
     @level.setter
     def level(self, total):
         pass
-#===============================================================================================================================================
-#===========================================================================Class Methods=======================================================
+#==============================================================================================================================================
+#===========================================================================Class Methods======================================================
     def initialize_subjects(self):
         """Load subjects saved in Habit Tracker"""
-        file = Path(__file__).parent / "habit tracker files/last saved.txt"
-        subjects_level = Path(__file__).parent / "dashboard files/subjects_level.json"
-
-        try:
-            with open(file, "r") as f:
-                subjects = [line.strip() for line in f.readlines()]
-        except FileNotFoundError:
-            logging.error("Subjects text file does not exist")
-            return
-
-        self.subjects = {}  # Reset or initialize class-level dictionary
-
-#-----------------------------------------------------------------If the JSON is empty, initialize it fresh-------------------------------------
-        if os.path.getsize(subjects_level) == 0:
-            for subject in subjects:
-                self.subjects[subject] = {"level": 0, "xp": 0}
-            with open(subjects_level, "w") as f:
-                json.dump(self.subjects, f, indent=4)
-            logging.debug("Initialized subjects from scratch.")
-            return self.subjects
-
-#---------------------------------------------------------------------Otherwise, load the existing JSON data------------------------------------
-        with open(subjects_level, "r") as f:
-            subjects_level_data = json.load(f)
-
-#---------------------------------------------------------------------Update existing dict with any new subjects--------------------------------
-        for subject in subjects:
-            if subject not in subjects_level_data:
-                logging.debug(f"Adding new subject: {subject}")
-                subjects_level_data[subject] = {"level": 0, "xp": 0}
-
-#----------------------------------------------------------------------Save updated data back---------------------------------------------------
-        with open(subjects_level, "w") as f:
-            json.dump(subjects_level_data, f, indent=4)
-
-        self.subjects = subjects_level_data  # Update internal state
+        
+        self.subjects = cp_tracker.get_cerebral_pursuits()
         return self.subjects         
     
     def load_update_state(self):
@@ -147,7 +116,7 @@ class UserIfo:
         badges_file = Path(__file__).parent / "dashboard files/subjects_badges.json"
         temp = {}
         
-#------------------------------------------------------------------------IF FILE IS EMPTY-------------------------------------------------------
+#------------------------------------------------------------------------IF FILE IS EMPTY------------------------------------------------------
         if os.path.getsize(badges_file) == 0:
             with open(subjects_level_file, "r") as f:
                 data = json.load(f)
@@ -159,7 +128,7 @@ class UserIfo:
             with open(badges_file, "w") as f:
                 json.dump(temp, f, indent=4)
         
-#------------------------------------------------------------------------For new subjects-------------------------------------------------------
+#------------------------------------------------------------------------For new subjects------------------------------------------------------
         logging.debug("checking for new subjects")
         try:
             with open(subjects_level_file, "r") as f:
@@ -223,41 +192,42 @@ class UserIfo:
             logging.warning(e)
             return
         
-#------------------------------------------------------------------checking if process ready----------------------------------------------------
+#------------------------------------------------------------------checking if process ready---------------------------------------------------
         self.subjects_badges_state()
 
 #--------------------------------------------------------------------badge for over level 5----------------------------------------------------
         if self._overAll_level == 5:
             self.badge_appending_method("Overall level", "🎖️ Level 5 Unlocked")
 
-#----------------------------------------------------------badge for every tenth level achieved.------------------------------------------------
+#----------------------------------------------------------badge for every tenth level achieved.-----------------------------------------------
         if self._overAll_level % 10 == 0:
             self.badge_appending_method("Overall level", "💎 Every Tenth Tier counts")
         
-#----------------------------------------------------------------badge for every thousand xps earned--------------------------------------------
+#----------------------------------------------------------------badge for every thousand xps earned-------------------------------------------
         for key in subjects_data:
                 xp = subjects_data[key].get("xp", 0)
                 if xp % 1000 == 0 and xp != 0: 
                     self.badge_appending_method(key, "🏆 1K Subject XP Master")
 
-#-------------------------------------------------------------badge for every tenth level for a  subject----------------------------------------
+#-------------------------------------------------------------badge for every tenth level for a  subject---------------------------------------
         for key in subjects_data:
             subject = subjects_data[key].get("level", 0)
             if subject % 10 == 0 and subject !=0:
                 self.badge_appending_method(key, "🎯 Every Ten Counts")
 
-#----------------------------------------------------------------------badge for every 10000 xp earned------------------------------------------
+#----------------------------------------------------------------------badge for every 10000 xp earned-----------------------------------------
         if total_xp % 10000 == 0:
             self.badge_appending_method("Overall level", "🖤 Every Ten K Counts")
 
     def load_overall_level(self):
         """Loads the Overall level when app is opened"""
-        file = Path(__file__).parent / "dashboard files/overall_level.json"
+        # file = Path(__file__).parent / "dashboard files/overall_level.json"
 
-        with open(file, "r") as f:
-            data = json.load(f)
-        level = data["overall_level"]
-        self._overAll_level = level
+        # with open(file, "r") as f:
+            # data = json.load(f)
+        # level = data["overall_level"]
+
+        self._overAll_level = dashboard.get_overall_level()
         return self._overAll_level
 
     def load_username(self):
@@ -278,7 +248,7 @@ class UserIfo:
             with open(username_file, "r") as f:
                 data = json.load(f)
         except FileNotFoundError:
-#--------------------------------------------------------------------------creating file anew---------------------------------------------------
+#--------------------------------------------------------------------------creating file anew--------------------------------------------------
             data = {}
             data["username"] = ""
             data["userstate"] = False
@@ -287,26 +257,26 @@ class UserIfo:
             logging.debug("New file written")
 
         data["username"] = self._name
-#------------------------------------------------------------------------saving username--------------------------------------------------------
+#------------------------------------------------------------------------saving username-------------------------------------------------------
         open(username_file, "w").close()
         with open(username_file, "w") as f:
             json.dump(data, f)
         logging.debug(f"New username: {data["username"]}")
-#===============================================================================================================================================
-#***********************************************************************************************************************************************
-#=====================================================================Autodidex bank class======================================================
+#==============================================================================================================================================
+#**********************************************************************************************************************************************
+#=====================================================================Autodidex bank class=====================================================
 class AutodidexBank:
     """Details with xp, badges,lumens and user bank details """
-#------------------------------------------------------------------------Data field-------------------------------------------------------------
+#------------------------------------------------------------------------Data field------------------------------------------------------------
     def __init__(self, user_info):
         self._wallet_total: Optional[int] = None #intial value
         self._bank_details_file = Path(__file__).parent / "dashboard files/bank_details.json"
         self.badges: Optional[int] = None #intial value
         self.user_info = user_info #UserIfo()
 
-#-------------------------------------------------------------loading lumens and xp #points------------------------------------------------------
+#-------------------------------------------------------------loading lumens and xp #points----------------------------------------------------
         self._load_wallet_total_and_xp()
-#=========================================================================Getters===============================================================
+#=========================================================================Getters==============================================================
     @property
     def wallet(self) -> int:
         
@@ -333,7 +303,7 @@ class AutodidexBank:
         self._save_wallet_total()
 
         logging.info(f"Deposited {lumens} lumens. New balance: {self._wallet_total}")
-#=================================================================================Setters=======================================================
+#=================================================================================Setters======================================================
     @xpPoints.setter
     def xpPoints(self, points):
         if points < 0:
@@ -347,8 +317,8 @@ class AutodidexBank:
             return "You cannot earn negative xp points"
         else:
             self._xp_total += points
-#===============================================================================================================================================
-#============================================================================Class Methods======================================================
+#==============================================================================================================================================
+#============================================================================Class Methods=====================================================
     def _save_wallet_total(self, withdraw=False):
         bank_details_file = Path(__file__).parent / "dashboard files/bank_details.json"
         try:
@@ -490,9 +460,9 @@ class AutodidexBank:
         self._wallet_total = self._wallet_total - amount
         bank_details["lumens"] = self._wallet_total
         
-#-----------------------------------------------------------------------clear old data-----------------------------------------------------------
+#-----------------------------------------------------------------------clear old data---------------------------------------------------------
         open(bank_details_file, "w").close()
-#--------------------------------------------------------------------------load new data----------------------------------------------------------
+#--------------------------------------------------------------------------load new data-------------------------------------------------------
         with open(bank_details_file, "w") as f:
             json.dump(bank_details, f, indent=4)
         logging.debug(f"Transection complete")
@@ -551,18 +521,18 @@ class AutodidexBank:
     def load_internal_methods(self):
         """Loads internal methods needed when app is started"""
         self._load_wallet_total_and_xp()
-#===============================================================================================================================================
-#***********************************************************************************************************************************************
-#======================================================================Polymart Class===========================================================
+#==============================================================================================================================================
+#**********************************************************************************************************************************************
+#======================================================================Polymart Class==========================================================
 class PolyMart:
-#-------------------------------------------------------------------------data fields-----------------------------------------------------------
+#-------------------------------------------------------------------------data fields----------------------------------------------------------
     def __init__(self,bank_account):
         self.bank_account = bank_account #AutodidexBank(UserIfo())
         self.store_items = {}
         self.trade_items = {}
-#-----------------------------------------------------------------------------------------------------------------------------------------------
-#===============================================================================================================================================
-#======================================================================Class Methods============================================================
+#----------------------------------------------------------------------------------------------------------------------------------------------
+#==============================================================================================================================================
+#======================================================================Class Methods===========================================================
     def load_store_items(self):
         """Load store items to correct item dict"""
         items_list_file = Path(__file__).parent / "dashboard files/store_items.json"
@@ -580,7 +550,7 @@ class PolyMart:
         """"Purchases or trades items selected"""
         logging.debug(item_name)
         
-#------------------------------------------------------------------------ Separating the name from the price -----------------------------------
+#------------------------------------------------------------------------ Separating the name from the price ----------------------------------
         tuple_items = item_name.partition(":")
         item = tuple_items[0]
         item_name = str(item).strip().lower()
@@ -599,7 +569,7 @@ class PolyMart:
                     return  "Transection Failed",f"💸 Not enough lumens to purchase {item_name}"
                     
                 
-#----------------------------------------------------------------------------trading badges-----------------------------------------------------
+#----------------------------------------------------------------------------trading badges----------------------------------------------------
         for key, value in self.trade_items.items():
             trade_amount = int(value)
             trade_item = str(key).strip().lower()
@@ -612,7 +582,7 @@ class PolyMart:
                 self.remove_traded_badge(item_name)
                 return f"Transaction Complete Traded {item_name} for {trade_amount}"
                 
-#-------------------------------------------------------------------------If loop finishes and no item was found--------------------------------
+#-------------------------------------------------------------------------If loop finishes and no item was found-------------------------------
         return "❌ Item not found in PolyMart."
     
     def remove_traded_badge(self, store_item):
@@ -637,11 +607,11 @@ class SpinningLabel(QLabel):
         self.setFont(QFont("Arial", 80, QFont.Bold))
         self.angle = 0
 
-#----------------------------------------------------------------Timer to simulate 3D spin------------------------------------------------------
+#----------------------------------------------------------------Timer to simulate 3D spin-----------------------------------------------------
         self.timer = QTimer()
         self.timer.timeout.connect(self.spin)
         self.timer.start(30)  # Spin speed
-#=====================================================================Class Methods=============================================================
+#=====================================================================Class Methods============================================================
     def spin(self):
         self.angle += 2
         if self.angle >= 360:
@@ -652,13 +622,13 @@ class SpinningLabel(QLabel):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
 
-#---------------------------------------------------------------------Create radial gradient (white to purple)----------------------------------
+#---------------------------------------------------------------------Create radial gradient (white to purple)---------------------------------
         gradient = QRadialGradient(self.width()/2, self.height()/2, self.width()/1.5)
         gradient.setColorAt(0, QColor("white"))
         gradient.setColorAt(1, QColor(128, 0, 128))  # Purple
         painter.fillRect(self.rect(), QBrush(gradient))
 
-#-----------------------------------------------------------------------Simulate 3D spin using scaling on the x-axis----------------------------
+#-----------------------------------------------------------------------Simulate 3D spin using scaling on the x-axis---------------------------
         transform = QTransform()
         scale = math.cos(math.radians(self.angle))
         transform.translate(self.width()/2, self.height()/2)
@@ -666,14 +636,14 @@ class SpinningLabel(QLabel):
         transform.translate(-self.width()/2, -self.height()/2)
         painter.setTransform(transform)
 
-#------------------------------------------------------------------------------Draw the text----------------------------------------------------
+#------------------------------------------------------------------------------Draw the text---------------------------------------------------
         painter.setPen(Qt.black)
         painter.drawText(self.rect(), Qt.AlignCenter, self.text())
-#===============================================================================================================================================
-#***********************************************************************************************************************************************
-#=====================================================================Dashboard UI==============================================================
+#==============================================================================================================================================
+#**********************************************************************************************************************************************
+#=====================================================================Dashboard UI=============================================================
 class MainWindow(QMainWindow):
-#-----------------------------------------------------------------------Data Fields-------------------------------------------------------------
+#-----------------------------------------------------------------------Data Fields------------------------------------------------------------
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Autodidex Dashboard")
@@ -682,8 +652,7 @@ class MainWindow(QMainWindow):
         self.bank = AutodidexBank(self.user) 
         self.market = PolyMart(self.bank) 
         self.name_null_value: Optional[str] = None
-        self.user_present = self.present_user_state()
-
+        self.user_present = dashboard.get_user_state()
 
         self.window_load = QWidget()
        
@@ -709,28 +678,20 @@ class MainWindow(QMainWindow):
         self.light_mode: Optional[str] = None
         self.theme_toggle = QPushButton("")
         self.theme_toggle.setIcon(QIcon(str(self.light_icon)))
-
         self.cpt_timer = QTimer(self)
         self.cpt_timer.setInterval(2000)  # 2000 ms = 2 seconds
         self.cpt_timer.timeout.connect(self.check_new_cpt)
         self.cpt_timer.start()
-
         self.badge_list = QListWidget()
         self.container = QWidget()
-
         self.subject_combo = QComboBox()
 
-        # self.on_load()
-        # if self.user_present == True:
-        #     self.setup_ui()
-        # self.thm_wrapper()
-        # self.init_wrapper()
-#===============================================================================Class Methods===================================================
+        self.init_wrapper()
+#===============================================================================Class Methods==================================================
     def setup_ui(self):
         """"Struture the UI"""
         layout = QVBoxLayout()
-
-#---------------------------------------------------------------------------Header Section with Toggle------------------------------------------ 
+#---------------------------------------------------------------------------Header Section with Toggle-----------------------------------------
         header_layout = QHBoxLayout()
 
         self.theme_toggle.clicked.connect(self.toggle_theme)
@@ -776,8 +737,7 @@ class MainWindow(QMainWindow):
         layout.addWidget(self.level_label)
         layout.addWidget(self.wallet_label)
         layout.addWidget(self.xp_label)
-
-#----------------------------------------------------------------------Subject XP System--------------------------------------------------------
+#----------------------------------------------------------------------Subject XP System-------------------------------------------------------
         xp_layout = QHBoxLayout()
         self.subject_combo.currentIndexChanged.connect(self.display_badges)
         
@@ -791,15 +751,13 @@ class MainWindow(QMainWindow):
         xp_layout.addWidget(subjects_label)
         xp_layout.addWidget(self.subject_combo)
         layout.addLayout(xp_layout)
-
-#-------------------------------------------------------------------------Badge Display---------------------------------------------------------
+#-------------------------------------------------------------------------Badge Display--------------------------------------------------------
         badges_label = QLabel()
         b_icon = Path(__file__).parent / "Icons/icons8-trophy-64.png"
         badges_label.setText(f'<img src="{str(b_icon)}" width="40" height="40">')
         badges_label.setToolTip("Badges")
         layout.addWidget(badges_label)
         layout.addWidget(self.badge_list)
-
 #--------------------------------------------------------------------------PolyMart-------------------------------------------------------------
         c_icon = Path(__file__).parent / "Icons/icons8-cart-64.png"
         cart_label = QLabel(f'<img src="{str(c_icon)}" width="40" height="40">'
@@ -830,17 +788,17 @@ class MainWindow(QMainWindow):
                 self.setLayout(main_layout)
                 layout = QHBoxLayout()
                 
-
                 layout.addWidget(self.name_input)
                 layout.addWidget(self.enter_btn)
                 main_layout.addWidget(self.label)
                 main_layout.addLayout(layout)
                 self.window_load.setLayout(main_layout)
                 self.setCentralWidget(self.window_load)
-                # if self.user.name:
-                    # self.save_user_state(True)
-            # else:
-            #     self.setup_ui()
+                if self.user.name:
+                    dashboard.update_is_active_state(1)
+                    dashboard.starter_badge()
+            else:
+                self.setup_ui()
         logging.debug(f"The user state is {self.user_present}")
         logging.debug(f"The name of the user is now {self.user.name}")
             
@@ -853,10 +811,11 @@ class MainWindow(QMainWindow):
             try:
                 self.user.name = name
                 self.user.save_username()
-                self.user_present = True
+                state = dashboard.create_new_user(name)
+                self.user_present = state
                 logging.debug("User logged in as: %s", self.user.name)
 
-#------------------------------------------------------------------replacing the window with the actual UI--------------------------------------
+#------------------------------------------------------------------replacing the window with the actual UI-------------------------------------
                 self.setup_ui()
             except ValueError as e:
                 logging.debug("Name validation failed: %s", e)
@@ -886,7 +845,7 @@ class MainWindow(QMainWindow):
                 trade_items = data['badges']
                 logging.debug(f"badges for trade: {trade_items}")
         except FileNotFoundError:
-#----------------------------------------------------------------------add back open back up file feature---------------------------------------
+#----------------------------------------------------------------------add back open back up file feature--------------------------------------
             raise ValueError("file not found. Loading back up")
 
         item = self.store_combo.currentText().partition(":")[0]
@@ -923,40 +882,9 @@ class MainWindow(QMainWindow):
             self.user.subjects_badges_state()
         
     def add_subject(self):
-        """Load subjects from JSON and return them as a list. Handles missing or empty files gracefully."""
-        subjects_data = Path(__file__).parent / "habit tracker files/last saved.txt"
-        subjects_list = []
-
-        try:
-            if not subjects_data.exists():
-                logging.warning(f"Subjects file not found: {subjects_data}")
-                return subjects_list
-
-            if subjects_data.stat().st_size == 0:
-                logging.debug("Subjects file is empty.")
-                subjects_list.append("None")
-                return subjects_list
-
-            with open(subjects_data, "r", encoding="utf-8") as f:
-                data = []
-                cp_list = f.readlines()
-                if not isinstance(cp_list, list):
-                    logging.warning("Subjects file format is invalid (expected a list object).")
-                    return subjects_list
-                
-                #removing whitespace
-                for cp in cp_list:
-                    cp = cp.strip()
-                    data.append(cp)
-                logging.debug(f"CP data {data}")
-            
-        except FileNotFoundError:
-            logging.error("Failed to load file, file not found")
-        except Exception as e:
-            logging.error(f"Unexpected error while loading subjects: {e}")
-
-        subjects_list = data
-
+        """Load subjects from db"""
+       
+        subjects_list = sorted(self.user.subjects)
         return subjects_list
 
         
@@ -981,45 +909,6 @@ class MainWindow(QMainWindow):
 
         return store_products
     
-    def present_user_state(self):
-        """checks whether or not a new username is required"""
-        userstate_file = Path(__file__).parent / "dashboard files/username.json"
-
-        try:
-            with open(userstate_file, "r") as f:
-                data = json.load(f)
-        except FileNotFoundError:
-            data = {}
-            data["username"] = ""
-            data["userstate"] = False
-            with open(userstate_file, "w") as f:
-                json.dump(userstate_file, data)
-        
-        state = data["userstate"]
-        self.name_null_value = data["username"]
-        logging.debug(f"The present user state is {state}")
-        return state
-    
-    def save_user_state(self, state):
-        """saves whether or not there is a username saved"""
-        userstate_file = Path(__file__).parent / "dashboard files/username.json"
-        logging.debug(f"Passed in userstate is {state}")
-
-#-------------------------------------------------------------------------laad data-------------------------------------------------------------
-        with open(userstate_file, "r") as f:
-            data = json.load(f)
-
-#---------------------------------------------------------------------change value of state-----------------------------------------------------
-        data["userstate"] = state
-        
-#---------------------------------------------------------------------------clear old data------------------------------------------------------
-        open(userstate_file, "w").close()
-#---------------------------------------------------------------------------load new data-------------------------------------------------------
-        with open(userstate_file, "w") as f:
-            json.dump(data, f)
-        logging.debug(f'new user state saved')
-        return
-
     def load_themes(self):
         theme_files = {
             "light_mode": Path(__file__).parent / "themes files/light_mode.txt",
@@ -1058,7 +947,7 @@ class MainWindow(QMainWindow):
                 data = json.load(f)
                 self.theme_state = data["mode"]
         except (FileNotFoundError, json.decoder.JSONDecodeError):
-#--------------------------------------------------------------------------------set to defaulf-------------------------------------------------
+#--------------------------------------------------------------------------------set to defaulf------------------------------------------------
             self.theme_state = "dark"
         
         if self.theme_state == "dark":
@@ -1097,10 +986,10 @@ class MainWindow(QMainWindow):
         self.bank.earn_subject_xp()
         self.bank.load_internal_methods()
         self.market.load_store_items
-#===========================================================================Run application=====================================================
-# if __name__ == "__main__":
-#     app = QApplication(sys.argv)
-#     window = MainWindow()
-#     window.resize(400, 600)
-#     window.show()
-#     sys.exit(app.exec())
+#===========================================================================Run application====================================================
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    window.resize(400, 600)
+    window.show()
+    sys.exit(app.exec())

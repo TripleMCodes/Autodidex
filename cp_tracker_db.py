@@ -17,7 +17,7 @@ class Cp_tracker():
         self.table_name_two = "check_marks"
 
     def _commit_data(self):
-        """Commits data to the data (does not close connection)"""
+        """Commits data to the data base (does not close connection)"""
         self.conn.commit()
 
     def _get_user_id(self) -> int | None:
@@ -30,6 +30,7 @@ class Cp_tracker():
         except Exception as e:
             logging.debug(f"An error occurred: {e}")
             return
+    
 
     def insert_cp(self, cp:str) -> dict:
         """Add a new cerebral pursuit"""
