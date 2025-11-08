@@ -11,7 +11,6 @@ from PySide6.QtCore import Qt,QTimer
 from datetime import date
 from pathlib import Path
 from typing import Optional
-
 import matplotlib.pyplot as plt
 from PySide6.QtCore import QDate, QSize, Qt
 from PySide6.QtGui import QColor, QIcon
@@ -21,7 +20,6 @@ from PySide6.QtWidgets import (QApplication, QCheckBox,
                                QPushButton, QSizePolicy, QTableWidget,
                                QTableWidgetItem, QVBoxLayout, QWidget,
                                QMenu, QInputDialog)
-
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 from cp_tracker_db import Cp_tracker
 cp_table = Cp_tracker()
@@ -43,25 +41,20 @@ class CPTracker(QWidget):
         self.shadow.setYOffset(4)
         self.shadow.setColor(QColor(180, 150, 255, 120))
 
-        self.thm_pref = Path(__file__).parent / "v tab files/dashboard_config.json"
-        
+        self.thm_pref = Path(__file__).parent / "v tab files/dashboard_config.json" 
 #-----------------------------------------------------------------------StlyeSheets----------------------------------------------
         self.light_mode: Optional[str] = None
         self.dark_mode: Optional[str] = None
-
 #-----------------------------------------------------------------------Main Layout-----------------------------------------------
         self.main_layout =  QHBoxLayout(self)
-        self.main_layout.setObjectName("mainframe")
-        
+        self.main_layout.setObjectName("mainframe")    
 #-----------------------------------------------------------------Sidebar Widget-------------------------------------------------
         self.sidebar = QWidget()
         self.sidebar.setFixedWidth(200)  # Default width "background-color: #333;"
         self.sidebar.setStyleSheet(self.light_mode)
-
 #---------------------------------------------------------------Sidebar Layout (Vertical)----------------------------------------
         self.sidebar_layout = QVBoxLayout(self.sidebar)
         self.sidebar_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
 #------------------------------------------------------------Toggle Button (Collapses Sidebar)-----------------------------------
         self.menu_icon = Path(__file__).parent / "Icons/icons8-menu-48.png"
         self.x_icon = Path(__file__).parent / "Icons/icons8-close-64.png"
@@ -69,10 +62,8 @@ class CPTracker(QWidget):
         self.toggle_btn.setIcon(QIcon(str(self.x_icon)))
         self.toggle_btn.setIconSize(QSize(40, 40))
         self.toggle_btn.clicked.connect(self.toggle_sidebar)
-
 #-----------------------------------------------------------------app theme state------------------------------------------------
         self.mode: Optional[str] = None
-
 #-------------------------------------------------------------------Sidebar Buttons----------------------------------------------
         p_icon = Path(__file__).parent / "Icons/icons8-progress-64.png"
         progress_btn = QPushButton("")
@@ -98,7 +89,6 @@ class CPTracker(QWidget):
         self.sidebar_layout.addWidget(progress_btn)
         self.sidebar_layout.addWidget(self.thm_btn)
         self.sidebar_layout.addWidget(self.exit_btn)
-
 #------------------------------------------------------------Main Content Area---------------------------------------------------
         layout = QVBoxLayout()
         self.setLayout(layout)
@@ -297,7 +287,6 @@ class CPTracker(QWidget):
         for idx, subj in enumerate(subjects):
             if subj and subj.strip():
                 self.habit_tracker.setItem(idx, 0, QTableWidgetItem(subj.strip()))
-
         self.counter = len(subjects)
 
     def checkbox_changed(self, row, col, state):
@@ -308,7 +297,7 @@ class CPTracker(QWidget):
         header_item = self.habit_tracker.horizontalHeaderItem(col)
         if not header_item:
             return
-
+        
         column_header = header_item.text()
         logging.debug(f"Column header at column {col}: {column_header}")
 
@@ -319,9 +308,6 @@ class CPTracker(QWidget):
         cell_text = item.text()
         logging.debug(cell_text)
 
-        # dt = QDate(date.today()).toString('dddd, MMMM d, yyyy')
-        # logging.debug(f"Checkbox at ({row}, {col}) changed to {'checked' if state == 2 else 'unchecked'}")
-
         if state != 2:
             return  # Only proceed if checked
 
@@ -329,7 +315,7 @@ class CPTracker(QWidget):
         logging.debug(f"Subject key: {key}")
         cp = key
 #------------------------------------------------------------------Save data----------------------------------------------------
-        day = self.habit_tracker.horizontalHeaderItem(col).text()
+        day = column_header
         state = {f'{row},{col}': True}
         msg = cp_table.save_cp(row, state, cp, day)
         logging.debug(msg)
@@ -361,26 +347,12 @@ class CPTracker(QWidget):
         self.load_themes()
         self.load_thm_pref()
 
-    def _load_habit_data(self, filepath):
-        with open(filepath, 'r') as file:
-            data = json.load(file)
-        return data
-
-    def count_checkmarks(self, habit_data):
-        counts = defaultdict(int)
-        for habit, entries in habit_data.items():
-            for entry in entries:
-                if entry["state"] == "checked":
-                    counts[habit] += 1
-        return counts
-
     def plot_habit_barchart(self, counts):
         habits = list(counts.keys())
         frequencies = list(counts.values())
 
         plt.figure(figsize=(10, 6))
         bars = plt.bar(habits, frequencies, color="mediumpurple", edgecolor="black")
-        
 #----------------------------------------------------------------Add count labels on top of bars---------------------------------
         for bar in bars:
             height = bar.get_height()
@@ -398,12 +370,10 @@ class CPTracker(QWidget):
         """loads the themes, and sets them to their data fields"""
         light_mode_file = Path(__file__).parent / "themes files/light_mode.txt"
         dark_mode_file = Path(__file__).parent / "themes files/dark_mode.txt"
-
 #------------------------------------------------------------------------load light mode-----------------------------------------
         with open(light_mode_file, "r") as f:
             light_mode = f.read()
         self.light_mode = light_mode
-
 #------------------------------------------------------------------load dark mode------------------------------------------------
         with open(dark_mode_file, "r") as f:
             dark_mode = f.read()
@@ -447,15 +417,13 @@ class CPTracker(QWidget):
             self.setStyleSheet(self.light_mode)
 
     def show_progress(self):
-        file = Path(__file__).parent / "habit tracker files/subject_tracker.json"
+        """Shows the check marks for each cp per week"""
 
-        data = self._load_habit_data(file)
-        count = self.count_checkmarks(data)
+        count = cp_table.get_cp_with_check_marks()
         self.plot_habit_barchart(count)
 
     def exit_app(self):
         sys.exit()
-
 # ======================================================================Run Application===========================================
 if __name__ == "__main__":
     app = QApplication([])

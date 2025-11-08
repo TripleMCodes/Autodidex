@@ -178,20 +178,53 @@ class Cp_tracker():
         except Exception as e:
             logging.debug(f"An error occurred while deleting {cp}: {e}")
             return {"message": "An error occurred", "status": False}
+        
+    def get_cp_with_check_marks(self):
+        """Get all the cerebral pursuits saved with repective check marks."""
+
+        query = f"""SELECT a.subject, b.Monday, b.Tuesday, b.Wednesday, b.Thursday, b.Friday, b.Saturday, b.Sunday
+                    FROM cerebral_pursuits AS a
+                    INNER JOIN (
+                        SELECT 
+                            subject_id,
+                            MAX(Monday) AS Monday,
+                            MAX(Tuesday) AS Tuesday,
+                            MAX(Wednesday) AS Wednesday,
+                            MAX(Thursday) AS Thursday,
+                            MAX(Friday) AS Friday,
+                            MAX(Saturday) AS Saturday,
+                            MAX(Sunday) AS Sunday
+                        FROM check_marks
+                        GROUP BY subject_id) AS b
+                    ON a.id = b.subject_id;
+                    """
+        dct = {}
+        try:
+            self.conn_cursor.execute(query)
+            data = self.conn_cursor.fetchall()
+            for i in range(len(data)):
+                cp = data[i][0]
+                lst = [obj for obj in list(data[i][1:]) if obj != None]
+                dct[cp] = len(lst)
+            return dct
+        except Exception as e:
+            logging.debug(f"An error has occurred: {e}")
+            return {"error": e}
 
 if __name__ == "__main__":
 
     cp_table = Cp_tracker()
-    dt = cp_table.get_reset_date()
-    today = str(datetime.now().date())
-    today = datetime.strptime(today, "%Y-%m-%d")
-    print(isinstance(today, datetime))
-    print(isinstance(dt, datetime))
-    print(dt)
-    print(today)
-    if today >= dt:
-        print("the are the same")
-    else:
-        print('you know what this means')
-    # print(datetime.now())
+    cp_table.get_cp_with_check_marks()
+    # dt = cp_table.get_reset_date()
+    # today = str(datetime.now().date())
+    # today = datetime.strptime(today, "%Y-%m-%d")
+    # print(isinstance(today, datetime))
+    # print(isinstance(dt, datetime))
+    # print(dt)
+    # print(today)
+    # if today >= dt:
+    #     print("the are the same")
+    # else:
+    #     print('you know what this means')
+    # # print(datetime.now())
 
