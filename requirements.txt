@@ -1,0 +1,18 @@
+# Auto-generated requirements file (inferred from project imports)
+# Review and pin versions with `pip freeze > requirements.txt` in your
+# development environment before deploying.
+
+PySide6
+matplotlib
+requests
+pyinputplus
+sounddevice
+numpy
+scipy
+psutil
+pygame
+Markdown
+nltk
+pyphen
+pronouncing
+pyspellchecker
