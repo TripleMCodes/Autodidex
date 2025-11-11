@@ -1,1 +1,3 @@
-secrets
+# Ignore secrets folder
+/secrets/
+secrets/
