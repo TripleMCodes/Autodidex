@@ -15,6 +15,8 @@ class Cp_tracker():
         self.conn_cursor = self.conn.cursor()
         self.table_name_one = "cerebral_pursuits"
         self.table_name_two = "check_marks"
+        self.table_name_three = "user_info"
+        self.table_name_four = "bank"
 
     def _commit_data(self):
         """Commits data to the data base (does not close connection)"""
@@ -22,7 +24,7 @@ class Cp_tracker():
 
     def _get_user_id(self) -> int | None:
         """Get the id of current user"""
-        query = f"SELECT uid FROM user_info;"
+        query = f"SELECT uid FROM {self.table_name_three};"
         try:
             self.conn_cursor.execute(query)
             uid = int(self.conn_cursor.fetchone()[0])
@@ -30,8 +32,35 @@ class Cp_tracker():
         except Exception as e:
             logging.debug(f"An error occurred: {e}")
             return
-    
+        
+    def _check_cp(self, cp:str) -> bool:
+        """Checks if a subject is saved in database"""
 
+        query = f"""SELECT subject FROM cerebral_pursuits 
+                    WHERE subject = ?;"""
+        try:
+            self.conn_cursor.execute(query, (cp,))
+            if self.conn_cursor.fetchone()[0]:
+                return True
+            else:
+                return False
+        except Exception as e:
+            logging.debug(f"An error occurred: {e}")
+            return None
+        
+    def _get_current_xp_level(self, cp:str) -> int | None:
+        """Get current xp of a cp"""
+
+        query = f"""SELECT subject_xp FROM {self.table_name_one}
+                    WHERE subject = ?;"""
+        try:
+            self.conn_cursor.execute(query, (cp,))
+            xp = self.conn_cursor.fetchone()[0]
+            return xp
+        except Exception as e:
+            logging.debug(f"An error occurred: {e}")
+            return
+    
     def insert_cp(self, cp:str) -> dict:
         """Add a new cerebral pursuit"""
 
@@ -90,8 +119,25 @@ class Cp_tracker():
             return {"message": "Done"}
         except Exception as e:
             logging.debug(f"An error occurred: {e}")
+            return {"message": f"An error occurred: {e}"}       
+        
+    def save_cp_xp(self, cp:str, xp:int):
+        """Saves the xp of the subject"""
+
+        query = f"""UPDATE cerebral_pursuits 
+                    SET subject_xp += ?
+                    WHERE subject = ?;"""
+        if self._check_cp(cp):
+            try:
+                self.conn_cursor.execute(query, (xp, cp,))
+                self._commit_data()
+                return
+            except Exception as e:
+                logging.debug(f"An error occurred: {e}")
+                return
+        else:
             return
-    
+
     def get_check_marks(self) -> dict | None:
         """Get all the check marks for saved cerebral pursuits"""
         cp_dict = dict()
@@ -211,11 +257,12 @@ class Cp_tracker():
         except Exception as e:
             logging.debug(f"An error has occurred: {e}")
             return {"error": e}
+    
 
 if __name__ == "__main__":
 
     cp_table = Cp_tracker()
-    cp_table.get_cp_with_check_marks()
+    print(cp_table.save_cp_xp("Mathematics", 100))
     # dt = cp_table.get_reset_date()
     # today = str(datetime.now().date())
     # today = datetime.strptime(today, "%Y-%m-%d")

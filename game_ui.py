@@ -221,47 +221,42 @@ class UserIfo:
 
     def load_overall_level(self):
         """Loads the Overall level when app is opened"""
-        # file = Path(__file__).parent / "dashboard files/overall_level.json"
-
-        # with open(file, "r") as f:
-            # data = json.load(f)
-        # level = data["overall_level"]
 
         self._overAll_level = dashboard.get_overall_level()
         return self._overAll_level
 
-    def load_username(self):
-        """"Load username""" 
-        username_file = Path(__file__).parent / "dashboard files/username.json"
-        try:
-            with open(username_file, "r") as f:
-                data = json.load(f)
-        except FileNotFoundError:
-            return
-        name = data["username"]
-        return name
+    # def load_username(self):
+    #     """"Load username""" 
+    #     username_file = Path(__file__).parent / "dashboard files/username.json"
+    #     try:
+    #         with open(username_file, "r") as f:
+    #             data = json.load(f)
+    #     except FileNotFoundError:
+    #         return
+    #     name = data["username"]
+    #     return name
     
-    def save_username(self):
-        """Save new username""" 
-        username_file = Path(__file__).parent / "dashboard files/username.json"
-        try:
-            with open(username_file, "r") as f:
-                data = json.load(f)
-        except FileNotFoundError:
-#--------------------------------------------------------------------------creating file anew--------------------------------------------------
-            data = {}
-            data["username"] = ""
-            data["userstate"] = False
-            with open(username_file, "r") as f:
-                json.dump(data, f)
-            logging.debug("New file written")
+#     def save_username(self):
+#         """Save new username""" 
+#         username_file = Path(__file__).parent / "dashboard files/username.json"
+#         try:
+#             with open(username_file, "r") as f:
+#                 data = json.load(f)
+#         except FileNotFoundError:
+# #--------------------------------------------------------------------------creating file anew--------------------------------------------------
+#             data = {}
+#             data["username"] = ""
+#             data["userstate"] = False
+#             with open(username_file, "r") as f:
+#                 json.dump(data, f)
+#             logging.debug("New file written")
 
-        data["username"] = self._name
-#------------------------------------------------------------------------saving username-------------------------------------------------------
-        open(username_file, "w").close()
-        with open(username_file, "w") as f:
-            json.dump(data, f)
-        logging.debug(f"New username: {data["username"]}")
+#         data["username"] = self._name
+# #------------------------------------------------------------------------saving username-------------------------------------------------------
+#         open(username_file, "w").close()
+#         with open(username_file, "w") as f:
+#             json.dump(data, f)
+#         logging.debug(f"New username: {data["username"]}")
 #==============================================================================================================================================
 #**********************************************************************************************************************************************
 #=====================================================================Autodidex bank class=====================================================
@@ -366,7 +361,6 @@ class AutodidexBank:
                 state = json.load(f)
                 state = state["state"]
                 logging.debug(f"The state is {state}")
-
 #------------------------------------------------------------------Check if date file is empty ormissing---------------------------------------
             if not date_file.exists() or os.path.getsize(date_file) == 0:
                 logging.warning("⚠️ Date file missing or empty. Saving today's date.")
@@ -380,7 +374,6 @@ class AutodidexBank:
         except (FileNotFoundError):
             raise FileNotFoundError("Couldn't find files for this process")
             
-
         if today.date() == saved_date.date() if isinstance(saved_date, datetime.datetime) else saved_date:
             if state:
                 logging.debug(f"subject data is {subject_level_data}")
@@ -398,39 +391,51 @@ class AutodidexBank:
             self.user_info.save_update_state(state)
             logging.debug("state ready for update")
 
-        
     def update_user_info(self, data, subjects, subjects_data, subject_level_data):
         """"Updates the subjesct level"""
-        if data != {}:
-            for key, value in data.items():
-                        for i in range(len(subjects)):
-                            if subjects[i].strip() == key.strip():
-                                subject = subjects[i].strip()
-                                if subject in subject_level_data:
-                                    check = len(value)
-                                    income = self.progress_conversion(check)
-                                    self.add_subject_xp(subject, income)
-                                    self.subject_level_up(subject)
-                                    logging.debug(f'subject updated is {subject}')
-                                    logging.debug(self.user_info.subjects)
-                                    self.add_total_xp(income)
 
-            open(subjects_data).close()
-            with open(subjects_data, "w") as f:
-                json.dump(self.user_info.subjects, f)
-            return self.user_info.subjects
-        else:
-            empty_dict = {}
-            return empty_dict
+        for cp, streak in subjects_data.items():
+            xp = self.progress_conversion(streak)
+            self.add_total_xp(cp)
+            cp_tracker.save_cp_xp(cp, xp)
+
+
+
+
+        # if data != {}:
+        #     for key, value in data.items():
+        #                 for i in range(len(subjects)):
+        #                     if subjects[i].strip() == key.strip():
+        #                         subject = subjects[i].strip()
+        #                         if subject in subject_level_data:
+        #                             check = len(value)
+        #                             income = self.progress_conversion(check)
+        #                             self.add_subject_xp(subject, income)
+        #                             self.subject_level_up(subject)
+        #                             logging.debug(f'subject updated is {subject}')
+        #                             logging.debug(self.user_info.subjects)
+        #                             self.add_total_xp(income)
+
+        #     open(subjects_data).close()
+        #     with open(subjects_data, "w") as f:
+        #         json.dump(self.user_info.subjects, f)
+        #     return self.user_info.subjects
+        # else:
+        #     empty_dict = {}
+        #     return empty_dict
         
     def subject_level_up(self, subject):
         """Add level up for a subject if new level > current and rewards with 10 lumens"""
+        #get subject xp
         subjects_data = self.user_info.subjects
         current_level = subjects_data[subject]["level"]
+        #check for new level
         new_level = subjects_data[subject]["xp"] //  200
 
+        #set new level
         if new_level > current_level:
             subjects_data[subject]["level"] += new_level
+            #add lumens
             self.wallet = 10
         
     def add_total_xp(self, amount):

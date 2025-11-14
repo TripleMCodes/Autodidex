@@ -13,6 +13,7 @@ class Dashboard():
         self.app_attr_table = "app_attr"
         self.badges_table = "badges_and_titles"
         self.user_table = "user_info"
+        self.bank_table = "bank"
     
     def _commit_data(self):
         """Commits data to data base (does not close connection)"""
@@ -26,7 +27,8 @@ class Dashboard():
         try:
             self.conn_cursor.execute(query, (name,))
             self._commit_data()
-            # self.starter_badge()
+            self.starter_badge()
+            self._create_bank()
             return True
         except Exception as e:
             logging.debug(f"An error occurred: {e}")
@@ -43,6 +45,24 @@ class Dashboard():
             logging.debug(f"An error occurred: {e}")
             return
         
+    def _create_bank(self) -> None:
+        "Creates bank 'account' for new user"
+
+        query = f"INSERT INTO {self.bank_table} (uid, lumens, total_xp) VALUES (?, 0, 0);"
+        id = self._get_user_id()
+        try:
+            self.conn_cursor.execute(query, (id,))
+            self._commit_data()
+            return
+        except Exception as e:
+            logging.debug(f"An error occured: {e}")
+            return
+        
+    def increment_overall_level(self):
+        """Increases the overall level"""
+
+        pass
+
     def get_overall_level(self) -> int:
         """Get the overall xp level of active user"""
 
@@ -111,7 +131,31 @@ class Dashboard():
         except Exception as e:
             logging.debug(f'An error occurred: {e}')
             return
-    
+        
+    def _delete_all_badges(self):
+        """Deletes all badges of user"""
+
+        query = f"DELETE FROM badges_and_titles WHERE ?;"
+        id = self._get_user_id()
+        try:
+            self.conn_cursor.execute(query, (id,))
+            self._commit_data()
+            return
+        except Exception as e:
+            logging.debug(f'An error occurred: {e}')
+            return
+        
+    def _delete_bank(self):
+        """Clear bank details of user"""
+
+        query = f"DELETE FROM bank WHERE uid = ?"
+        id = self._get_user_id()
+        try:
+            self.conn_cursor.execute(query, (id,))
+            self._commit_data()
+        except Exception as e:
+            logging.debug(f'An error occurred: {e}')
+
     def _reset_active_state(self) -> None:
         """logs out all user"""
         
