@@ -29,16 +29,15 @@ logging.disable(logging.DEBUG)
 class UserIfo:
 
     def __init__(self):
-        self._name = self.load_username()
+        self._name = dashboard.get_user_name()
         # self._title = ""
-        self._overAll_level = 0
+        self._overAll_level = dashboard.get_overall_level()
         self.subjects = []
 #============================================================================================================================================= 
 #==================================================================================Getters=====================================================
     @property
     def name(self):
         return self._name
-    
     
     @property
     def level(self):
@@ -219,44 +218,6 @@ class UserIfo:
         if total_xp % 10000 == 0:
             self.badge_appending_method("Overall level", "🖤 Every Ten K Counts")
 
-    def load_overall_level(self):
-        """Loads the Overall level when app is opened"""
-
-        self._overAll_level = dashboard.get_overall_level()
-        return self._overAll_level
-
-    # def load_username(self):
-    #     """"Load username""" 
-    #     username_file = Path(__file__).parent / "dashboard files/username.json"
-    #     try:
-    #         with open(username_file, "r") as f:
-    #             data = json.load(f)
-    #     except FileNotFoundError:
-    #         return
-    #     name = data["username"]
-    #     return name
-    
-#     def save_username(self):
-#         """Save new username""" 
-#         username_file = Path(__file__).parent / "dashboard files/username.json"
-#         try:
-#             with open(username_file, "r") as f:
-#                 data = json.load(f)
-#         except FileNotFoundError:
-# #--------------------------------------------------------------------------creating file anew--------------------------------------------------
-#             data = {}
-#             data["username"] = ""
-#             data["userstate"] = False
-#             with open(username_file, "r") as f:
-#                 json.dump(data, f)
-#             logging.debug("New file written")
-
-#         data["username"] = self._name
-# #------------------------------------------------------------------------saving username-------------------------------------------------------
-#         open(username_file, "w").close()
-#         with open(username_file, "w") as f:
-#             json.dump(data, f)
-#         logging.debug(f"New username: {data["username"]}")
 #==============================================================================================================================================
 #**********************************************************************************************************************************************
 #=====================================================================Autodidex bank class=====================================================
@@ -267,10 +228,14 @@ class AutodidexBank:
         self._wallet_total: Optional[int] = None #intial value
         self._bank_details_file = Path(__file__).parent / "dashboard files/bank_details.json"
         self.badges: Optional[int] = None #intial value
+        self._xp_total = dashboard.get_total_xp()
+        self._wallet_total = dashboard.get_lumens_amount()
         self.user_info = user_info #UserIfo()
 
 #-------------------------------------------------------------loading lumens and xp #points----------------------------------------------------
-        self._load_wallet_total_and_xp()
+        # self._load_wallet_total_and_xp()
+        #To do: fix how incrementation operates
+        self.earn_subject_xp()
 #=========================================================================Getters==============================================================
     @property
     def wallet(self) -> int:
@@ -326,129 +291,37 @@ class AutodidexBank:
         open(bank_details_file, "w").close() #clearing file for updated data
         with open(self._bank_details_file, "w") as f:
             json.dump(bank_details, f, indent=4)
-    
-    def _load_wallet_total_and_xp(self):
-        """Loads the wallet and total xp amounts when app is opened"""
-        if self._bank_details_file.exists():
-            try:
-                with open(self._bank_details_file, "r") as f:
-                    data = json.load(f)
-                    self._wallet_total = data.get("lumens", 0)
-                    self._xp_total = data.get("total_xp", 0)
-            except json.JSONDecodeError:
-                logging.warning("Bank details file is corrupted. Starting with 0 lumens and 0 xp.")
-        else:
-            self._wallet_total = 0
-            
-        self.load_earned_badges()
 
     def earn_subject_xp(self):
         """User earns XP in a specific subject."""
-        progress_file = Path(__file__).parent / "habit tracker files/weekly_progress.json"
-        subjects_file = Path(__file__).parent / "habit tracker files/last saved.txt"
-        subjects_data = Path(__file__).parent / "dashboard files/subjects_level.json"
-        date_file = Path(__file__).parent / "habit tracker files/save_state.pkl"
-        state_file = Path(__file__).parent / "dashboard files/game_update_state.json" 
-        today = datetime.datetime.today()
-        subject_level_data = self.user_info.initialize_subjects()
-
-        try:
-            with open(progress_file, "r") as f:
-                data = json.load(f)
-            with open(subjects_file, "r") as f:
-                subjects = f.readlines()
-            with open(state_file, "r") as f:
-                state = json.load(f)
-                state = state["state"]
-                logging.debug(f"The state is {state}")
-#------------------------------------------------------------------Check if date file is empty ormissing---------------------------------------
-            if not date_file.exists() or os.path.getsize(date_file) == 0:
-                logging.warning("⚠️ Date file missing or empty. Saving today's date.")
-                with open(date_file, "wb") as f:
-                    pickle.dump(today, f)
-                saved_date = today
-            else:
-                with open(date_file, "rb") as f:
-                    saved_date = pickle.load(f)
-
-        except (FileNotFoundError):
-            raise FileNotFoundError("Couldn't find files for this process")
-            
-        if today.date() == saved_date.date() if isinstance(saved_date, datetime.datetime) else saved_date:
-            if state:
-                logging.debug(f"subject data is {subject_level_data}")
-                self.update_user_info(data, subjects, subjects_data, subject_level_data)
-                state = False
-                self.user_info.save_update_state(state)
-                self.user_info.overall_level_up()
-                self._load_wallet_total_and_xp()
-                self.user_info.append_badges()
-            else:
-                self._load_wallet_total_and_xp()
-                logging.debug("app already updated")
-        else:
-            state = True
-            self.user_info.save_update_state(state)
-            logging.debug("state ready for update")
-
-    def update_user_info(self, data, subjects, subjects_data, subject_level_data):
+        subjects_data = cp_tracker.get_cp_with_check_marks()
+       
+        logging.debug(f"subject data is {subjects_data}")
+        self.update_user_info(subjects_data)
+    
+    def update_user_info(self,subjects_data):
         """"Updates the subjesct level"""
 
         for cp, streak in subjects_data.items():
             xp = self.progress_conversion(streak)
-            self.add_total_xp(cp)
+            dashboard.add_total_xp(xp)
             cp_tracker.save_cp_xp(cp, xp)
-
-
-
-
-        # if data != {}:
-        #     for key, value in data.items():
-        #                 for i in range(len(subjects)):
-        #                     if subjects[i].strip() == key.strip():
-        #                         subject = subjects[i].strip()
-        #                         if subject in subject_level_data:
-        #                             check = len(value)
-        #                             income = self.progress_conversion(check)
-        #                             self.add_subject_xp(subject, income)
-        #                             self.subject_level_up(subject)
-        #                             logging.debug(f'subject updated is {subject}')
-        #                             logging.debug(self.user_info.subjects)
-        #                             self.add_total_xp(income)
-
-        #     open(subjects_data).close()
-        #     with open(subjects_data, "w") as f:
-        #         json.dump(self.user_info.subjects, f)
-        #     return self.user_info.subjects
-        # else:
-        #     empty_dict = {}
-        #     return empty_dict
+            self.subject_level_up(cp)
+            logging.debug(f'Update added for {cp}')
         
     def subject_level_up(self, subject):
         """Add level up for a subject if new level > current and rewards with 10 lumens"""
         #get subject xp
-        subjects_data = self.user_info.subjects
-        current_level = subjects_data[subject]["level"]
+        subject_xp = cp_tracker.get_cp_specific_xp(subject)
+        current_level = cp_tracker.get_cp_specific_level(subject)
         #check for new level
-        new_level = subjects_data[subject]["xp"] //  200
+        new_level = subject_xp //  200
 
         #set new level
         if new_level > current_level:
-            subjects_data[subject]["level"] += new_level
+            cp_tracker.increment_cp_level(subject, new_level)
             #add lumens
             self.wallet = 10
-        
-    def add_total_xp(self, amount):
-        """"Add total xp amount"""
-        file = Path(__file__).parent / "dashboard files/bank_details.json"
-        with open(file, "r") as f:
-            bank_details = json.load(f)
-
-        bank_details["total_xp"] += amount
-
-        open(file).close()
-        with open(file, "w") as f:
-            json.dump(bank_details, f)
         
     def progress_conversion(self,value):
         """Performs conversion of checkboxes ticked for the week into xps for the subject"""
@@ -491,22 +364,6 @@ class AutodidexBank:
         subjects_data = self.user_info.subjects
         subjects_data[subject]["xp"] += points
         self._xp_total += points
-
-    def load_lumens(self):
-        """Loads the amount of lumens when app is open"""
-        file = Path(__file__).parent / "dashboard files/bank_details.json"
-        with open(file, "r") as f:
-            data = json.load(f)
-        lumens = data["lumens"]
-        self._wallet_total = lumens
-
-    def load_xp(self):
-        """Loads the total xps when the app is started"""
-        file = Path(__file__).parent / "dashboard files/bank_details.json"
-        with open(file, "r") as f:
-            data = json.load(f)
-        xp = data["total_xp"]
-        self._xp_total = xp
     
     def load_earned_badges(self):
         """Loads the badge collection when is started"""
@@ -523,9 +380,6 @@ class AutodidexBank:
             open(earned_badges_file, "w").close()
             return "subjects_badges.json file is corrupted. File has been reset"
     
-    def load_internal_methods(self):
-        """Loads internal methods needed when app is started"""
-        self._load_wallet_total_and_xp()
 #==============================================================================================================================================
 #**********************************************************************************************************************************************
 #======================================================================Polymart Class==========================================================
@@ -718,7 +572,7 @@ class MainWindow(QMainWindow):
         l_icon = Path(__file__).parent / "Icons/icons8-bill-64.png" 
         self.level_label = QLabel(
                 f'<img src="{l_icon.as_posix()}" width="40" height="40">'
-                f'<span style="font-size: 20px;"> ⁚ {self.user.load_overall_level()}</span>'
+                f'<span style="font-size: 20px;"> ⁚ {self.user.level}</span>'
             )
         self.level_label.setToolTip("overall level")
 
@@ -976,7 +830,7 @@ class MainWindow(QMainWindow):
         self.subject_combo.addItems(subjects)
     
     def update_ui(self):
-        self.bank._load_wallet_total_and_xp()
+        # self.bank._load_wallet_total_and_xp()
         self.wallet_label.setText(
                 f'<img src="{self.w_icon.as_posix()}" width="40" height="40">'
                 f'<span style="font-size: 20px;"> ⁚ {self.bank.wallet} Lumens</span>'
@@ -988,8 +842,8 @@ class MainWindow(QMainWindow):
         if self.user_present == True:
             self.setup_ui()
         self.thm_wrapper()
-        self.bank.earn_subject_xp()
-        self.bank.load_internal_methods()
+        # self.bank.earn_subject_xp()
+        # self.bank.load_internal_methods()
         self.market.load_store_items
 #===========================================================================Run application====================================================
 if __name__ == "__main__":

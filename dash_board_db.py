@@ -19,6 +19,7 @@ class Dashboard():
         """Commits data to data base (does not close connection)"""
 
         self.conn.commit()
+#=========================================================User related=================================================
 
     def create_new_user(self, name:str) -> bool:
         """Create a new user"""
@@ -33,6 +34,19 @@ class Dashboard():
         except Exception as e:
             logging.debug(f"An error occurred: {e}")
             return False
+        
+    def get_user_name(self) -> str | None:
+        """Gets the name of the user from db in the user in logged in."""
+
+        query = f"SELECT name FROM {self.user_table};"
+
+        try:
+            self.conn_cursor.execute(query)
+            name = self.conn_cursor.fetchone()[0]
+            return name
+        except Exception as e:
+            logging.debug(f"An error occurred: {e}")
+            return None
 
     def _get_user_id(self) -> int | None:
         """Get the id of current user"""
@@ -45,6 +59,20 @@ class Dashboard():
             logging.debug(f"An error occurred: {e}")
             return
         
+    def get_user_state(self) -> bool:
+        """Checks if there is a user active"""
+
+        query = f"SELECT is_active FROM {self.app_attr_table};"
+        try:
+            self.conn_cursor.execute(query)
+            state = self.conn_cursor.fetchone()[0]
+            state = bool(state)
+            return state
+        except Exception as e:
+            logging.debug(f'An error as occurred: {e}')
+            return False #return default
+#=====================================================================================================================
+#========================================================bank related functions========================================        
     def _create_bank(self) -> None:
         "Creates bank 'account' for new user"
 
@@ -57,7 +85,66 @@ class Dashboard():
         except Exception as e:
             logging.debug(f"An error occured: {e}")
             return
+
+    def get_lumens_amount(self) -> int:
+        """Get the amount of lumens"""
+
+        query = f"SELECT lumens FROM {self.bank_table};"
+        try:
+            self.conn_cursor.execute(query)
+            lumens = self.conn_cursor.fetchone()[0]
+            return lumens
+        except Exception as e:
+            logging.debug(f'An error occurred: {e}')
+            return 0
         
+    def get_total_xp(self) -> int:
+        """Get total xp amout"""
+        
+        query = f"SELECT total_xp FROM {self.bank_table};"
+        try:
+            self.conn_cursor.execute(query)
+            total_xp = self.conn_cursor.fetchone()[0]
+            return total_xp
+        except Exception as e:
+            logging.debug(f"An error occurred: {e}")
+            return 0
+        
+    def add_total_xp(self, new_amount: int) -> dict | None:
+        """Increment total xp"""
+
+        query = f"""UPDATE {self.bank_table}
+                    SET total_xp = ?
+                    WHERE uid = ?;"""
+        id = self._get_user_id()
+        current_amount = self.get_total_xp()
+        new_amount = new_amount + current_amount
+
+        try:
+            self.conn_cursor.execute(query, (new_amount, id))
+            self._commit_data()
+            return {"msg": "total xp incremented"}
+        except Exception as e:
+            logging.debug(f"An error occurred: {e}")
+            return
+        
+    def add_lumens(self, amount):
+        """Increment total lumens"""
+
+        query = f"""UPDATE bank
+                    SET lumens = ?
+                    WHERE uid = ?;"""
+        id = self._get_user_id()
+        try:
+            self.conn_cursor.execute(query, (amount, id,))
+            self._commit_data()
+        except Exception as e:
+            logging.debug(f"An error occurred: {e}")
+        finally:
+            return
+
+        
+#======================================================================================================================
     def increment_overall_level(self):
         """Increases the overall level"""
 
@@ -75,18 +162,6 @@ class Dashboard():
             logging.debug(f"An error occurred: {e}")
             return 0 #default
 
-    def get_user_state(self) -> bool:
-        """Checks if there is a user active"""
-
-        query = f"SELECT is_active FROM {self.app_attr_table};"
-        try:
-            self.conn_cursor.execute(query)
-            state = self.conn_cursor.fetchone()[0]
-            state = bool(state)
-            return state
-        except Exception as e:
-            logging.debug(f'An error as occurred: {e}')
-            return False #return default
         
     def update_is_active_state(self, val:int) -> None:
         """Change based on whether there is a user logged in"""
@@ -165,7 +240,8 @@ class Dashboard():
     
 if __name__ == "__main__":
     db = Dashboard()
-    # db.update_is_active_state(0)
+    print(db.get_lumens_amount())
+    print(db.add_total_xp(300))
     # print(db.get_user_state())
     # db._delete_active_user()
     # db._reset_active_state()

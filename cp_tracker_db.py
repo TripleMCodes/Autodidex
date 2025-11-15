@@ -56,7 +56,7 @@ class Cp_tracker():
         try:
             self.conn_cursor.execute(query, (cp,))
             xp = self.conn_cursor.fetchone()[0]
-            return xp
+            return xp 
         except Exception as e:
             logging.debug(f"An error occurred: {e}")
             return
@@ -119,14 +119,42 @@ class Cp_tracker():
             return {"message": "Done"}
         except Exception as e:
             logging.debug(f"An error occurred: {e}")
-            return {"message": f"An error occurred: {e}"}       
+            return {"message": f"An error occurred: {e}"}    
+
+    def get_cp_specific_xp(self, cp: str) -> int | None:
+        """Get xp of a specific cp"""
+
+        query = f"""SELECT subject_xp FROM {self.table_name_one}
+                    WHERE subject = ?;"""
+        try:
+            self.conn_cursor.execute(query, (cp,))
+            xp = self.conn_cursor.fetchone()[0]
+            return xp
+        except Exception as e:
+            logging.debug(f"An error occurred: {e}")
+            return
+        
+    def get_cp_specific_level(self, cp:str) -> int | None:
+        """Get the level for a specific cp"""
+
+        query = f"""SELECT subject_level FROM {self.table_name_one}
+                    WHERE subject = ?;"""
+        try:
+            self.conn_cursor.execute(query, (cp,))
+            level = self.conn_cursor.fetchone()[0]
+            return level
+        except Exception as e:
+            logging.debug(f"An error occurred: {e}")
+            return None
         
     def save_cp_xp(self, cp:str, xp:int):
         """Saves the xp of the subject"""
 
         query = f"""UPDATE cerebral_pursuits 
-                    SET subject_xp += ?
+                    SET subject_xp = ?
                     WHERE subject = ?;"""
+        xp = xp + self.get_cp_specific_xp(cp)
+
         if self._check_cp(cp):
             try:
                 self.conn_cursor.execute(query, (xp, cp,))
@@ -136,6 +164,21 @@ class Cp_tracker():
                 logging.debug(f"An error occurred: {e}")
                 return
         else:
+            return
+        
+    def increment_cp_level(self, cp:str, new_level:int):
+        """Increment the level of cp"""
+        
+        query = f"""UPDATE {self.table_name_one}
+                    SET subject_level = ?
+                    WHERE subject = ?;"""
+        
+        try:
+            self.conn_cursor.execute(query, (new_level, cp,))
+            self._commit_data()
+        except Exception as e:
+            logging.debug("An error has occurred: {e}")
+        finally:
             return
 
     def get_check_marks(self) -> dict | None:
@@ -262,7 +305,7 @@ class Cp_tracker():
 if __name__ == "__main__":
 
     cp_table = Cp_tracker()
-    print(cp_table.save_cp_xp("Mathematics", 100))
+    print(cp_table.get_cp_specific_xp("Mathematics"))
     # dt = cp_table.get_reset_date()
     # today = str(datetime.now().date())
     # today = datetime.strptime(today, "%Y-%m-%d")
