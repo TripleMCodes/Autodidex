@@ -16,10 +16,14 @@ from PySide6.QtGui import (QBrush, QColor, QFont, QIcon, QLinearGradient,
 from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox, QHBoxLayout,
                                QLabel, QLineEdit, QListWidget, QMainWindow,
                                QMessageBox, QPushButton, QVBoxLayout, QWidget)
+from autodidex_cache import DictionaryCache
 from dash_board_db import Dashboard
 from cp_tracker_db import Cp_tracker
+#cache class instance
+cache = DictionaryCache()
 cp_tracker = Cp_tracker()
 dashboard = Dashboard()
+
 #=====================================================================logs enable/disable======================================================
 logging.basicConfig(level=logging.DEBUG) 
 logging.disable(logging.DEBUG)
@@ -31,7 +35,7 @@ class UserIfo:
     def __init__(self):
         self._name = dashboard.get_user_name()
         # self._title = ""
-        self._overAll_level = dashboard.get_overall_level()
+        self._overAll_level = self.load_overall_level() 
         self.subjects = []
 #============================================================================================================================================= 
 #==================================================================================Getters=====================================================
@@ -60,7 +64,17 @@ class UserIfo:
         """Load subjects saved in Habit Tracker"""
         
         self.subjects = cp_tracker.get_cerebral_pursuits()
-        return self.subjects         
+        return self.subjects
+
+    def load_overall_level(self):
+        """Load overall level from db if not cached, otherwise load cached overall level."""
+
+        level = cache.get("overall_level")
+        if level == None:
+            level = dashboard.get_overall_level()
+            cache.set("overall_level", level)
+        return level
+
     
     def load_update_state(self):
         """loads the variable responsible for updating bank and subjects information"""
@@ -81,33 +95,17 @@ class UserIfo:
         with open(file, 'w')  as f:
             state_to_save["state"] = state
             json.dump(state_to_save, f)
-
+ 
     def overall_level_up(self):
         """Sum all subject XP points, each new gain of 500 XP points gives 1 overall level up."""
-
-        file = Path(__file__).parent / "dashboard files/overall_level.json"
-        bank_detail_file = Path(__file__).parent / "dashboard files/bank_details.json"
-
-        with open(bank_detail_file, "r") as f:
-            bank_details = json.load(f)
-        xp_amount = bank_details["total_xp"]
+        xp_amount = dashboard.get_total_xp()
         new_overall_level = xp_amount // 500
 
-        logging.debug(f"New level is {new_overall_level}")
-
-        with open(file, "r") as f:
-            level = json.load(f)
-        
-        if new_overall_level > self._overAll_level:
-
-            level["overall_level"] = new_overall_level
-            logging.debug(f"new over lever is {level["overall_level"]}")
-            open(file).close()
-            with open(file, "w") as f:
-                json.dump(level, f, indent=4)
+        if new_overall_level > cache.get("overall_level"):
             self._overAll_level = new_overall_level
-        else:
-            logging.debug(f"No new lever achieved")
+            dashboard.increment_overall_level(new_overall_level)
+            self._oveall_level_badge_reward()
+            cache.set("overall_level", new_overall_level)
 
     def subjects_badges_state(self):
         """Check if user qualifies for a badge and award it."""
@@ -174,50 +172,42 @@ class UserIfo:
             json.dump(subject_badges, f, indent=4)
         logging.debug(f"Added {badge_name} badge for {dict_key}")
 
-    def append_badges(self):
-        """Add badges for a particular subject"""
-        total_xp_file = Path(__file__).parent / "dashboard files/bank_details.json"
-        subjects_level_file = Path(__file__).parent / "dashboard files/subjects_level.json"
-
-        try:
-            with open(subjects_level_file, "r") as f:
-                subjects_data = json.load(f)
-
-            with open(total_xp_file, "r") as f:
-                data = json.load(f)
-                total_xp = data["total_xp"]
-        except json.decoder.JSONDecodeError as e:
-            logging.warning("⚠️ JSON is malformed!")
-            logging.warning(e)
-            return
-        
-#------------------------------------------------------------------checking if process ready---------------------------------------------------
-        self.subjects_badges_state()
-
+    def _oveall_level_badge_reward(self):
+        """Give overall badge reward"""
 #--------------------------------------------------------------------badge for over level 5----------------------------------------------------
         if self._overAll_level == 5:
-            self.badge_appending_method("Overall level", "🎖️ Level 5 Unlocked")
-
+            dashboard.add_new_badge("🎖️ Level 5 Unlocked")
 #----------------------------------------------------------badge for every tenth level achieved.-----------------------------------------------
         if self._overAll_level % 10 == 0:
-            self.badge_appending_method("Overall level", "💎 Every Tenth Tier counts")
-        
-#----------------------------------------------------------------badge for every thousand xps earned-------------------------------------------
-        for key in subjects_data:
-                xp = subjects_data[key].get("xp", 0)
-                if xp % 1000 == 0 and xp != 0: 
-                    self.badge_appending_method(key, "🏆 1K Subject XP Master")
+            dashboard.add_new_badge("💎 Every Tenth Tier counts")
+
+    def _cp_level_badge_reward(self):
+        """Reward every level for a particular of a cp"""
+
+        cp_with_levels = cp_tracker.get_cp_with_level()
+    
 
 #-------------------------------------------------------------badge for every tenth level for a  subject---------------------------------------
-        for key in subjects_data:
-            subject = subjects_data[key].get("level", 0)
-            if subject % 10 == 0 and subject !=0:
-                self.badge_appending_method(key, "🎯 Every Ten Counts")
+        # if subject % 10 == 0 and subject !=0:
+        #     self.badge_appending_method(key, "🎯 Every Ten Counts")
 
-#----------------------------------------------------------------------badge for every 10000 xp earned-----------------------------------------
-        if total_xp % 10000 == 0:
-            self.badge_appending_method("Overall level", "🖤 Every Ten K Counts")
 
+
+            
+    def append_badges(self, cp, xp):
+        """Add badges for a particular subject"""
+        
+# #------------------------------------------------------------------checking if process ready---------------------------------------------------
+#         self.subjects_badges_state()
+        
+#----------------------------------------------------------------badge for every thousand xps earned-------------------------------------------
+        
+#         if xp % 1000 == 0 and xp != 0: 
+#             self.badge_appending_method(key, "🏆 1K Subject XP Master")
+
+# #----------------------------------------------------------------------badge for every 10000 xp earned-----------------------------------------
+#         if total_xp % 10000 == 0:
+#             self.badge_appending_method("Overall level", "🖤 Every Ten K Counts")
 #==============================================================================================================================================
 #**********************************************************************************************************************************************
 #=====================================================================Autodidex bank class=====================================================
@@ -234,7 +224,6 @@ class AutodidexBank:
 
 #-------------------------------------------------------------loading lumens and xp #points----------------------------------------------------
         # self._load_wallet_total_and_xp()
-        #To do: fix how incrementation operates
         self.earn_subject_xp()
 #=========================================================================Getters==============================================================
     @property
@@ -302,18 +291,23 @@ class AutodidexBank:
     def update_user_info(self,subjects_data):
         """"Updates the subjesct level"""
 
-        sample_cached_data = {'Mathematics': 3, 'Computer Science': 4, 'Korean': 5, 'Physics': 7}
+        cp_cached_data = cache.get("cp_streak")
 
-        for cp, streak in subjects_data.items():
-            for cache_cp, cache_streak in sample_cached_data.items():
-                if cp == cache_cp:
-                    if cache_streak < streak:
-                        xp = self.progress_conversion(streak)
-                        dashboard.add_total_xp(xp)
-                        cp_tracker.save_cp_xp(cp, xp)
-                        self.subject_level_up(cp)
-                        logging.debug(f'Update added for {cp}')
-        # logging.debug(f"There is no update")
+        if cp_cached_data == None:
+            cache.set("cp_streak", subjects_data)
+        else:
+            for cp, streak in subjects_data.items():
+                for cache_cp, cache_streak in cp_cached_data.items():
+                    if cp == cache_cp:
+                        if cache_streak < streak:
+                            xp = self.progress_conversion(streak)
+                            dashboard.add_total_xp(xp)
+                            cp_tracker.save_cp_xp(cp, xp)
+                            self.subject_level_up(cp)
+                            self.user_info.overall_level_up()
+                            logging.debug(f'Update added for {cp}')
+        cache.set("cp_streak", subjects_data)
+
         
     def subject_level_up(self, subject):
         """Add level up for a subject if new level > current and rewards with 10 lumens"""

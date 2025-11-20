@@ -141,15 +141,34 @@ class Dashboard():
         except Exception as e:
             logging.debug(f"An error occurred: {e}")
         finally:
-            return
-
-        
-#======================================================================================================================
-    def increment_overall_level(self):
+            return 
+#=========================================================overlevel related============================================
+    def increment_overall_level(self, new_level:int):
         """Increases the overall level"""
 
-        pass
+        query = f"""UPDATE user_info
+                    SET overall_level = ?
+                    WHERE uid = ?;"""
+        id = self._get_user_id()
+        try:
+            self.conn_cursor.execute(query, (new_level, id,))
+            self._commit_data()
+        except Exception as e:
+            logging.debug(f"An error occurred: {e}")
 
+    def add_new_badge(self, badge_name:str):
+        """Add a new overall level badge"""
+
+        query = f"""INSERT INTO badges_and_titles (badge, uid)
+                        VALUES (?,?);"""
+        id = self._get_user_id()
+        try:
+            self.conn_cursor.execute(query, (badge_name, id,))
+            self._commit_data()
+            return {"message": "new badge added"}
+        except Exception as e:
+            logging.debug(f"An error occurred: {e}")
+            
     def get_overall_level(self) -> int:
         """Get the overall xp level of active user"""
 
@@ -241,7 +260,7 @@ class Dashboard():
 if __name__ == "__main__":
     db = Dashboard()
     print(db.get_lumens_amount())
-    print(db.add_total_xp(300))
+    print(db.get_total_xp())
     # print(db.)
     # print(db.get_user_state())
     # db._delete_active_user()

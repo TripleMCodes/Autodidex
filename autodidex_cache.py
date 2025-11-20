@@ -9,9 +9,9 @@ cache_dir = Path(__file__).parent / "cache dir/cache.json"
 class DictionaryCache:
     def __init__(self, filename=cache_dir):
         self.filename = filename
-        self.lock = RLock
+        self.lock = RLock()
         self.cache = {}
-        self._load_from_dick()
+        self._load_from_disk()
 
     def _load_from_disk(self):
         """Load cache from file if it exists."""
