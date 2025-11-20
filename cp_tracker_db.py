@@ -306,6 +306,7 @@ if __name__ == "__main__":
 
     cp_table = Cp_tracker()
     print(cp_table.get_cp_specific_xp("Mathematics"))
+    print(cp_table.get_cp_with_check_marks())
     # dt = cp_table.get_reset_date()
     # today = str(datetime.now().date())
     # today = datetime.strptime(today, "%Y-%m-%d")

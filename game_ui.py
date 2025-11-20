@@ -294,20 +294,26 @@ class AutodidexBank:
 
     def earn_subject_xp(self):
         """User earns XP in a specific subject."""
+
         subjects_data = cp_tracker.get_cp_with_check_marks()
-       
         logging.debug(f"subject data is {subjects_data}")
         self.update_user_info(subjects_data)
     
     def update_user_info(self,subjects_data):
         """"Updates the subjesct level"""
 
+        sample_cached_data = {'Mathematics': 3, 'Computer Science': 4, 'Korean': 5, 'Physics': 7}
+
         for cp, streak in subjects_data.items():
-            xp = self.progress_conversion(streak)
-            dashboard.add_total_xp(xp)
-            cp_tracker.save_cp_xp(cp, xp)
-            self.subject_level_up(cp)
-            logging.debug(f'Update added for {cp}')
+            for cache_cp, cache_streak in sample_cached_data.items():
+                if cp == cache_cp:
+                    if cache_streak < streak:
+                        xp = self.progress_conversion(streak)
+                        dashboard.add_total_xp(xp)
+                        cp_tracker.save_cp_xp(cp, xp)
+                        self.subject_level_up(cp)
+                        logging.debug(f'Update added for {cp}')
+        # logging.debug(f"There is no update")
         
     def subject_level_up(self, subject):
         """Add level up for a subject if new level > current and rewards with 10 lumens"""
@@ -743,10 +749,9 @@ class MainWindow(QMainWindow):
     def add_subject(self):
         """Load subjects from db"""
        
-        subjects_list = sorted(self.user.subjects)
+        subjects_list = sorted(self.user.initialize_subjects())
         return subjects_list
 
-        
     def polymart_items(self):
         """Get list of items from Polymart class for the UI"""
         items_list_file = Path(__file__).parent / "dashboard files/store_items.json"
@@ -842,7 +847,7 @@ class MainWindow(QMainWindow):
         if self.user_present == True:
             self.setup_ui()
         self.thm_wrapper()
-        # self.bank.earn_subject_xp()
+        self.bank.earn_subject_xp()
         # self.bank.load_internal_methods()
         self.market.load_store_items
 #===========================================================================Run application====================================================

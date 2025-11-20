@@ -242,6 +242,7 @@ if __name__ == "__main__":
     db = Dashboard()
     print(db.get_lumens_amount())
     print(db.add_total_xp(300))
+    # print(db.)
     # print(db.get_user_state())
     # db._delete_active_user()
     # db._reset_active_state()
