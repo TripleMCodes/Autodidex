@@ -9,8 +9,7 @@ import pickle
 import sys
 from pathlib import Path
 from typing import Optional
-
-from PySide6.QtCore import QSize, Qt, QTimer
+from PySide6.QtCore import QSize, Qt, QTimer, QFileSystemWatcher
 from PySide6.QtGui import (QBrush, QColor, QFont, QIcon, QLinearGradient,
                            QPainter, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox, QHBoxLayout,
@@ -70,6 +69,7 @@ class UserIfo:
         """Load overall level from db if not cached, otherwise load cached overall level."""
 
         level = cache.get("overall_level")
+        print(f'the overall level is: {level}')
         if level == None:
             level = dashboard.get_overall_level()
             cache.set("overall_level", level)
@@ -181,11 +181,25 @@ class UserIfo:
         if self._overAll_level % 10 == 0:
             dashboard.add_new_badge("💎 Every Tenth Tier counts")
 
-    def _cp_level_badge_reward(self):
+    def cp_level_badge_reward(self):
         """Reward every level for a particular of a cp"""
 
+        reward_badges = [ "🎯 Every Ten Counts", "🏆 1K Subject XP Master"]
+
         cp_with_levels = cp_tracker.get_cp_with_level()
+        cp_with_xp = cp_tracker.get_cp_with_xp()
+
+        for k, v in cp_with_levels.items():
+            if v % 10 == 0 and v != 0:
+                msg = dashboard.add_cp_badge(reward_badges[0], k)
+                if msg:
+                    logging.debug(msg["message"])
     
+        for k, v in cp_with_xp.items():
+                if v % 10 == 0 and v != 0:
+                    msg = dashboard.add_cp_badge(reward_badges[1], k)
+                    if msg:
+                        logging.debug(msg["message"])
 
 #-------------------------------------------------------------badge for every tenth level for a  subject---------------------------------------
         # if subject % 10 == 0 and subject !=0:
@@ -224,7 +238,7 @@ class AutodidexBank:
 
 #-------------------------------------------------------------loading lumens and xp #points----------------------------------------------------
         # self._load_wallet_total_and_xp()
-        self.earn_subject_xp()
+        # self.earn_subject_xp()
 #=========================================================================Getters==============================================================
     @property
     def wallet(self) -> int:
@@ -304,6 +318,7 @@ class AutodidexBank:
                             dashboard.add_total_xp(xp)
                             cp_tracker.save_cp_xp(cp, xp)
                             self.subject_level_up(cp)
+                            self.user_info.cp_level_badge_reward()
                             self.user_info.overall_level_up()
                             logging.debug(f'Update added for {cp}')
         cache.set("cp_streak", subjects_data)
@@ -506,7 +521,12 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Autodidex Dashboard")
-        
+#============================================================================
+        self.trigger_file = Path(__file__).parent / "update.txt"
+        self.watcher = QFileSystemWatcher()
+        self.watcher.addPath(str(self.trigger_file))
+        self.watcher.fileChanged.connect(self.check_new_cp)
+#================================================================
         self.user = UserIfo()
         self.bank = AutodidexBank(self.user) 
         self.market = PolyMart(self.bank) 
@@ -537,15 +557,15 @@ class MainWindow(QMainWindow):
         self.light_mode: Optional[str] = None
         self.theme_toggle = QPushButton("")
         self.theme_toggle.setIcon(QIcon(str(self.light_icon)))
-        self.cpt_timer = QTimer(self)
-        self.cpt_timer.setInterval(2000)  # 2000 ms = 2 seconds
-        self.cpt_timer.timeout.connect(self.check_new_cpt)
-        self.cpt_timer.start()
+        # self.cpt_timer = QTimer(self)
+        # self.cpt_timer.setInterval(2000)  # 2000 ms = 2 seconds
+        # self.cpt_timer.timeout.connect(self.check_new_cpt)
+        # self.cpt_timer.start()
         self.badge_list = QListWidget()
         self.container = QWidget()
         self.subject_combo = QComboBox()
 
-        self.init_wrapper()
+        # self.init_wrapper()
 #===============================================================================Class Methods==================================================
     def setup_ui(self):
         """"Struture the UI"""
@@ -818,11 +838,11 @@ class MainWindow(QMainWindow):
         self.load_themes()
         self.load_thm_pref()
 
-    def check_new_cpt(self):
-        """Checks for new subjects added to the last saved.txt"""
+    def check_new_cp(self):
+        """Checks for new subjects added"""
         # if self.user_present == True:
         #remove duplicates from list
-        subjects = set(self.add_subject())
+        subjects = set(cp_tracker.get_cerebral_pursuits())
         #convert set into list
         subjects = list(subjects)
         self.subject_combo.clear()

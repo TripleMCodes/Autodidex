@@ -314,12 +314,26 @@ class Cp_tracker():
             return cp_level_dict
         except Exception as e:
             logging.debug(f'An error occurred: {e}')
+    
+    def get_cp_with_xp(self) -> dict:
+        """Get cp with respecive xp"""
+
+        query = f"SELECT subject, subject_xp FROM cerebral_pursuits;"
+        cp_level_dict = {}
+        try:
+            self.conn_cursor.execute(query)
+            cp_with_level = self.conn_cursor.fetchall()
+            for i in range(len(cp_with_level)):
+                cp_level_dict[cp_with_level[i][0]] = cp_with_level[i][1]
+            return cp_level_dict
+        except Exception as e:
+            logging.debug(f'An error occurred: {e}')
 
 if __name__ == "__main__":
 
     cp_table = Cp_tracker()
     # print(cp_table.get_cp_specific_xp("Mathematics"))
-    print(cp_table.get_cp_with_level())
+    print(cp_table.get_cp_with_xp())
     # dt = cp_table.get_reset_date()
     # today = str(datetime.now().date())
     # today = datetime.strptime(today, "%Y-%m-%d")

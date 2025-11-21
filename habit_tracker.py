@@ -3,6 +3,8 @@
 import datetime
 import json
 import logging
+import random
+import string
 import sys
 from collections import defaultdict
 from PySide6.QtCore import Qt,QTimer
@@ -39,7 +41,8 @@ class CPTracker(QWidget):
         self.shadow.setYOffset(4)
         self.shadow.setColor(QColor(180, 150, 255, 120))
 
-        self.thm_pref = Path(__file__).parent / "v tab files/dashboard_config.json" 
+        self.thm_pref = Path(__file__).parent / "v tab files/dashboard_config.json"
+        self.trigger_file = Path(__file__).parent / "update.txt" 
 #-----------------------------------------------------------------------StlyeSheets----------------------------------------------
         self.light_mode: Optional[str] = None
         self.dark_mode: Optional[str] = None
@@ -149,7 +152,7 @@ class CPTracker(QWidget):
         self.enable_check_box_change = False #checking checkboxes again when loading the app
         self.end_date = cp_table.get_reset_date()
 #------------------------------------------------------------init wrapper------------------------------------------------------       
-        self.init_wrapper()
+        # self.init_wrapper()
 #==========================================================methods begin here==================================================
     def load_last_entered_habits(self):
         """load the previously cerebral pursuits"""
@@ -193,6 +196,14 @@ class CPTracker(QWidget):
         else:
             self.sidebar.show()
             self.toggle_btn.setIcon(QIcon(str(self.x_icon)))
+    
+    def update_dashboard(self):
+        """When a cp is added or updated this 
+        triggers the dashboard to update cp list"""
+        letters = string.ascii_letters
+        random_string = "".join(random.choice(letters) for _ in range(26))
+        with open(self.trigger_file, "w") as f:
+            f.write(random_string)
 
     def add_habit(self):
         
@@ -207,7 +218,9 @@ class CPTracker(QWidget):
             QMessageBox.information(self, "Successful", msg["message"])
             logging.debug(f"done! added {habit}")
             self.input.clear()
-            self.counter += 1
+            self.counter += 1 
+            self.update_dashboard()
+
         else:
                 QMessageBox.warning(self, "WARNING", "Enter a valid habit")
 
@@ -255,7 +268,8 @@ class CPTracker(QWidget):
         QMessageBox.information(self, "Success", msg.get("message", "Subject renamed"))
         # refresh visible list
         self.refresh_subjects()
-
+        self.update_dashboard()
+        
     def delete_subject(self, row: int, subject: str):
         """Confirm deletion, remove from DB and JSON stores, then refresh UI."""
         reply = QMessageBox.question(self, "Delete Subject",

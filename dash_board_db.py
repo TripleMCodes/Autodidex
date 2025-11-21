@@ -59,6 +59,19 @@ class Dashboard():
             logging.debug(f"An error occurred: {e}")
             return
         
+    def _get_cp_id(self, cp:str) -> int:
+        """Get the id of a given cp"""
+
+        query = f"""SELECT id FROM cerebral_pursuits
+                    WHERE subject = ?;"""    
+        try:
+            self.conn_cursor.execute(query, (cp,))
+            id = self.conn_cursor.fetchone()[0]
+            return id
+        except Exception as e:
+            logging.debug(f"An error occurred: {e}")
+            return
+        
     def get_user_state(self) -> bool:
         """Checks if there is a user active"""
 
@@ -156,7 +169,7 @@ class Dashboard():
         except Exception as e:
             logging.debug(f"An error occurred: {e}")
 
-    def add_new_badge(self, badge_name:str):
+    def add_new_badge(self, badge_name:str) -> dict | None:
         """Add a new overall level badge"""
 
         query = f"""INSERT INTO badges_and_titles (badge, uid)
@@ -168,6 +181,21 @@ class Dashboard():
             return {"message": "new badge added"}
         except Exception as e:
             logging.debug(f"An error occurred: {e}")
+
+    def add_cp_badge(self, badge_name: str, cp:str) -> dict | None:
+        """Add badge for a particular cp"""
+
+        query = f"""INSERT INTO badges_and_titles (badge, uid, subject_id) 
+                    VALUES (?,?,?);"""
+        cp_id = self._get_cp_id(cp)
+        uid = self._get_user_id()
+        try:
+            self.conn_cursor.execute(query, (badge_name, uid, cp_id,))
+            self._commit_data()
+            return {"message": f"new badge added: {badge_name}"}
+        except Exception as e:
+            logging.debug(f"An error occurred: {e}")
+            return
             
     def get_overall_level(self) -> int:
         """Get the overall xp level of active user"""
