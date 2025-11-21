@@ -167,7 +167,6 @@ class CPTracker(QWidget):
                     item = QTableWidgetItem(habit.strip())
                     self.habit_tracker.setItem(idx, 0, item)
                     logging.debug(f"done! added {habit}")
-            # next free row index
             self.counter = len(habits)
         except FileNotFoundError:
             logging.deg("last saved.txt file not found")
@@ -269,7 +268,7 @@ class CPTracker(QWidget):
         # refresh visible list
         self.refresh_subjects()
         self.update_dashboard()
-        
+
     def delete_subject(self, row: int, subject: str):
         """Confirm deletion, remove from DB and JSON stores, then refresh UI."""
         reply = QMessageBox.question(self, "Delete Subject",
@@ -331,7 +330,12 @@ class CPTracker(QWidget):
         state = {f'{row},{col}': True}
         msg = cp_table.save_cp(row, state, cp, day)
         logging.debug(msg)
-        QMessageBox.information(self, "Message", msg["message"])        
+        QMessageBox.information(self, "Message", msg["message"])
+        letters = string.ascii_letters
+        random_string = "".join(random.choice(letters) for _ in range(26))
+        trigger_file_2 = Path(__file__).parent / "update_db_ui.txt"
+        with open(trigger_file_2, "w") as f:
+            f.write(random_string)        
                         
     def init_wrapper(self):
         """Initailze necessary methods and check if app needs reset"""

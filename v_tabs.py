@@ -208,8 +208,8 @@ class Autodidex (QWidget):
 #=========================================================class methods==============================================
     def exit_app(self):
         self.cirillo.log_sessions()
-        self.cpt_tracker.save_last_entered_habits()
-        self.cpt_tracker.save_checkbox_states()
+        # self.cpt_tracker.save_last_entered_habits()
+        # self.cpt_tracker.save_checkbox_states()
         self.close()
         self.destroy()
 

@@ -1,6 +1,9 @@
 {
     "cp_streak": {
-        "Mathematics": 5
+        "Mathematics": 5,
+        "Computer Science": 6,
+        "Korean": 2,
+        "Physics": 2
     },
-    "overall_level": 14
+    "overall_level": 15
 }

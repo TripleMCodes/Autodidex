@@ -526,6 +526,11 @@ class MainWindow(QMainWindow):
         self.watcher = QFileSystemWatcher()
         self.watcher.addPath(str(self.trigger_file))
         self.watcher.fileChanged.connect(self.check_new_cp)
+
+        self.trigger_file_2 = Path(__file__).parent / "update_db_ui.txt"
+        self.watcher_2 = QFileSystemWatcher()
+        self.watcher_2.addPath(str(self.trigger_file_2))
+        self.watcher_2.fileChanged.connect(self.update_wrapper)
 #================================================================
         self.user = UserIfo()
         self.bank = AutodidexBank(self.user) 
@@ -589,9 +594,9 @@ class MainWindow(QMainWindow):
             )
         self.name_label.setToolTip("Name")
 
-        l_icon = Path(__file__).parent / "Icons/icons8-bill-64.png" 
+        self.l_icon = Path(__file__).parent / "Icons/icons8-bill-64.png" 
         self.level_label = QLabel(
-                f'<img src="{l_icon.as_posix()}" width="40" height="40">'
+                f'<img src="{self.l_icon.as_posix()}" width="40" height="40">'
                 f'<span style="font-size: 20px;"> ⁚ {self.user.level}</span>'
             )
         self.level_label.setToolTip("overall level")
@@ -603,9 +608,9 @@ class MainWindow(QMainWindow):
             )
         self.wallet_label.setToolTip("Wallet")
 
-        xp_icon = Path(__file__).parent / "Icons/icons8-points-64.png"
+        self.xp_icon = Path(__file__).parent / "Icons/icons8-points-64.png"
         self.xp_label = QLabel(
-                f'<img src="{xp_icon.as_posix()}" width="40" height="40">'
+                f'<img src="{self.xp_icon.as_posix()}" width="40" height="40">'
                 f'<span style="font-size: 20px;"> ⁚ {self.bank.xpPoints}</span>'
                             )
         self.xp_label.setToolTip("XP points")
@@ -623,8 +628,8 @@ class MainWindow(QMainWindow):
         self.subject_combo.addItems(self.add_subject())
 
         subjects_label = QLabel()
-        s_icon = Path(__file__).parent / "Icons/icons8-calibre-64.png"
-        subjects_label.setText(f'<img src="{str(s_icon)}" width="40" height="40">')
+        self.s_icon = Path(__file__).parent / "Icons/icons8-calibre-64.png"
+        subjects_label.setText(f'<img src="{str(self.s_icon)}" width="40" height="40">')
         subjects_label.setToolTip("Subjects")
 
         xp_layout.addWidget(subjects_label)
@@ -854,6 +859,25 @@ class MainWindow(QMainWindow):
                 f'<img src="{self.w_icon.as_posix()}" width="40" height="40">'
                 f'<span style="font-size: 20px;"> ⁚ {self.bank.wallet} Lumens</span>'
             )
+    
+    def update_wrapper(self):
+        self.bank.earn_subject_xp()
+        level = self.user.load_overall_level()
+        xp_points = dashboard.get_total_xp()
+        wallet = dashboard.get_lumens_amount()
+        self.level_label.setText(
+                f'<img src="{self.l_icon.as_posix()}" width="40" height="40">'
+                f'<span style="font-size: 20px;"> ⁚ {level}</span>'
+            )
+        self.xp_label.setText(
+                f'<img src="{self.xp_icon.as_posix()}" width="40" height="40">'
+                f'<span style="font-size: 20px;"> ⁚ {xp_points}</span>'
+                            )
+        self.wallet_label.setText(
+                f'<img src="{self.w_icon.as_posix()}" width="40" height="40">'
+                f'<span style="font-size: 20px;"> ⁚ {wallet} Lumens</span>'
+            )
+    
         
 
     def init_wrapper(self):
