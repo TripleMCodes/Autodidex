@@ -74,27 +74,6 @@ class UserIfo:
             level = dashboard.get_overall_level()
             cache.set("overall_level", level)
         return level
-
-    
-    def load_update_state(self):
-        """loads the variable responsible for updating bank and subjects information"""
-        file = Path(__file__).parent / "dashboard files/game_update_state.json"
-         
-        with open(file, 'r') as f:
-            state = f.read()
-            state = bool(int(state))
-            self.update_state = state
-            logging.debug(f"The state is {state}")
-            return self.update_state
-    
-    def save_update_state(self, state):
-        file = Path(__file__).parent / "dashboard files/game_update_state.json"
-        state_to_save = {}
-
-        open(file).close()
-        with open(file, 'w')  as f:
-            state_to_save["state"] = state
-            json.dump(state_to_save, f)
  
     def overall_level_up(self):
         """Sum all subject XP points, each new gain of 500 XP points gives 1 overall level up."""
@@ -106,71 +85,6 @@ class UserIfo:
             dashboard.increment_overall_level(new_overall_level)
             self._oveall_level_badge_reward()
             cache.set("overall_level", new_overall_level)
-
-    def subjects_badges_state(self):
-        """Check if user qualifies for a badge and award it."""
-        subjects_level_file = Path(__file__).parent / "dashboard files/subjects_level.json"
-        badges_file = Path(__file__).parent / "dashboard files/subjects_badges.json"
-        temp = {}
-        
-#------------------------------------------------------------------------IF FILE IS EMPTY------------------------------------------------------
-        if os.path.getsize(badges_file) == 0:
-            with open(subjects_level_file, "r") as f:
-                data = json.load(f)
-                
-                for key in data.keys():
-                    temp[key] = []
-                temp["Overall level"] = []
-
-            with open(badges_file, "w") as f:
-                json.dump(temp, f, indent=4)
-        
-#------------------------------------------------------------------------For new subjects------------------------------------------------------
-        logging.debug("checking for new subjects")
-        try:
-            with open(subjects_level_file, "r") as f:
-                data = json.load(f)
-            
-            with open(badges_file, "r") as f:
-                subject_badges = json.load(f)
-        except json.decoder.JSONDecodeError as e:
-            logging.warning("⚠️ JSON is malformed!")
-            logging.warning(e)
-            return
-        
-        except FileExistsError:
-            # Create the file
-            badges_file.touch(exist_ok=True)
-            return
-        
-        for key in data.keys():
-            if key not in subject_badges:
-                logging.debug(f"{key} has not badges list")
-                subject_badges[key] = []
-        
-        open(badges_file).close()
-        with open(badges_file, "w") as f:
-            json.dump(subject_badges, f, indent=4)
-            logging.debug("added new subject")
-        
-        logging.debug("All good, append badges.")
-        return True
-    
-    def badge_appending_method(self, dict_key, badge_name):
-        """Adds badges to badges file"""
-        badges_file = Path(__file__).parent / "dashboard files/subjects_badges.json"
-
-        with open(badges_file, "r") as f:
-            subject_badges = json.load(f)
-
-        if badge_name not in subject_badges[dict_key]:
-            subject_badges[dict_key].append(badge_name)
-        else:
-            return
-
-        with open(badges_file, "w") as f:
-            json.dump(subject_badges, f, indent=4)
-        logging.debug(f"Added {badge_name} badge for {dict_key}")
 
     def _oveall_level_badge_reward(self):
         """Give overall badge reward"""
@@ -201,27 +115,6 @@ class UserIfo:
                     if msg:
                         logging.debug(msg["message"])
 
-#-------------------------------------------------------------badge for every tenth level for a  subject---------------------------------------
-        # if subject % 10 == 0 and subject !=0:
-        #     self.badge_appending_method(key, "🎯 Every Ten Counts")
-
-
-
-            
-    def append_badges(self, cp, xp):
-        """Add badges for a particular subject"""
-        
-# #------------------------------------------------------------------checking if process ready---------------------------------------------------
-#         self.subjects_badges_state()
-        
-#----------------------------------------------------------------badge for every thousand xps earned-------------------------------------------
-        
-#         if xp % 1000 == 0 and xp != 0: 
-#             self.badge_appending_method(key, "🏆 1K Subject XP Master")
-
-# #----------------------------------------------------------------------badge for every 10000 xp earned-----------------------------------------
-#         if total_xp % 10000 == 0:
-#             self.badge_appending_method("Overall level", "🖤 Every Ten K Counts")
 #==============================================================================================================================================
 #**********************************************************************************************************************************************
 #=====================================================================Autodidex bank class=====================================================
@@ -254,8 +147,7 @@ class AutodidexBank:
         return self._subjectXp
 
     @wallet.setter
-    def wallet(self, lumens:int
-               ):
+    def wallet(self, lumens:int):
         if not isinstance(lumens, int):
             raise TypeError("Lumens not the expect value.")
 
@@ -263,7 +155,7 @@ class AutodidexBank:
             raise ValueError("You cannot deposit negative lumens.")
 
         self._wallet_total += lumens
-        self._save_wallet_total()
+        # self._save_wallet_total()
 
         logging.info(f"Deposited {lumens} lumens. New balance: {self._wallet_total}")
 #=================================================================================Setters======================================================
@@ -282,18 +174,18 @@ class AutodidexBank:
             self._xp_total += points
 #==============================================================================================================================================
 #============================================================================Class Methods=====================================================
-    def _save_wallet_total(self, withdraw=False):
-        bank_details_file = Path(__file__).parent / "dashboard files/bank_details.json"
-        try:
-            with open(bank_details_file, "r") as f:
-                bank_details = json.load(f)
-        except FileNotFoundError:
-            return "❌ File not found"
+    # def _save_wallet_total(self, withdraw=False):
+    #     bank_details_file = Path(__file__).parent / "dashboard files/bank_details.json"
+    #     try:
+    #         with open(bank_details_file, "r") as f:
+    #             bank_details = json.load(f)
+    #     except FileNotFoundError:
+    #         return "❌ File not found"
         
-        bank_details["lumens"] = self._wallet_total
-        open(bank_details_file, "w").close() #clearing file for updated data
-        with open(self._bank_details_file, "w") as f:
-            json.dump(bank_details, f, indent=4)
+    #     bank_details["lumens"] = self._wallet_total
+    #     open(bank_details_file, "w").close() #clearing file for updated data
+    #     with open(self._bank_details_file, "w") as f:
+    #         json.dump(bank_details, f, indent=4)
 
     def earn_subject_xp(self):
         """User earns XP in a specific subject."""
@@ -323,7 +215,6 @@ class AutodidexBank:
                             logging.debug(f'Update added for {cp}')
         cache.set("cp_streak", subjects_data)
 
-        
     def subject_level_up(self, subject):
         """Add level up for a subject if new level > current and rewards with 10 lumens"""
         #get subject xp
@@ -352,7 +243,6 @@ class AutodidexBank:
         logging.debug(f"current bank amount: {self._wallet_total}")
         self._wallet_total = self._wallet_total - amount
         bank_details["lumens"] = self._wallet_total
-        
 #-----------------------------------------------------------------------clear old data---------------------------------------------------------
         open(bank_details_file, "w").close()
 #--------------------------------------------------------------------------load new data-------------------------------------------------------
@@ -379,21 +269,6 @@ class AutodidexBank:
         subjects_data = self.user_info.subjects
         subjects_data[subject]["xp"] += points
         self._xp_total += points
-    
-    def load_earned_badges(self):
-        """Loads the badge collection when is started"""
-        earned_badges_file = Path(__file__).parent / "dashboard files/subjects_badges.json"
-        try:
-            with open(earned_badges_file, "r", encoding="utf-8") as f:
-                data = json.load(f)
-            self.badges = data
-            # logging.debug(f"badges data(load_earned_badges): {self.badges}")
-            return
-        except FileNotFoundError:
-            return "file not found"
-        except json.JSONDecodeError:
-            open(earned_badges_file, "w").close()
-            return "subjects_badges.json file is corrupted. File has been reset"
     
 #==============================================================================================================================================
 #**********************************************************************************************************************************************
@@ -423,7 +298,6 @@ class PolyMart:
     def purchase_item(self, item_name):
         """"Purchases or trades items selected"""
         logging.debug(item_name)
-        
 #------------------------------------------------------------------------ Separating the name from the price ----------------------------------
         tuple_items = item_name.partition(":")
         item = tuple_items[0]
@@ -441,8 +315,6 @@ class PolyMart:
                     return f"🛒 You bought {item_name} for {cost} lumens!"
                 else:
                     return  "Transection Failed",f"💸 Not enough lumens to purchase {item_name}"
-                    
-                
 #----------------------------------------------------------------------------trading badges----------------------------------------------------
         for key, value in self.trade_items.items():
             trade_amount = int(value)
@@ -455,7 +327,6 @@ class PolyMart:
                 self.bank_account.wallet = trade_amount
                 self.remove_traded_badge(item_name)
                 return f"Transaction Complete Traded {item_name} for {trade_amount}"
-                
 #-------------------------------------------------------------------------If loop finishes and no item was found-------------------------------
         return "❌ Item not found in PolyMart."
     
@@ -480,7 +351,6 @@ class SpinningLabel(QLabel):
         self.setAlignment(Qt.AlignCenter)
         self.setFont(QFont("Arial", 80, QFont.Bold))
         self.angle = 0
-
 #----------------------------------------------------------------Timer to simulate 3D spin-----------------------------------------------------
         self.timer = QTimer()
         self.timer.timeout.connect(self.spin)
@@ -562,15 +432,11 @@ class MainWindow(QMainWindow):
         self.light_mode: Optional[str] = None
         self.theme_toggle = QPushButton("")
         self.theme_toggle.setIcon(QIcon(str(self.light_icon)))
-        # self.cpt_timer = QTimer(self)
-        # self.cpt_timer.setInterval(2000)  # 2000 ms = 2 seconds
-        # self.cpt_timer.timeout.connect(self.check_new_cpt)
-        # self.cpt_timer.start()
         self.badge_list = QListWidget()
         self.container = QWidget()
         self.subject_combo = QComboBox()
 
-        # self.init_wrapper()
+        self.init_wrapper()
 #===============================================================================Class Methods==================================================
     def setup_ui(self):
         """"Struture the UI"""
@@ -763,7 +629,7 @@ class MainWindow(QMainWindow):
             badges_list_file.touch(exist_ok=True)
         except (json.decoder.JSONDecodeError, Exception):
             open(badges_list_file, "w").close()
-            self.user.subjects_badges_state()
+            # self.user.subjects_badges_state()
         
     def add_subject(self):
         """Load subjects from db"""
@@ -853,13 +719,6 @@ class MainWindow(QMainWindow):
         self.subject_combo.clear()
         self.subject_combo.addItems(subjects)
     
-    def update_ui(self):
-        # self.bank._load_wallet_total_and_xp()
-        self.wallet_label.setText(
-                f'<img src="{self.w_icon.as_posix()}" width="40" height="40">'
-                f'<span style="font-size: 20px;"> ⁚ {self.bank.wallet} Lumens</span>'
-            )
-    
     def update_wrapper(self):
         self.bank.earn_subject_xp()
         level = self.user.load_overall_level()
@@ -878,15 +737,12 @@ class MainWindow(QMainWindow):
                 f'<span style="font-size: 20px;"> ⁚ {wallet} Lumens</span>'
             )
     
-        
-
     def init_wrapper(self):
         self.on_load()
         if self.user_present == True:
             self.setup_ui()
         self.thm_wrapper()
         self.bank.earn_subject_xp()
-        # self.bank.load_internal_methods()
         self.market.load_store_items
 #===========================================================================Run application====================================================
 if __name__ == "__main__":
