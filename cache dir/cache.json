@@ -3,7 +3,10 @@
         "Mathematics": 5,
         "Computer Science": 6,
         "Korean": 2,
-        "Physics": 2
+        "Physics": 4,
+        "DSA": 7,
+        "Linguistics": 7,
+        "Calculus": 7
     },
-    "overall_level": 15
+    "overall_level": 19
 }

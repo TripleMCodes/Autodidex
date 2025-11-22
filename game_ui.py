@@ -56,7 +56,8 @@ class UserIfo:
         
     @level.setter
     def level(self, total):
-        pass
+        self._overAll_level += total
+
 #==============================================================================================================================================
 #===========================================================================Class Methods======================================================
     def initialize_subjects(self):
@@ -85,6 +86,7 @@ class UserIfo:
             dashboard.increment_overall_level(new_overall_level)
             self._oveall_level_badge_reward()
             cache.set("overall_level", new_overall_level)
+            self._overAll_level = new_overall_level
 
     def _oveall_level_badge_reward(self):
         """Give overall badge reward"""
@@ -155,6 +157,7 @@ class AutodidexBank:
             raise ValueError("You cannot deposit negative lumens.")
 
         self._wallet_total += lumens
+        dashboard.add_lumens(self._wallet_total)
         # self._save_wallet_total()
 
         logging.info(f"Deposited {lumens} lumens. New balance: {self._wallet_total}")
@@ -208,6 +211,7 @@ class AutodidexBank:
                         if cache_streak < streak:
                             xp = self.progress_conversion(streak)
                             dashboard.add_total_xp(xp)
+                            self._xp_total += xp
                             cp_tracker.save_cp_xp(cp, xp)
                             self.subject_level_up(cp)
                             self.user_info.cp_level_badge_reward()
@@ -436,7 +440,7 @@ class MainWindow(QMainWindow):
         self.container = QWidget()
         self.subject_combo = QComboBox()
 
-        self.init_wrapper()
+        # self.init_wrapper()
 #===============================================================================Class Methods==================================================
     def setup_ui(self):
         """"Struture the UI"""
@@ -721,20 +725,20 @@ class MainWindow(QMainWindow):
     
     def update_wrapper(self):
         self.bank.earn_subject_xp()
-        level = self.user.load_overall_level()
-        xp_points = dashboard.get_total_xp()
-        wallet = dashboard.get_lumens_amount()
+        # level = self.user.load_overall_level()
+        # xp_points = dashboard.get_total_xp()
+        # wallet = dashboard.get_lumens_amount()
         self.level_label.setText(
                 f'<img src="{self.l_icon.as_posix()}" width="40" height="40">'
-                f'<span style="font-size: 20px;"> ⁚ {level}</span>'
+                f'<span style="font-size: 20px;"> ⁚ {self.user.level}</span>'
             )
         self.xp_label.setText(
                 f'<img src="{self.xp_icon.as_posix()}" width="40" height="40">'
-                f'<span style="font-size: 20px;"> ⁚ {xp_points}</span>'
+                f'<span style="font-size: 20px;"> ⁚ {self.bank.xpPoints}</span>'
                             )
         self.wallet_label.setText(
                 f'<img src="{self.w_icon.as_posix()}" width="40" height="40">'
-                f'<span style="font-size: 20px;"> ⁚ {wallet} Lumens</span>'
+                f'<span style="font-size: 20px;"> ⁚ {self.bank.wallet} Lumens</span>'
             )
     
     def init_wrapper(self):
