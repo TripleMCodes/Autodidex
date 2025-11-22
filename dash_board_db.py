@@ -141,10 +141,10 @@ class Dashboard():
             logging.debug(f"An error occurred: {e}")
             return
         
-    def add_lumens(self, amount):
+    def add_lumens(self, amount) -> dict:
         """Increment total lumens"""
 
-        query = f"""UPDATE bank
+        query = f"""UPDATE {self.bank_table}
                     SET lumens = ?
                     WHERE uid = ?;"""
         id = self._get_user_id()
@@ -155,6 +155,22 @@ class Dashboard():
             logging.debug(f"An error occurred: {e}")
         finally:
             return 
+        
+    def decrement_lumens(self, new_amount):
+        """Decrement total lumens"""
+
+        query = f"""UPDATE {self.bank_table}
+                    SET lumens = ?
+                    WHERE uid = ?;"""
+        id = self._get_user_id()
+        try:
+            self.conn_cursor.execute(query, (new_amount, id,))
+            self._commit_data()
+            return {"message": "Purchased successful."}
+        except Exception as e:
+            logging.debug(f"An error occurred: {e}")
+            return {"message": "Purchased unsuccessful, an error occurred."}
+
 #=========================================================overlevel related============================================
     def increment_overall_level(self, new_level:int):
         """Increases the overall level"""
@@ -289,6 +305,7 @@ if __name__ == "__main__":
     db = Dashboard()
     print(db.get_lumens_amount())
     print(db.get_total_xp())
+    print(db.decrement_lumens(1200))
     # print(db.)
     # print(db.get_user_state())
     # db._delete_active_user()

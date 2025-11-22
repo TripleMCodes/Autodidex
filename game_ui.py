@@ -25,7 +25,7 @@ dashboard = Dashboard()
 
 #=====================================================================logs enable/disable======================================================
 logging.basicConfig(level=logging.DEBUG) 
-logging.disable(logging.DEBUG)
+# logging.disable(logging.DEBUG)
 #===============================================================================================================================================
 #***********************************************************************************************************************************************
 #========================================================================User INfo Class=======================================================
@@ -246,14 +246,18 @@ class AutodidexBank:
 
         logging.debug(f"current bank amount: {self._wallet_total}")
         self._wallet_total = self._wallet_total - amount
-        bank_details["lumens"] = self._wallet_total
-#-----------------------------------------------------------------------clear old data---------------------------------------------------------
-        open(bank_details_file, "w").close()
-#--------------------------------------------------------------------------load new data-------------------------------------------------------
-        with open(bank_details_file, "w") as f:
-            json.dump(bank_details, f, indent=4)
-        logging.debug(f"Transection complete")
-        return self._wallet_total
+        msg = dashboard.decrement_lumens(self._wallet_total)
+        return msg
+
+
+#         bank_details["lumens"] = self._wallet_total
+# #-----------------------------------------------------------------------clear old data---------------------------------------------------------
+#         open(bank_details_file, "w").close()
+# #--------------------------------------------------------------------------load new data-------------------------------------------------------
+#         with open(bank_details_file, "w") as f:
+#             json.dump(bank_details, f, indent=4)
+#         logging.debug(f"Transection complete")
+#         return self._wallet_total
     
     def remove_badge(self, subject, badge, index):
         """"Removes traded badge from badge collection"""
@@ -295,13 +299,16 @@ class PolyMart:
         
         for key, value in items_list[0].items():
             self.store_items[key] = value
+        logging.debug(f"The store items {self.store_items}")
 
         for key, value in items_list[1].items():
             self.trade_items[key] = value
+        logging.debug(f"The store items {self.trade_items}")
 
     def purchase_item(self, item_name):
         """"Purchases or trades items selected"""
-        logging.debug(item_name)
+        logging.debug(f"the item name is {item_name}")
+        logging.debug(f"store items {self.store_items}")
 #------------------------------------------------------------------------ Separating the name from the price ----------------------------------
         tuple_items = item_name.partition(":")
         item = tuple_items[0]
@@ -315,10 +322,10 @@ class PolyMart:
 
             if item_name == key:
                 if self.bank_account.wallet >= cost:
-                    self.bank_account.spend_lumens(cost)
-                    return f"🛒 You bought {item_name} for {cost} lumens!"
+                    msg = self.bank_account.spend_lumens(cost)
+                    return msg["message"] #f"🛒 You bought {item_name} for {cost} lumens!"
                 else:
-                    return  "Transection Failed",f"💸 Not enough lumens to purchase {item_name}"
+                    return  f"Transection Failed ,💸 Not enough lumens to purchase {item_name}"
 #----------------------------------------------------------------------------trading badges----------------------------------------------------
         for key, value in self.trade_items.items():
             trade_amount = int(value)
@@ -440,7 +447,7 @@ class MainWindow(QMainWindow):
         self.container = QWidget()
         self.subject_combo = QComboBox()
 
-        # self.init_wrapper()
+        self.init_wrapper()
 #===============================================================================Class Methods==================================================
     def setup_ui(self):
         """"Struture the UI"""
@@ -580,6 +587,7 @@ class MainWindow(QMainWindow):
     def buy_item(self):
         """"Calls the method purchasing or trades from PolyMart"""
         item = self.store_combo.currentText()
+        logging.debug(f'The current item is {item}')
 
         res = self.market.purchase_item(item)
         QMessageBox.information(self, "Transaction result", res, QMessageBox.Ok)
@@ -747,7 +755,7 @@ class MainWindow(QMainWindow):
             self.setup_ui()
         self.thm_wrapper()
         self.bank.earn_subject_xp()
-        self.market.load_store_items
+        self.market.load_store_items()
 #===========================================================================Run application====================================================
 if __name__ == "__main__":
     app = QApplication(sys.argv)
