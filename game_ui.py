@@ -97,6 +97,9 @@ class UserIfo:
         if self._overAll_level % 10 == 0:
             dashboard.add_new_badge("💎 Every Tenth Tier counts")
         
+        cp_with_badges = dashboard.get_cp_with_badges()
+        cache.set("cp_badges", cp_with_badges)
+        
         badges = dashboard.get_all_badges()
         cache.set("badges", badges)
 
@@ -119,6 +122,9 @@ class UserIfo:
                     msg = dashboard.add_cp_badge(reward_badges[1], k)
                     if msg:
                         logging.debug(msg["message"])
+        
+        cp_with_badges = dashboard.get_cp_with_badges()
+        cache.set("cp_badges", cp_with_badges)
         
         badges = dashboard.get_all_badges()
         cache.set("badges", badges)
@@ -183,19 +189,6 @@ class AutodidexBank:
             self._xp_total += points
 #==============================================================================================================================================
 #============================================================================Class Methods=====================================================
-    # def _save_wallet_total(self, withdraw=False):
-    #     bank_details_file = Path(__file__).parent / "dashboard files/bank_details.json"
-    #     try:
-    #         with open(bank_details_file, "r") as f:
-    #             bank_details = json.load(f)
-    #     except FileNotFoundError:
-    #         return "❌ File not found"
-        
-    #     bank_details["lumens"] = self._wallet_total
-    #     open(bank_details_file, "w").close() #clearing file for updated data
-    #     with open(self._bank_details_file, "w") as f:
-    #         json.dump(bank_details, f, indent=4)
-
     def earn_subject_xp(self):
         """User earns XP in a specific subject."""
 
@@ -255,15 +248,6 @@ class AutodidexBank:
         msg = dashboard.decrement_lumens(self._wallet_total)
         return msg
 
-
-#         bank_details["lumens"] = self._wallet_total
-# #-----------------------------------------------------------------------clear old data---------------------------------------------------------
-#         open(bank_details_file, "w").close()
-# #--------------------------------------------------------------------------load new data-------------------------------------------------------
-#         with open(bank_details_file, "w") as f:
-#             json.dump(bank_details, f, indent=4)
-#         logging.debug(f"Transection complete")
-#         return self._wallet_total
     
     def remove_badge(self, subject, badge, index):
         """"Removes traded badge from badge collection"""
@@ -621,24 +605,16 @@ class MainWindow(QMainWindow):
 
     def display_badges(self, index):
         """Display badges for a particular subject"""
-        badges_list_file = Path(__file__).parent / "dashboard files/subjects_badges.json"
+       
+        badges_list = cache.get("cp_badges")
+        logging.debug(f"The badges: {badges_list}")
 
-        try:
-            if not badges_list_file.exists():
-                with open(badges_list_file , "r", encoding="utf-8") as f:
-                    badges_list = json.load(f)
+        self.badge_list.clear()
+        selected_item = self.subject_combo.itemText(index)
 
-                self.badge_list.clear()
-                selected_item = self.subject_combo.itemText(index)
-
-                subject_badges = badges_list[selected_item]
-            
-                self.badge_list.addItems(set(subject_badges))
-        except FileNotFoundError:
-            badges_list_file.touch(exist_ok=True)
-        except (json.decoder.JSONDecodeError, Exception):
-            open(badges_list_file, "w").close()
-            # self.user.subjects_badges_state()
+        subject_badges = badges_list[selected_item]
+    
+        self.badge_list.addItems(set(subject_badges))
         
     def add_subject(self):
         """Load subjects from db"""
@@ -747,14 +723,17 @@ class MainWindow(QMainWindow):
             )
     
     def init_wrapper(self):
+        badges = dashboard.get_all_badges()
+        cp_with_badges = dashboard.get_cp_with_badges()
+        cache.set("cp_badges", cp_with_badges)
+        cache.set("badges", badges)
         self.on_load()
         if self.user_present == True:
             self.setup_ui()
         self.thm_wrapper()
         self.bank.earn_subject_xp()
         self.market.load_store_items()
-        badges = dashboard.get_all_badges()
-        cache.set("badges", badges)
+        
 #===========================================================================Run application====================================================
 if __name__ == "__main__":
     app = QApplication(sys.argv)

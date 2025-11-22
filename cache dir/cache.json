@@ -12,5 +12,28 @@
     "badges": [
         "\ud83d\udd30Genesis",
         "\ud83c\udfc6 1K Subject XP Master"
-    ]
+    ],
+    "cp_badges": {
+        "DSA": [
+            "\ud83c\udfc6 1K Subject XP Master"
+        ],
+        "Physics": [
+            "\ud83c\udfc6 1K Subject XP Master"
+        ],
+        "Calculus": [
+            "\ud83c\udfc6 1K Subject XP Master"
+        ],
+        "Korean": [
+            "\ud83c\udfc6 1K Subject XP Master"
+        ],
+        "Computer Science": [
+            "\ud83c\udfc6 1K Subject XP Master"
+        ],
+        "Mathematics": [
+            "\ud83c\udfc6 1K Subject XP Master"
+        ],
+        "Linguistics": [
+            "\ud83c\udfc6 1K Subject XP Master"
+        ]
+    }
 }

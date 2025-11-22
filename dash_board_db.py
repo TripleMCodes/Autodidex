@@ -247,13 +247,17 @@ class Dashboard():
                         SELECT badge, subject_id FROM {self.badges_table}
                         WHERE subject_id is not null) as b
                     ON a.id = b.subject_id;"""
+        cp_with_badges = {}
         try:
             self.conn_cursor.execute(query)
-            cp_badges = self.conn_cursor()
-            logging.debug(cp_badges)
+            cp_badges = set(self.conn_cursor.fetchall())
+            cp_badges = list(cp_badges)
+            for i in range(len(cp_badges)):
+                cp_with_badges[cp_badges[i][0]] = list(cp_badges[i][1:])
+            return cp_with_badges
         except Exception as e:
             logging.debug(f"An error occurred: {e}")
-            
+
     def get_all_badges(self) -> list:
         """Get all badges from db"""
         query = f"SELECT badge FROM {self.badges_table};" 
@@ -345,7 +349,7 @@ if __name__ == "__main__":
     db = Dashboard()
     print(db.get_lumens_amount())
     print(db.get_total_xp())
-    print(db.get_all_badges())
+    print(db.get_cp_with_badges())
     # print(db.)
     # print(db.get_user_state())
     # db._delete_active_user()
