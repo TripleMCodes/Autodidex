@@ -96,6 +96,9 @@ class UserIfo:
 #----------------------------------------------------------badge for every tenth level achieved.-----------------------------------------------
         if self._overAll_level % 10 == 0:
             dashboard.add_new_badge("💎 Every Tenth Tier counts")
+        
+        badges = dashboard.get_all_badges()
+        cache.set("badges", badges)
 
     def cp_level_badge_reward(self):
         """Reward every level for a particular of a cp"""
@@ -116,6 +119,9 @@ class UserIfo:
                     msg = dashboard.add_cp_badge(reward_badges[1], k)
                     if msg:
                         logging.debug(msg["message"])
+        
+        badges = dashboard.get_all_badges()
+        cache.set("badges", badges)
 
 #==============================================================================================================================================
 #**********************************************************************************************************************************************
@@ -308,7 +314,6 @@ class PolyMart:
     def purchase_item(self, item_name):
         """"Purchases or trades items selected"""
         logging.debug(f"the item name is {item_name}")
-        logging.debug(f"store items {self.store_items}")
 #------------------------------------------------------------------------ Separating the name from the price ----------------------------------
         tuple_items = item_name.partition(":")
         item = tuple_items[0]
@@ -323,7 +328,7 @@ class PolyMart:
             if item_name == key:
                 if self.bank_account.wallet >= cost:
                     msg = self.bank_account.spend_lumens(cost)
-                    return msg["message"] #f"🛒 You bought {item_name} for {cost} lumens!"
+                    return msg["message"]
                 else:
                     return  f"Transection Failed ,💸 Not enough lumens to purchase {item_name}"
 #----------------------------------------------------------------------------trading badges----------------------------------------------------
@@ -333,28 +338,20 @@ class PolyMart:
             logging.debug(f'items for trand in polymart: {self.trade_items}')
             logging.debug(f"Item to be traded {item_name}")
 
+            cached_badges = cache.get("badges")
+            if item_name.title() not in cached_badges:
+                return  f"Transection Failed , you don't have `{item_name.title()}` yet."
             if item_name == trade_item:
                 logging.debug("Item found")
-                self.bank_account.wallet = trade_amount
-                self.remove_traded_badge(item_name)
-                return f"Transaction Complete Traded {item_name} for {trade_amount}"
+                if dashboard.remove_badge(item_name.title()):
+                    self.bank_account.wallet = trade_amount
+                    # self.remove_traded_badge(item_name)
+                    badges = dashboard.get_all_badges()
+                    cache.set("badges", badges)
+                    return f"Transaction Complete Traded {item_name} for {trade_amount}"
+                return f"An error occurred. Please try again."
 #-------------------------------------------------------------------------If loop finishes and no item was found-------------------------------
         return "❌ Item not found in PolyMart."
-    
-    def remove_traded_badge(self, store_item):
-        """Call the method for removes badges in AutodidexBank"""
-        for key, value in self.bank_account.badges.items():
-            subject = key
-            badges_list = value
-            for index, badges in enumerate(badges_list):
-                badge_to_be_traded = badges.lower()
-                logging.debug(f"badge to be traded: {store_item} badge in badge collection {badge_to_be_traded}")
-                if store_item == badge_to_be_traded:
-                    logging.debug(f"badges data(remove_traded_badge: method): {store_item} badge found in {subject}")
-                    self.bank_account.remove_badge(subject, store_item, index)
-                    return
-                else:
-                    logging.debug(f"badge not found in {subject}")
 
 class SpinningLabel(QLabel):
     def __init__(self, text):
@@ -756,6 +753,8 @@ class MainWindow(QMainWindow):
         self.thm_wrapper()
         self.bank.earn_subject_xp()
         self.market.load_store_items()
+        badges = dashboard.get_all_badges()
+        cache.set("badges", badges)
 #===========================================================================Run application====================================================
 if __name__ == "__main__":
     app = QApplication(sys.argv)

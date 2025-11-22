@@ -14,7 +14,7 @@ class Dashboard():
         self.badges_table = "badges_and_titles"
         self.user_table = "user_info"
         self.bank_table = "bank"
-    
+        self.cp_table = "cerebral_pursuits"
     def _commit_data(self):
         """Commits data to data base (does not close connection)"""
 
@@ -239,6 +239,46 @@ class Dashboard():
             logging.debug(f'An error occurred: {e}')
             return
     
+    def get_cp_with_badges(self):
+        """Get all cp with respective badges."""
+
+        query = f"""SELECT a.subject, b.badge FROM {self.cp_table} as a
+                    INNER JOIN (
+                        SELECT badge, subject_id FROM {self.badges_table}
+                        WHERE subject_id is not null) as b
+                    ON a.id = b.subject_id;"""
+        try:
+            self.conn_cursor.execute(query)
+            cp_badges = self.conn_cursor()
+            logging.debug(cp_badges)
+        except Exception as e:
+            logging.debug(f"An error occurred: {e}")
+            
+    def get_all_badges(self) -> list:
+        """Get all badges from db"""
+        query = f"SELECT badge FROM {self.badges_table};" 
+        try:
+            self.conn_cursor.execute(query)
+            badges = set(self.conn_cursor.fetchall())
+            badges = [b[0] for b in badges]
+            return badges
+        except Exception as e:
+            logging.debug(f"An error occurred: {e}")
+            return None  
+        
+    def remove_badge(self, badge):
+        """Remove specific from db"""
+
+        query = f"""DELETE FROM {self.badges_table}
+                    WHERE badge = ? ;"""
+        try:
+            self.conn_cursor.execute(query, (badge,))
+            self._commit_data()
+            return True
+        except Exception as e:
+            logging.debug("An error occurred")
+            return False
+
     def starter_badge(self) -> None:
         """Give a badge to new user"""
 
@@ -305,7 +345,7 @@ if __name__ == "__main__":
     db = Dashboard()
     print(db.get_lumens_amount())
     print(db.get_total_xp())
-    print(db.decrement_lumens(1200))
+    print(db.get_all_badges())
     # print(db.)
     # print(db.get_user_state())
     # db._delete_active_user()
