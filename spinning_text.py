@@ -53,7 +53,7 @@ class MainWindow(QWidget):
         # self.setFixedSize(400, 200)
 
         layout = QVBoxLayout()
-        label = SpinningLabel("Autodidext")
+        label = SpinningLabel(f'Autodidex')
         layout.addWidget(label)
 
         self.setLayout(layout)
