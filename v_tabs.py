@@ -252,7 +252,7 @@ class Autodidex (QWidget):
     def load_thms(self):
         """Loads the styling data for the app"""
         
-        light_mode_file = Path(__file__).parent / "themes files/light_mode.txt"
+        light_mode_file = Path(__file__).parent / "themes files/neutral_mode.txt"
         with open(light_mode_file, "r") as f:
             light_mode = f.read()
         

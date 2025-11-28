@@ -658,7 +658,7 @@ class MainWindow(QMainWindow):
         """Switches between light and dark mode"""
 
         if self.theme_state == "light":
-            stylesheet_file = Path(__file__).parent / "themes files/dark_mode.txt"
+            stylesheet_file = Path(__file__).parent / "themes files/neutral_mode.txt"
             self.theme_state = "dark"
             self.theme_toggle.setText("")
             self.theme_toggle.setIcon(QIcon(str(self.light_icon)))

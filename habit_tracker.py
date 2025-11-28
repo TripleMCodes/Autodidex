@@ -46,6 +46,7 @@ class CPTracker(QWidget):
 #-----------------------------------------------------------------------StlyeSheets----------------------------------------------
         self.light_mode: Optional[str] = None
         self.dark_mode: Optional[str] = None
+        self.neutral_mode: Optional[str] = None
 #-----------------------------------------------------------------------Main Layout-----------------------------------------------
         self.main_layout =  QHBoxLayout(self)
         self.main_layout.setObjectName("mainframe")    
@@ -75,6 +76,7 @@ class CPTracker(QWidget):
 
         self.d_mode = Path(__file__).parent / "Icons/icons8-dark-mode-48.png"
         self.l_mode = Path(__file__).parent / "Icons/icons8-light-64.png"
+        self.n_mode = Path(__file__).parent / "Icons/icons8-day-and-night-50.png"
         self.thm_btn = QPushButton("")
         self.thm_btn.setIcon(QIcon(str(self.d_mode)))
         self.thm_btn.setIconSize(QSize(30, 30))
@@ -152,7 +154,7 @@ class CPTracker(QWidget):
         self.enable_check_box_change = False #checking checkboxes again when loading the app
         self.end_date = cp_table.get_reset_date()
 #------------------------------------------------------------init wrapper------------------------------------------------------       
-        # self.init_wrapper()
+        self.init_wrapper()
 #==========================================================methods begin here==================================================
     def load_last_entered_habits(self):
         """load the previously cerebral pursuits"""
@@ -386,6 +388,7 @@ class CPTracker(QWidget):
         """loads the themes, and sets them to their data fields"""
         light_mode_file = Path(__file__).parent / "themes files/light_mode.txt"
         dark_mode_file = Path(__file__).parent / "themes files/dark_mode.txt"
+        neutral_mode_file = Path(__file__).parent / "themes files/neutral_mode.txt"
 #------------------------------------------------------------------------load light mode-----------------------------------------
         with open(light_mode_file, "r") as f:
             light_mode = f.read()
@@ -395,6 +398,11 @@ class CPTracker(QWidget):
             dark_mode = f.read()
         self.dark_mode = dark_mode
 
+        with open(neutral_mode_file, "r") as f:
+            neutral_mode = f.read()
+        self.neutral_mode = neutral_mode
+
+
     def theme(self):
 #---------------------------------------------------------------------to dark mode-----------------------------------------------
         if self.mode == "light":
@@ -402,19 +410,30 @@ class CPTracker(QWidget):
             self.habit_tracker.setStyleSheet(self.dark_mode)
             self.input.setStyleSheet(self.dark_mode)
             self.enter_btn.setStyleSheet(self.dark_mode)
-            self.edit_btn.setStyleSheet(self.dark_mode)
+            # self.edit_btn.setStyleSheet(self.dark_mode)
             self.thm_btn.setIcon(QIcon(str(self.l_mode)))
             self.setStyleSheet(self.dark_mode)
             self.mode = "dark"
-        else:
+        elif self.mode == "dark":
 #----------------------------------------------------------------------to light mode---------------------------------------------
+            self.sidebar.setStyleSheet(self.neutral_mode)
+            self.habit_tracker.setStyleSheet(self.neutral_mode)
+            self.input.setStyleSheet(self.neutral_mode)
+            self.enter_btn.setStyleSheet(self.neutral_mode)
+            # self.edit_btn.setStyleSheet(self.neutral_mode)
+            self.thm_btn.setIcon(QIcon(str(self.n_mode)))
+            self.setStyleSheet(self.neutral_mode)
+            self.mode = "neutral"
+        elif self.mode == "neutral":
             self.sidebar.setStyleSheet(self.light_mode)
             self.habit_tracker.setStyleSheet(self.light_mode)
             self.input.setStyleSheet(self.light_mode)
             self.enter_btn.setStyleSheet(self.light_mode)
-            self.edit_btn.setStyleSheet(self.light_mode)
+            # self.edit_btn.setStyleSheet(self.light_mode)
+            self.thm_btn.setIcon(QIcon(str(self.d_mode)))
             self.setStyleSheet(self.light_mode)
             self.mode = "light"
+
 
     def load_thm_pref(self):
         """load saved theme preferrence"""

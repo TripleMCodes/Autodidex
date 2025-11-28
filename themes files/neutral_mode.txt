@@ -1,0 +1,209 @@
+/* === GLOBAL BASE === */
+* {
+    font-family: "Fira Sans", "Segoe UI", sans-serif;
+    color: #3A2F55; /* deep muted plum */
+}
+
+/* === MAIN BACKGROUND === */
+QWidget {
+    background-color: qlineargradient(
+        x1:0, y1:0, x2:1, y2:1,
+        stop:0 #E6E0F8,
+        stop:1 #CFC4EF
+    );
+}
+
+QHBoxLayout#mainframe {
+    background-color: qlineargradient(
+        x1:0, y1:0, x2:1, y2:1,
+        stop:0 #E6E0F8,
+        stop:1 #CFC4EF
+    );
+    font-size: 120px;
+}
+
+/* === LABELS === */
+QLabel {
+    color: #4B3A6A;
+    font-size: 14px;
+}
+QLabel#onloadlabel {
+    font-size: 80px;
+    font-family:"Arial";
+    color: #3A2F55;
+}
+QLabel#dblabel {
+    font-size: 50px;
+    color:#6B56A8;
+}
+
+/* === BUTTONS === */
+QPushButton {
+    background-color: qlineargradient(
+        x1:0, y1:0, x2:1, y2:1,
+        stop:0 #D4C7F5,
+        stop:1 #BEAEEA
+    );
+    border: 1px solid #A797DA;
+    border-radius: 10px;
+    padding: 8px 16px;
+    color: #3A2F55;
+    font-weight: bold;
+}
+QPushButton:hover {
+    background-color: #E2D8FF;
+    border: 1px solid #9C87D8;
+}
+QPushButton:pressed {
+    background-color: #C9BBF0;
+    border: 1px solid #8A71D0;
+}
+
+/* === LINE EDITS === */
+QLineEdit {
+    background-color: #F8F5FF;
+    border: 1px solid #B6A3E6;
+    border-radius: 6px;
+    padding: 6px;
+    color: #3A2F55;
+}
+QLineEdit:focus {
+    border: 1px solid #8F77D9;
+    background-color: #F0EBFF;
+}
+
+/* === COMBOBOX === */
+QComboBox {
+    background-color: #F3EEFF;
+    border: 1px solid #B7A6E9;
+    padding: 6px;
+    border-radius: 6px;
+    color: #3A2F55;
+}
+QComboBox:hover {
+    border-color: #8C73D6;
+}
+QComboBox QAbstractItemView {
+    background-color: #FFFFFF;
+    border: 1px solid #C7B2F2;
+    selection-background-color: #D8C8FF;
+    color: #3A2F55;
+}
+
+/* === CHECKBOXES === */
+QCheckBox {
+    color: #4B3A6A;
+    padding: 4px;
+}
+QCheckBox::indicator {
+    border: 1px solid #C3B2F5;
+    width: 16px;
+    height: 16px;
+    background-color: #F1ECFF;
+    border-radius: 4px;
+}
+QCheckBox::indicator:checked {
+    background-color: #BFA9FF;
+    border: 1px solid #8A71D8;
+}
+
+/* === SCROLLBARS === */
+QScrollBar:vertical {
+    background: #E9E2FF;
+    width: 10px;
+}
+QScrollBar::handle:vertical {
+    background: #B8A5F3;
+    border-radius: 5px;
+}
+QScrollBar::handle:vertical:hover {
+    background: #A48CE8;
+}
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+    background: none;
+}
+
+/* === TOOLTIP === */
+QToolTip {
+    background-color: #D9CCFF;
+    color: #3A2F55;
+    border: 1px solid #B6A2E6;
+    padding: 6px;
+    border-radius: 4px;
+}
+
+/* === MENUBAR === */
+QMenuBar {
+    background-color: #EDE7FF;
+    color: #3A2F55;
+}
+QMenuBar::item:selected {
+    background-color: #D3C9F8;
+}
+QMenu {
+    background-color: #FFFFFF;
+    border: 1px solid #C3B2F0;
+}
+QMenu::item:selected {
+    background-color: #D7CDFE;
+}
+
+/* === GROUPBOX === */
+QGroupBox {
+    border: 1px solid #C8B9F2;
+    border-radius: 8px;
+    padding: 10px;
+}
+QGroupBox:title {
+    padding: 0 5px;
+    color: #7A63CE;
+    font-weight: bold;
+}
+
+/* === TABS === */
+QTabWidget::pane {
+    border: 1px solid #C7BBF5;
+    background: qlineargradient(
+        x1:0, y1:0, x2:1, y2:1,
+        stop:0 #EEE8FF,
+        stop:1 #DCD3F7
+    );
+    border-radius: 3px;
+}
+
+QTabBar::tab {
+    background: #F2EEFF;
+    color: #5C4A84;
+    border: 1px solid #D3C6F5;
+    padding: 12px;
+    border-radius: 8px;
+    min-width: 110px;
+}
+QTabBar::tab:selected {
+    background: qlineargradient(
+        x1:0, y1:0, x2:1, y2:1,
+        stop:0 #8A71D8,
+        stop:1 #BFA6FF
+    );
+    color: white;
+    border: 2px solid #9D84FF;
+}
+QTabBar::tab:hover {
+    background-color: #E8E0FF;
+}
+
+/* === TABLE & CALENDAR === */
+QTableWidget {
+    background-color: #FFFFFF;
+    border: 1px solid #D4C8FB;
+    gridline-color: #E5DDFF;
+    color: #463B6B;
+    alternate-background-color: #F5F1FF;
+    selection-background-color: #D6C9FF;
+}
+
+QHeaderView::section {
+    background-color: #E3DAFF;
+    color: #3A2F55;
+    font-weight: bold;
+}

@@ -450,7 +450,7 @@ class PomodoroGUI(QWidget):
         content_layout.addLayout(btn_layout)
 #-------------------------------------------------------------------------Control buttons-------------------------------------------------------
         self.start_btn = QPushButton("")
-        start_icon = Path(__file__).parent / "Icons\icons8-play-64.png"
+        start_icon = Path(__file__).parent / "Icons/icons8-play-64.png"
         self.start_btn.setIcon(QIcon(str(start_icon)))
         self.start_btn.setIconSize(QSize(40, 40))
         self.start_btn.clicked.connect(self.start_session)
@@ -520,7 +520,7 @@ class PomodoroGUI(QWidget):
         main_layout.addWidget(self.main_content)
 #===============================================================================================================================================
 #===================================================================method for starting app=====================================================
-        # self.init()
+        self.init()
 #===============================================================================================================================================
 #=================================================================================Methods=======================================================
     def load_themes(self):
@@ -748,7 +748,6 @@ class PomodoroGUI(QWidget):
 
     def plot_sessions_from_csv(self):
         """Plots the study session and show progress"""
-
 #-------------------------------------------------------------Safeguard: Make sure file exists and isn't empty-----------------------------
         try:
             with open(self.file, newline='') as csvfile:
@@ -938,9 +937,9 @@ class PomodoroGUI(QWidget):
         sys.exit()
 #===============================================================================================================================================
 #=========================================================================Run app===============================================================
-# if __name__ == "__main__":
-#     app = QApplication(sys.argv)
-#     window = PomodoroGUI()
-#     window.resize(400, 300)
-#     window.show()
-#     sys.exit(app.exec())
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = PomodoroGUI()
+    window.resize(400, 300)
+    window.show()
+    sys.exit(app.exec())
