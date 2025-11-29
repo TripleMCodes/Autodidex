@@ -13,6 +13,10 @@ from PySide6.QtWidgets import (QApplication, QCalendarWidget, QLabel,
                                QMessageBox, QPushButton, QVBoxLayout, QWidget)
 
 from heatmap import HeatmapWidget, StreakTracker
+from autodidex_cache import DictionaryCache
+from themes_db import Themes
+cache = DictionaryCache()
+themes = Themes()
 
 logging.basicConfig(level=logging.DEBUG) 
 logging.disable(logging.DEBUG)
@@ -41,13 +45,17 @@ class Calendar_Heatmap(QWidget):
 #-----------------------------------------------------theme button---------------------------------
         self.light_mode: Optional[str] = None
         self.dark_mode: Optional[str] = None
+        self.neutral_mode: Optional[str] = None
+
         self.l_mode = Path(__file__).parent / "Icons/icons8-light-64.png"
         self.d_mode = Path(__file__).parent / "Icons/icons8-dark-mode-48.png"
+        self.n_mode = Path(__file__).parent / "Icons/icons8-day-and-night-50.png"
+
         self.thm_pref = Path(__file__).parent / "v tab files/dashboard_config.json"
         self.theme_toggle_btn = QPushButton("")
         self.theme_toggle_btn.setIcon(QIcon(str(self.l_mode)))
         self.theme_toggle_btn.setIconSize(QSize(30, 30))
-        self.thm_mode: Optional[str] = None
+        self.thm_mode = cache.get("theme") or themes.get_chosen_theme()
         self.setStyleSheet(self.dark_mode)
         self.theme_toggle_btn.clicked.connect(self.toggle_theme)
         layout.addWidget(self.theme_toggle_btn, alignment=Qt.AlignmentFlag.AlignCenter)
@@ -73,36 +81,51 @@ class Calendar_Heatmap(QWidget):
 
         # self.load_themes()
         # self.load_thm_pref()
-        # self.init_wrapper()
+        self.init_wrapper()
 
     def load_themes(self):
         """Loads the themes for the apps"""
 #-----------------------------------------------------------light mode----------------------------- 
-        light_mode_file = Path(__file__).parent / "themes files/light_mode.txt"
-        with open(light_mode_file, "r") as f:
-            self.light_mode = f.read()
+#         light_mode_file = Path(__file__).parent / "themes files/light_mode.txt"
+#         with open(light_mode_file, "r") as f:
+#             self.light_mode = f.read()
 
-#-------------------------------------------------------dark mode----------------------------------
-        dark_mode_file = Path(__file__).parent / "themes files/dark_mode.txt"
-        with open(dark_mode_file, "r") as f:
-            self.dark_mode = f.read()
+# #-------------------------------------------------------dark mode----------------------------------
+#         dark_mode_file = Path(__file__).parent / "themes files/dark_mode.txt"
+#         with open(dark_mode_file, "r") as f:
+#             self.dark_mode = f.read()
 
-        return
+#         return
+        if cache.get("light"):
+            self.light_mode = cache.get("light")
+        self.light_mode = themes.get_theme_mode("light")
+        cache.set("light", self.light_mode)
+
+        if cache.get("dark"):
+            self.dark_mode = cache.get("dark")
+        self.dark_mode = themes.get_theme_mode("dark")
+        cache.set("dark", self.dark_mode)
+
+        if cache.get("neutral"):
+            self.neutral_mode = cache.get("neutral")
+        self.neutral_mode = themes.get_theme_mode("neutral")
+        cache.set("neutral", self.neutral_mode)
+
     
-    def load_thm_pref(self):
-        try:
-            with open(self.thm_pref, "r") as f:
-                data = json.load(f)
-                self.thm_mode = data["mode"]
-        except (json.decoder.JSONDecodeError, FileNotFoundError, ValueError, KeyError):
-#------------------------------------------------------set to default------------------------------
-            self.thm_mode = "dark"
+#     def load_thm_pref(self):
+#         try:
+#             with open(self.thm_pref, "r") as f:
+#                 data = json.load(f)
+#                 self.thm_mode = data["mode"]
+#         except (json.decoder.JSONDecodeError, FileNotFoundError, ValueError, KeyError):
+# #------------------------------------------------------set to default------------------------------
+#             self.thm_mode = "dark"
         
-        if self.thm_mode == "dark":
-            self.setStyleSheet(self.dark_mode)
-        elif self.thm_mode == "light":
-            self.setStyleSheet(self.light_mode)
-        return
+#         if self.thm_mode == "dark":
+#             self.setStyleSheet(self.dark_mode)
+#         elif self.thm_mode == "light":
+#             self.setStyleSheet(self.light_mode)
+#         return
 
     def toggle_theme(self):
         """toggle between dark and light mode"""
@@ -110,10 +133,19 @@ class Calendar_Heatmap(QWidget):
             self.setStyleSheet(self.dark_mode)
             self.theme_toggle_btn.setIcon(QIcon(str(self.l_mode)))
             self.thm_mode = "dark"
-        else:
+            cache.set("theme", "dark")
+        elif self.thm_mode == "dark":
+            self.setStyleSheet(self.neutral_mode)
+            self.theme_toggle_btn.setIcon(QIcon(str(self.n_mode)))
+            self.thm_mode = "neutral"
+            cache.set("theme", "neutral")
+        elif self.thm_mode == "neutral":
             self.setStyleSheet(self.light_mode)
             self.theme_toggle_btn.setIcon(QIcon(str(self.d_mode)))
             self.thm_mode = "light"
+            cache.set("theme", "light")
+            
+
                                                             
     def date_selected(self, qdate: QDate):
         """Show the number of sessions on a particular day"""
@@ -162,11 +194,12 @@ class Calendar_Heatmap(QWidget):
     
     def init_wrapper(self):
         self.load_themes()
-        self.load_thm_pref()
+        self.toggle_theme()
+        # self.load_thm_pref()
 #==================================================================================================
 #===================================================Run============================================
-# if __name__ == "__main__":
-#     app = QApplication([])
-#     demo = Calendar_Heatmap()
-#     demo.show()
-#     app.exec()
+if __name__ == "__main__":
+    app = QApplication([])
+    demo = Calendar_Heatmap()
+    demo.show()
+    app.exec()
