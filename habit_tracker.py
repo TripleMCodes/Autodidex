@@ -21,8 +21,13 @@ from PySide6.QtWidgets import (QApplication, QCheckBox,
                                QTableWidgetItem, QVBoxLayout, QWidget,
                                QMenu, QInputDialog)
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+
+from autodidex_cache import DictionaryCache
 from cp_tracker_db import Cp_tracker
+from themes_db import Themes
+cache = DictionaryCache()
 cp_table = Cp_tracker()
+themes = Themes()
 # logging.disable(logging.DEBUG)
 #================================================================================================================================
 #********************************************************************************************************************************
@@ -386,22 +391,30 @@ class CPTracker(QWidget):
     
     def load_themes(self):
         """loads the themes, and sets them to their data fields"""
-        light_mode_file = Path(__file__).parent / "themes files/light_mode.txt"
-        dark_mode_file = Path(__file__).parent / "themes files/dark_mode.txt"
-        neutral_mode_file = Path(__file__).parent / "themes files/neutral_mode.txt"
+        # light_mode_file = Path(__file__).parent / "themes files/light_mode.txt"
+        # dark_mode_file = Path(__file__).parent / "themes files/dark_mode.txt"
+        # neutral_mode_file = Path(__file__).parent / "themes files/neutral_mode.txt"
 #------------------------------------------------------------------------load light mode-----------------------------------------
-        with open(light_mode_file, "r") as f:
-            light_mode = f.read()
-        self.light_mode = light_mode
+        # with open(light_mode_file, "r") as f:
+        #     light_mode = f.read()
+        if cache.get("light"):
+            self.light_mode = cache.get("light")
+        self.light_mode = themes.get_theme_mode("light")
+        cache.set("light", self.light_mode)
 #------------------------------------------------------------------load dark mode------------------------------------------------
-        with open(dark_mode_file, "r") as f:
-            dark_mode = f.read()
-        self.dark_mode = dark_mode
+        # with open(dark_mode_file, "r") as f:
+        #     dark_mode = f.read()
+        if cache.get("dark"):
+            self.dark_mode = cache.get("dark")
+        self.dark_mode = themes.get_theme_mode("dark")
+        cache.set("dark", self.dark_mode)
 
-        with open(neutral_mode_file, "r") as f:
-            neutral_mode = f.read()
-        self.neutral_mode = neutral_mode
-
+        # with open(neutral_mode_file, "r") as f:
+        #     neutral_mode = f.read()
+        if cache.get("neutral"):
+            self.neutral_mode = cache.get("neutral")
+        self.neutral_mode = themes.get_theme_mode("neutral")
+        cache.set("neutral", self.neutral_mode)
 
     def theme(self):
 #---------------------------------------------------------------------to dark mode-----------------------------------------------
@@ -414,6 +427,7 @@ class CPTracker(QWidget):
             self.thm_btn.setIcon(QIcon(str(self.l_mode)))
             self.setStyleSheet(self.dark_mode)
             self.mode = "dark"
+            cache.set("theme", "dark")
         elif self.mode == "dark":
 #----------------------------------------------------------------------to light mode---------------------------------------------
             self.sidebar.setStyleSheet(self.neutral_mode)
@@ -424,6 +438,7 @@ class CPTracker(QWidget):
             self.thm_btn.setIcon(QIcon(str(self.n_mode)))
             self.setStyleSheet(self.neutral_mode)
             self.mode = "neutral"
+            cache.set("theme", "neutral")
         elif self.mode == "neutral":
             self.sidebar.setStyleSheet(self.light_mode)
             self.habit_tracker.setStyleSheet(self.light_mode)
@@ -433,23 +448,25 @@ class CPTracker(QWidget):
             self.thm_btn.setIcon(QIcon(str(self.d_mode)))
             self.setStyleSheet(self.light_mode)
             self.mode = "light"
-
+            cache.set("theme", "light")
 
     def load_thm_pref(self):
         """load saved theme preferrence"""
-        try:
-            with open(self.thm_pref, "r") as f:
-                data = json.load(f)
-                thm = data["mode"]
-            self.mode = thm
-        except (FileNotFoundError, json.decoder.JSONDecodeError):
+        # try:
+        #     with open(self.thm_pref, "r") as f:
+        #         data = json.load(f)
+        #         thm = data["mode"]
+        #     self.mode = thm
+        # except (FileNotFoundError, json.decoder.JSONDecodeError):
 #------------------------------------------------------------------set theme to default------------------------------------------
-            self.mode = "dark"
+        self.mode = cache.get('theme') or themes.get_chosen_theme()
 
         if self.mode == "dark":
             self.setStyleSheet(self.dark_mode)
         elif self.mode == "light":
             self.setStyleSheet(self.light_mode)
+        elif self.mode == "neutral":
+            self.setStyleSheet(self.neutral_mode)
 
     def show_progress(self):
         """Shows the check marks for each cp per week"""

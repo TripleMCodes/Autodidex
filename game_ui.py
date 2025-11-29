@@ -16,13 +16,14 @@ from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox, QHBoxLayout,
                                QLabel, QLineEdit, QListWidget, QMainWindow,
                                QMessageBox, QPushButton, QVBoxLayout, QWidget)
 from autodidex_cache import DictionaryCache
+from themes_db import Themes
 from dash_board_db import Dashboard
 from cp_tracker_db import Cp_tracker
 #cache class instance
 cache = DictionaryCache()
 cp_tracker = Cp_tracker()
 dashboard = Dashboard()
-
+themes = Themes()
 #=====================================================================logs enable/disable======================================================
 logging.basicConfig(level=logging.DEBUG) 
 # logging.disable(logging.DEBUG)
@@ -414,16 +415,31 @@ class MainWindow(QMainWindow):
         self.enter_btn.clicked.connect(self.load_user_name)
 
         self.buy_icon = Path(__file__).parent / "Icons/icons8-pay-64.png"
-        self.trade_icon = Path(__file__).parent / "Icons/icons8-trade-64.png"
-        self.light_icon = Path(__file__).parent / "Icons/icons8-light-64.png"
-        self.dark_icon = Path(__file__).parent / "Icons/icons8-dark-mode-48.png"
-        self.thm_pref = Path(__file__).parent / "v tab files/dashboard_config.json"
+        # self.trade_icon = Path(__file__).parent / "Icons/icons8-trade-64.png"
+        # self.light_icon = Path(__file__).parent / "Icons/icons8-light-64.png"
+        # self.dark_icon = Path(__file__).parent / "Icons/icons8-dark-mode-48.png"
+        # self.thm_pref = Path(__file__).parent / "v tab files/dashboard_config.json"
 
-        self.theme_state: Optional[str] = None
-        self.dark_mode: Optional[str] = None
+        # self.theme_state: Optional[str] = None
+        # self.dark_mode: Optional[str] = None
+        # self.light_mode: Optional[str] = None
+
         self.light_mode: Optional[str] = None
+        self.dark_mode: Optional[str] = None
+        self.neutral_mode: Optional[str] = None
+        self.mode = cache.get("theme") or themes.get_chosen_theme()
+
+        self.d_mode = Path(__file__).parent / "Icons/icons8-dark-mode-48.png"
+        self.l_mode = Path(__file__).parent / "Icons/icons8-light-64.png"
+        self.n_mode = Path(__file__).parent / "Icons/icons8-day-and-night-50.png"
+
+        # self.thm_btn = QPushButton("")
+        # self.thm_btn.setIcon(QIcon(str(self.d_mode)))
+        # self.thm_btn.setIconSize(QSize(30, 30))
+        # self.thm_btn.clicked.connect(self.theme)
+
         self.theme_toggle = QPushButton("")
-        self.theme_toggle.setIcon(QIcon(str(self.light_icon)))
+        self.theme_toggle.setIcon(QIcon(str(self.l_mode)))
         self.badge_list = QListWidget()
         self.container = QWidget()
         self.subject_combo = QComboBox()
@@ -643,56 +659,105 @@ class MainWindow(QMainWindow):
 
         return store_products
     
-    def load_themes(self):
-        theme_files = {
-            "light_mode": Path(__file__).parent / "themes files/light_mode.txt",
-            "dark_mode": Path(__file__).parent / "themes files/dark_mode.txt"
-        }
+    
+    # def load_themes(self):
+    #     theme_files = {
+    #         "light_mode": Path(__file__).parent / "themes files/light_mode.txt",
+    #         "dark_mode": Path(__file__).parent / "themes files/dark_mode.txt"
+    #     }
 
-        for name, path in theme_files.items():
-            with open(path, "r") as f:
-                setattr(self, name, f.read())
+    #     for name, path in theme_files.items():
+    #         with open(path, "r") as f:
+    #             setattr(self, name, f.read())
+
+    def load_themes(self):
+        """loads the themes, and sets them to their data fields"""
+        # light_mode_file = Path(__file__).parent / "themes files/light_mode.txt"
+        # dark_mode_file = Path(__file__).parent / "themes files/dark_mode.txt"
+        # neutral_mode_file = Path(__file__).parent / "themes files/neutral_mode.txt"
+#------------------------------------------------------------------------load light mode-----------------------------------------
+        # with open(light_mode_file, "r") as f:
+        #     light_mode = f.read()
+        if cache.get("light"):
+            self.light_mode = cache.get("light")
+        else:
+            self.light_mode = themes.get_theme_mode("light")
+        cache.set("light", self.light_mode)
+
+#------------------------------------------------------------------load dark mode------------------------------------------------
+        # with open(dark_mode_file, "r") as f:
+        #     dark_mode = f.read()
+        if cache.get("dark"):
+            self.dark_mode = cache.get("dark")
+        else:
+            self.dark_mode = themes.get_theme_mode("dark")
+        cache.set("dark", self.dark_mode)
+
+        # with open(neutral_mode_file, "r") as f:
+        #     neutral_mode = f.read()
+        if cache.get("neutral"):
+            self.neutral_mode = cache.get("neutral")
+        self.neutral_mode = themes.get_theme_mode("neutral")
+        cache.set("neutral", self.neutral_mode)
+
+
 
                 
     def toggle_theme(self):
-        """Switches between light and dark mode"""
+        """Switches between themes"""
 
-        if self.theme_state == "light":
-            stylesheet_file = Path(__file__).parent / "themes files/neutral_mode.txt"
-            self.theme_state = "dark"
-            self.theme_toggle.setText("")
-            self.theme_toggle.setIcon(QIcon(str(self.light_icon)))
-        else:
-            stylesheet_file = Path(__file__).parent / "themes files/light_mode.txt"
-            self.theme_state = "light"
-            self.theme_toggle.setText("")
-            self.theme_toggle.setIcon(QIcon(str(self.dark_icon)))
-        self.theme_toggle.setIconSize(QSize(30, 30))
+        # if self.theme_state == "light":
+        #     stylesheet_file = Path(__file__).parent / "themes files/neutral_mode.txt"
+        #     self.theme_state = "dark"
+        #     self.theme_toggle.setText("")
+        #     self.theme_toggle.setIcon(QIcon(str(self.light_icon)))
+        # else:
+        #     stylesheet_file = Path(__file__).parent / "themes files/light_mode.txt"
+        #     self.theme_state = "light"
+        #     self.theme_toggle.setText("")
+        #     self.theme_toggle.setIcon(QIcon(str(self.dark_icon)))
+        # self.theme_toggle.setIconSize(QSize(30, 30))
 
-        with open(stylesheet_file, "r") as f:
-            stylesheet = f.read()
-
-        self.setStyleSheet(stylesheet)
+        # with open(stylesheet_file, "r") as f:
+        #     stylesheet = f.read()
+        if self.mode == "light":
+            self.theme_toggle.setIcon(QIcon(str(self.d_mode)))
+            self.setStyleSheet(self.dark_mode)
+            self.mode = "dark"
+            cache.set("theme", "dark")
+        elif self.mode == "dark":
+            self.theme_toggle.setIcon(QIcon(str(self.n_mode)))
+            self.setStyleSheet(self.neutral_mode)
+            self.mode = "neutral"
+            cache.set("theme","neutral")
+        elif self.mode == "neutral":
+            self.theme_toggle.setIcon(QIcon(str(self.l_mode)))
+            self.setStyleSheet(self.light_mode)
+            self.mode = "light"
+            cache.set("theme", "light")
+            
     
     def load_thm_pref(self):
-        "loads user preffered theme"
-        try:
-            with open(self.thm_pref, "r") as f:
-                data = json.load(f)
-                self.theme_state = data["mode"]
-        except (FileNotFoundError, json.decoder.JSONDecodeError):
-#--------------------------------------------------------------------------------set to defaulf------------------------------------------------
-            self.theme_state = "dark"
+        "loads user preferred theme"
+#         try:
+#             with open(self.thm_pref, "r") as f:
+#                 data = json.load(f)
+#                 self.theme_state = data["mode"]
+#         except (FileNotFoundError, json.decoder.JSONDecodeError):
+# #--------------------------------------------------------------------------------set to defaulf------------------------------------------------
+#             self.theme_state = "dark"
         
-        if self.theme_state == "dark":
-            self.setStyleSheet(self.dark_mode)
-        elif self.theme_state == "light":
-            self.setStyleSheet(self.light_mode)
-        return
+#         if self.theme_state == "dark":
+#             self.setStyleSheet(self.dark_mode)
+#         elif self.theme_state == "light":
+#             self.setStyleSheet(self.light_mode)
+#         return
+        self.toggle_theme()
+            
     
     def thm_wrapper(self):
         self.load_themes()
-        self.load_thm_pref()
+        self.toggle_theme()
 
     def check_new_cp(self):
         """Checks for new subjects added"""

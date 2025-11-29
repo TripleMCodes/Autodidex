@@ -4,6 +4,7 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 
 class Themes():
+    """A class that deals with theme related stuff."""
 
     def __init__(self):
         self.db_path = Path(__file__).parent / "autodidex.db"
@@ -22,8 +23,9 @@ class Themes():
                     WHERE id = 1;"""
         try:
             self.conn_cursor.execute(query)
-            light_mode = self.conn_cursor.fetchone()
-            logging.debug(light_mode)
+            theme_mode = self.conn_cursor.fetchone()[0]
+            # logging.debug(theme_mode)
+            return theme_mode
         except Exception as e:
             logging.debug(f"An error occurred {e}")
     
@@ -39,9 +41,23 @@ class Themes():
         except Exception as e:
             logging.debug(f"An error occurred: {e}")
     
+    def get_chosen_theme(self) -> str:
+        """Get the chosen theme"""
+
+        query = f"""SELECT "chosen theme" FROM {self.themes_table_name}
+                    WHERE ID = 1;"""
+        try:
+            self.conn_cursor.execute(query)
+            mode = self.conn_cursor.fetchone()[0]
+            # logging.debug(mode)
+            return mode
+        except Exception as e:
+            logging.debug(f'An error occurred: {e}')
+    
 
 
 if __name__ == "__main__":
     themes = Themes()
     # themes.get_theme_mode("neutral")
-    themes.insert_chosen_theme("neutral")
+    # themes.insert_chosen_theme("neutral")
+    themes.get_chosen_theme()
