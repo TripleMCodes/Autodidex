@@ -370,9 +370,6 @@ class NoteWorthy(QWidget):
         
 
     def theme(self):
-        # self.mode = not self.mode
-        # self.apply_theme()
-        # self._save_preferences()
         if self.mode == "light":
             self.sidebar.setStyleSheet(self.dark_mode)
             self.setStyleSheet(self.dark_mode)

@@ -21,7 +21,13 @@ from lyrics_n_summarization import OpenRouterClient
 from recorder import VoiceRecorder
 import json
 import pyphen
-import pronouncing 
+import pronouncing
+from autodidex_cache import DictionaryCache
+from themes_db import Themes
+
+themes = Themes()
+cache = DictionaryCache()
+
 logging.basicConfig(level=logging.DEBUG)
 logging.disable()
 
@@ -252,11 +258,17 @@ class LyricsSummarizationUi(QWidget):
         self.thm_label = QLabel("Theme Label")
         self.l_mode = Path(__file__).parent / "Icons/icons8-light-64.png"
         self.d_mode = Path(__file__).parent / "Icons/icons8-dark-mode-48.png"
+        self.n_mode = Path(__file__).parent / "Icons/icons8-day-and-night-50.png"
+
+        # theme attr
+        self.light_mode: Optional[str] = None
+        self.dark_mode: Optional[str] = None
+        self.neutral_mode: Optional[str] = None
+
         self.theme_btn = QPushButton("")
         self.theme_btn.setIcon(QIcon(str(self.d_mode)))
         self.theme_btn.setIconSize(QSize(30, 30))
-        self.theme_btn.clicked.connect(self.theme)
-
+        self.theme_btn.clicked.connect(self.apply_theme)
 
         files_icon = Path(__file__).parent / "Icons/icons8-new-document-48.png"
         self.file = QPushButton("")
@@ -363,6 +375,24 @@ class LyricsSummarizationUi(QWidget):
         self.main_layout.addLayout(self.sidebar_layout)
         self.main_layout.addLayout(self.editor_layout)
         self.init_wrapper()
+
+    def load_themes(self):
+        """Loads the themes, and sets them to their data fields"""
+        
+        if cache.get("light"):
+            self.light_mode = cache.get("light")
+        self.light_mode = themes.get_theme_mode("light")
+        cache.set("light", self.light_mode)
+
+        if cache.get("dark"):
+            self.dark_mode = cache.get("dark")
+        self.dark_mode = themes.get_theme_mode("dark")
+        cache.set("dark", self.dark_mode)
+
+        if cache.get("neutral"):
+            self.neutral_mode = cache.get("neutral")
+        self.neutral_mode = themes.get_theme_mode("neutral")
+        cache.set("neutral", self.neutral_mode)
 
     def change_font_size(self):
         if self.openning_app == True:
@@ -609,7 +639,7 @@ class LyricsSummarizationUi(QWidget):
     def save_preferences(self):
         """Save user preferences (theme & font size) to a JSON file."""
         data = {
-            "dark_mode": self.is_dark_mode,
+            "dark_mode": self.mode,
             "font_size": self.font_size_opt.currentText()
         }
         with open(CONFIG_FILE, "w") as file:
@@ -617,19 +647,38 @@ class LyricsSummarizationUi(QWidget):
 
     def load_preferences(self):
         """Load user preferences (theme & font size) from a JSON file."""
+        if cache.get("theme"):
+            selected_theme = cache.get("theme")
+        else:
+            selected_theme = themes.get_chosen_theme()
         try:
             with open(CONFIG_FILE, "r") as file:
                 data = json.load(file)
-                return data.get("dark_mode", False), int(data.get("font_size", 14))  # Default: Light mode, Font size 14
+                return selected_theme, int(data.get("font_size", 14))  # Default: Light mode, Font size 14
         except (FileNotFoundError, json.JSONDecodeError):
             # return False, 14  # Default values if file is missing or corrupted
             return
     
     def apply_theme(self):
-        if self.is_dark_mode:
-            self._dark_mode()
-        else:
-            self._light_mode()
+        # if self.mode:
+        #     self._dark_mode()
+        # else:
+        #     self._light_mode()
+        if self.mode == "light":
+            self.setStyleSheet(self.dark_mode)
+            self.theme_btn.setIcon(QIcon(str(self.l_mode)))
+            self.mode = "dark"
+            cache.set("theme", "dark")
+        elif self.mode == "dark":
+            self.setStyleSheet(self.neutral_mode)
+            self.theme_btn.setIcon(QIcon(str(self.n_mode)))
+            self.mode = "neutral"
+            cache.set("theme", "neutral")
+        elif self.mode == "neutral":
+            self.theme_btn.setIcon(QIcon(str(self.d_mode)))
+            self.setStyleSheet(self.light_mode)
+            self.mode = "light"
+            cache.set("theme", "light")
 
     def _dark_mode(self):
         """Apply dark mode styles"""
@@ -652,7 +701,8 @@ class LyricsSummarizationUi(QWidget):
         self.theme_btn.setIcon(QIcon(str(self.d_mode)))
 
     def init_wrapper(self):
-        self.is_dark_mode, self.font_size = self.load_preferences()
+        self.mode, self.font_size = self.load_preferences()
+        self.load_themes()
         self.apply_theme()
         self.change_font_size()
         self.get_last_written()
@@ -676,7 +726,7 @@ class LyricsSummarizationUi(QWidget):
                 file.write(self.writing_editor.toPlainText())
         
     def theme(self):
-        self.is_dark_mode = not self.is_dark_mode
+        self.mode = not self.mode
         self.apply_theme()
         self.save_preferences()
 
