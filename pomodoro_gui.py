@@ -23,6 +23,11 @@ from PySide6.QtWidgets import (QApplication, QComboBox, QHBoxLayout, QLabel,
                                QVBoxLayout, QWidget)
 
 from files_formats import file_types
+from autodidex_cache import DictionaryCache
+from themes_db import Themes
+
+cache = DictionaryCache()
+themes = Themes()
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 logging.disable(logging.DEBUG)
@@ -207,14 +212,16 @@ class PomodoroGUI(QWidget):
 #-----------------------------------------------------------------------------------theme button-------------------------------------------
         self.light_mode: Optional[str] = None
         self.dark_mode: Optional[str] = None
+        self.neutral_mode: Optional[str] = None
         self.theme_toggle_btn = QPushButton("")
 #------------------------------------------------------------------------------------theme Icons-------------------------------------------
         self.l_icon = Path(__file__).parent / "Icons/icons8-light-64.png"
         self.d_icon = Path(__file__).parent / "Icons/icons8-dark-mode-48.png"
+        self.n_icon = Path(__file__).parent / "Icons/icons8-day-and-night-50.png"
+
         self.theme_toggle_btn.setIcon(QIcon(str(self.l_icon)))
         self.theme_toggle_btn.setIconSize(QSize(30, 30))
-        self.load_themes()
-        self.thm_mode: Optional[str] = None 
+        self.thm_mode = cache.get("theme") or themes.get_chosen_theme() 
         self.setStyleSheet(self.dark_mode)
         self.theme_toggle_btn.clicked.connect(self.toggle_theme)
                 
@@ -525,17 +532,21 @@ class PomodoroGUI(QWidget):
 #=================================================================================Methods=======================================================
     def load_themes(self):
         """Loads the themes for the apps"""
-        #light mode 
-        light_mode_file = Path(__file__).parent / "themes files/light_mode.txt"
-        with open(light_mode_file, "r") as f:
-            self.light_mode = f.read()
+        
+        if cache.get("light"):
+            self.light_mode = cache.get("light")
+        self.light_mode = themes.get_theme_mode("light")
+        cache.set("light", self.light_mode)
 
-        #dark mode
-        dark_mode_file = Path(__file__).parent / "themes files/dark_mode.txt"
-        with open(dark_mode_file, "r") as f:
-            self.dark_mode = f.read()
+        if cache.get("dark"):
+            self.dark_mode = cache.get("dark")
+        self.dark_mode = themes.get_theme_mode("dark")
+        cache.set("dark", self.dark_mode)
 
-        return
+        if cache.get("neutral"):
+            self.neutral_mode = cache.get("neutral")
+        self.neutral_mode = themes.get_theme_mode("neutral")
+        cache.set("neutral", self.neutral_mode)
     
     def load_current_sessions(self):
         """Loads the the number of sessions save for the day.
@@ -571,11 +582,18 @@ class PomodoroGUI(QWidget):
             self.theme_toggle_btn.setText("")
             self.theme_toggle_btn.setIcon(QIcon(str(self.l_icon)))
             self.thm_mode = "dark"
-        else:
+            cache.set("theme", "dark")
+        elif self.thm_mode == "dark":
+            self.setStyleSheet(self.neutral_mode)
+            self.theme_toggle_btn.setText("")
+            self.theme_toggle_btn.setIcon(QIcon(str(self.n_icon)))
+            self.thm_mode = "neutral"
+        elif self.thm_mode == "neutral":
             self.setStyleSheet(self.light_mode)
             self.theme_toggle_btn.setText("")
             self.theme_toggle_btn.setIcon(QIcon(str(self.d_icon)))
             self.thm_mode = "light"
+            cache.set("theme", "light")
                           
 
     def start_session(self):
@@ -927,10 +945,9 @@ class PomodoroGUI(QWidget):
     def init(self):
         """calls methods to run the app"""
         self.load_themes()
-        self.load_thm_pref()
-        logging.debug(self.thm_mode)
-
-
+        self.toggle_theme()
+        # self.load_thm_pref
+        # logging.debug(self.thm_mode)
 
     def terminate(self):
         """Kill the app"""
