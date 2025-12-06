@@ -26,7 +26,7 @@ from files_formats import file_types
 from autodidex_cache import DictionaryCache
 from themes_db import Themes
 
-cache = DictionaryCache()
+
 themes = Themes()
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -210,7 +210,8 @@ class PomodoroGUI(QWidget):
 
         self.theme_toggle_btn.setIcon(QIcon(str(self.l_icon)))
         self.theme_toggle_btn.setIconSize(QSize(30, 30))
-        self.thm_mode = cache.get("theme") or themes.get_chosen_theme() 
+        self.cache = DictionaryCache() #lazy laoding
+        self.thm_mode = self.cache.get("theme") or themes.get_chosen_theme() 
         self.setStyleSheet(self.dark_mode)
         self.theme_toggle_btn.clicked.connect(self.toggle_theme)
                 
@@ -519,20 +520,20 @@ class PomodoroGUI(QWidget):
     def load_themes(self):
         """Loads the themes for the apps"""
         
-        if cache.get("light"):
-            self.light_mode = cache.get("light")
+        if self.cache.get("light"):
+            self.light_mode = self.cache.get("light")
         self.light_mode = themes.get_theme_mode("light")
-        cache.set("light", self.light_mode)
+        self.cache.set("light", self.light_mode)
 
-        if cache.get("dark"):
-            self.dark_mode = cache.get("dark")
+        if self.cache.get("dark"):
+            self.dark_mode = self.cache.get("dark")
         self.dark_mode = themes.get_theme_mode("dark")
-        cache.set("dark", self.dark_mode)
+        self.cache.set("dark", self.dark_mode)
 
-        if cache.get("neutral"):
-            self.neutral_mode = cache.get("neutral")
+        if self.cache.get("neutral"):
+            self.neutral_mode = self.cache.get("neutral")
         self.neutral_mode = themes.get_theme_mode("neutral")
-        cache.set("neutral", self.neutral_mode)
+        self.cache.set("neutral", self.neutral_mode)
     
     def load_current_sessions(self):
         """Loads the the number of sessions save for the day.

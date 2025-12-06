@@ -10,7 +10,6 @@ from PySide6.QtCore import QSize, Qt
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (QApplication, QHBoxLayout, QLabel, QMessageBox,
                                QPushButton, QTabWidget, QVBoxLayout, QWidget)
-
 from calander import Calendar_Heatmap
 from game_ui import MainWindow, SpinningLabel, AutodidexBank, UserIfo
 from habit_tracker import CPTracker
@@ -18,11 +17,8 @@ from note_worthy import NoteWorthy
 from pomodoro_gui import PomodoroGUI
 import csv
 # from space_invader_widget import SpaceInvaderWidget
-
 from autodidex_cache import DictionaryCache
 from themes_db import Themes
-cache = DictionaryCache()
-themes = Themes()
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 # logging.disable(logging.DEBUG)
@@ -81,13 +77,13 @@ class Autodidex (QWidget):
         self.d_mode = Path(__file__).parent / "Icons/icons8-dark-mode-48.png"
         self.l_mode = Path(__file__).parent / "Icons/icons8-light-64.png"
         self.n_mode = Path(__file__).parent / "Icons/icons8-day-and-night-50.png"
-
-
 #===================================================================================================================
         self.light_mode: Optional[str] = None
         self.dark_mode: Optional[str] = None
         self.neutral_mode: Optional[str] = None
-        self.mode = cache.get("theme") or themes.get_chosen_theme()
+        self.cache = DictionaryCache() #lazy loading
+        self.themes = Themes() #lazy loading
+        self.mode = self.cache.get("theme") or self.themes.get_chosen_theme()
 #====================================================================================================================
 #===========================================================layout content===========================================
         settings_label = SpinningLabel("⚙️Settings")
@@ -178,7 +174,6 @@ class Autodidex (QWidget):
             }
         """)
 
-
         self.exit_button.clicked.connect(self.exit_app)
         self.layout.addWidget(self.tab_widget)
         self.layout.addWidget(self.exit_button, alignment=Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignLeft)
@@ -222,26 +217,26 @@ class Autodidex (QWidget):
 
     def load_thm_pref(self):
         """load saved theme preferrence"""
-        self.mode = cache.get('theme') or themes.get_chosen_theme()
+        self.mode = self.cache.get('theme') or self.themes.get_chosen_theme()
 
     
     def load_themes(self):
         """loads the themes, and sets them to their data fields"""
         
-        if cache.get("light"):
-            self.light_mode = cache.get("light")
-        self.light_mode = themes.get_theme_mode("light")
-        cache.set("light", self.light_mode)
+        if self.cache.get("light"):
+            self.light_mode = self.cache.get("light")
+        self.light_mode = self.themes.get_theme_mode("light")
+        self.cache.set("light", self.light_mode)
 
-        if cache.get("dark"):
-            self.dark_mode = cache.get("dark")
-        self.dark_mode = themes.get_theme_mode("dark")
-        cache.set("dark", self.dark_mode)
+        if self.cache.get("dark"):
+            self.dark_mode = self.cache.get("dark")
+        self.dark_mode = self.themes.get_theme_mode("dark")
+        self.cache.set("dark", self.dark_mode)
 
-        if cache.get("neutral"):
-            self.neutral_mode = cache.get("neutral")
-        self.neutral_mode = themes.get_theme_mode("neutral")
-        cache.set("neutral", self.neutral_mode)
+        if self.cache.get("neutral"):
+            self.neutral_mode = self.cache.get("neutral")
+        self.neutral_mode = self.themes.get_theme_mode("neutral")
+        self.cache.set("neutral", self.neutral_mode)
 
     def thm_toggle(self):
         if self.mode == "light":
@@ -254,7 +249,7 @@ class Autodidex (QWidget):
             self.cal_ht.toggle_theme()
             self.noteworthy.theme()
             self.mode = "dark"
-            cache.set("theme", "dark")
+            self.cache.set("theme", "dark")
         elif self.mode == "dark":
             self.setStyleSheet(self.neutral_mode)
             self.thm_btn.setText("")
@@ -265,7 +260,7 @@ class Autodidex (QWidget):
             self.cal_ht.toggle_theme()
             self.noteworthy.theme()
             self.mode = "neutral"
-            cache.set("theme", "neutral")
+            self.cache.set("theme", "neutral")
         elif self.mode == "neutral":
             self.setStyleSheet(self.light_mode)
             self.thm_btn.setText("")
@@ -276,7 +271,7 @@ class Autodidex (QWidget):
             self.cal_ht.toggle_theme()
             self.noteworthy.theme()
             self.mode = "light"
-            cache.set("theme", "light")
+            self.cache.set("theme", "light")
         
     def about_autodidex(self):
         QMessageBox.information(
