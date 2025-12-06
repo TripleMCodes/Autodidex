@@ -11,7 +11,6 @@ from PySide6.QtCore import QDate, QSize, Qt, QFileSystemWatcher
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (QApplication, QCalendarWidget, QLabel,
                                QMessageBox, QPushButton, QVBoxLayout, QWidget)
-
 from heatmap import HeatmapWidget, StreakTracker
 from autodidex_cache import DictionaryCache
 from themes_db import Themes
@@ -38,10 +37,8 @@ class Calendar_Heatmap(QWidget):
         self.calendar.clicked.connect(self.date_selected)
         self.calendar.setSelectedDate(starting_date)  
         layout.addWidget(self.calendar)
-
 #-----------------------------------------------------load first date------------------------------
         self.first_date = self.load_first_date()
-
 #-----------------------------------------------------theme button---------------------------------
         self.light_mode: Optional[str] = None
         self.dark_mode: Optional[str] = None
@@ -75,27 +72,11 @@ class Calendar_Heatmap(QWidget):
                     }
                 """)
         layout.addWidget(self.label)
-
         self.heatmap = StreakTracker()
         layout.addWidget(self.heatmap)
 
-        # self.load_themes()
-        # self.load_thm_pref()
-        # self.init_wrapper()
-
     def load_themes(self):
         """Loads the themes for the apps"""
-#-----------------------------------------------------------light mode----------------------------- 
-#         light_mode_file = Path(__file__).parent / "themes files/light_mode.txt"
-#         with open(light_mode_file, "r") as f:
-#             self.light_mode = f.read()
-
-# #-------------------------------------------------------dark mode----------------------------------
-#         dark_mode_file = Path(__file__).parent / "themes files/dark_mode.txt"
-#         with open(dark_mode_file, "r") as f:
-#             self.dark_mode = f.read()
-
-#         return
         if cache.get("light"):
             self.light_mode = cache.get("light")
         self.light_mode = themes.get_theme_mode("light")
@@ -111,48 +92,26 @@ class Calendar_Heatmap(QWidget):
         self.neutral_mode = themes.get_theme_mode("neutral")
         cache.set("neutral", self.neutral_mode)
 
-    
-#     def load_thm_pref(self):
-#         try:
-#             with open(self.thm_pref, "r") as f:
-#                 data = json.load(f)
-#                 self.thm_mode = data["mode"]
-#         except (json.decoder.JSONDecodeError, FileNotFoundError, ValueError, KeyError):
-# #------------------------------------------------------set to default------------------------------
-#             self.thm_mode = "dark"
-        
-#         if self.thm_mode == "dark":
-#             self.setStyleSheet(self.dark_mode)
-#         elif self.thm_mode == "light":
-#             self.setStyleSheet(self.light_mode)
-#         return
-
     def toggle_theme(self):
         """toggle between dark and light mode"""
         if self.thm_mode == "light":
             self.setStyleSheet(self.dark_mode)
             self.theme_toggle_btn.setIcon(QIcon(str(self.d_mode)))
             self.thm_mode = "dark"
-            # cache.set("theme", "dark")
         elif self.thm_mode == "dark":
             self.setStyleSheet(self.neutral_mode)
             self.theme_toggle_btn.setIcon(QIcon(str(self.n_mode)))
             self.thm_mode = "neutral"
-            # cache.set("theme", "neutral")
         elif self.thm_mode == "neutral":
             self.setStyleSheet(self.light_mode)
             self.theme_toggle_btn.setIcon(QIcon(str(self.l_mode)))
             self.thm_mode = "light"
-            # cache.set("theme", "light")
-            
-
-                                                            
+                                                        
     def date_selected(self, qdate: QDate):
         """Show the number of sessions on a particular day"""
         some_date = qdate.toPython()
 #--------------------------------------Convert to datetime.datetime (with time 00:00:00)---------------------
         logging.debug(some_date)
-        # print(some_date)
         try:  
             self.label.setText(f"""Shows streak from {self.first_date}
                                 to {date.today()}a\nsessios on {qdate.toString('dddd, MMMM d, yyyy')}:
@@ -177,22 +136,18 @@ class Calendar_Heatmap(QWidget):
                 else:
                     logging.warning("No data found in sessions.csv after header.")
                     return None
-
         except FileNotFoundError:
             logging.error(f"File not found: {sessions_start_date_file}")
             return None
-
         except UnicodeDecodeError:
             logging.error("Encoding issue encountered. Make sure the file is UTF-8 encoded.")
             return None
-
         except Exception as e:
             logging.error(f"Unexpected error while loading first date: {e}")
             return None
     
     def load_thm_pref(self):
         """load saved theme preferrence"""
-
         if self.thm_mode == "dark":
             self.setStyleSheet(self.dark_mode)
             self.theme_toggle_btn.setIcon(QIcon(str(self.d_mode)))
@@ -203,10 +158,8 @@ class Calendar_Heatmap(QWidget):
             self.setStyleSheet(self.neutral_mode)
             self.theme_toggle_btn.setIcon(QIcon(str(self.n_mode)))
 
-    
     def init_wrapper(self):
         self.load_themes()
-        # self.toggle_theme()
         self.load_thm_pref()
 #==================================================================================================
 #===================================================Run============================================

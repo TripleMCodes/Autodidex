@@ -31,10 +31,12 @@ cache = DictionaryCache()
 themes = Themes()
 
 # Download WordNet if not already downloaded
-nltk.download('wordnet')
+try:
+    nltk.download('wordnet')
+except Exception as e:
+    print(e)
 
 CONFIG_FILE = Path(__file__).parent / "noteworthy files/config.json"  # File to store user preferences
-
 
 class SpellCheckTextEdit(QTextEdit):
     def __init__(self, spell_checker, *args, **kwargs):
@@ -73,15 +75,10 @@ class SpellCheckTextEdit(QTextEdit):
                 cursor.setPosition(start)
                 cursor.setPosition(end, QTextCursor.KeepAnchor)
                 cursor.mergeCharFormat(fmt)
-
         self.blockSignals(False)  # Re-enable signals
-
-   
 class NoteWorthy(QWidget):
     def __init__(self):
         super().__init__()
-
-       
 #===============================================================Main Layout=====================================================================
         self.main_layout = QHBoxLayout(self)
         self.setGeometry(100, 100, 600, 400)
@@ -89,12 +86,10 @@ class NoteWorthy(QWidget):
         self.setWindowTitle("Note Worthy")  
         win_icon = Path(__file__).parent / "Icons/icons8-notebook-64.png"
         self.setWindowIcon(QIcon(str(win_icon)))
-
 #===============================================================================================================================================
 #======================================================splitter=================================================================================
         self.splitter = QSplitter(Qt.Horizontal)
         self.splitter.setMinimumSize(QSize(500, 500))
-        # self.splitter.setSizes([700, 900])
 #===============================================================================================================================================
 #================================================================Text box=======================================================================
         self.spell = SpellChecker()
@@ -104,15 +99,9 @@ class NoteWorthy(QWidget):
         self.text_edit.textChanged.connect(self._restart_timer)
         self.text_edit.setPlaceholderText("Type your notes here...")
         self.splitter.addWidget(self.text_edit)
-
-        # self.preview = QTextBrowser()
-        # self.splitter.addWidget(self.preview)      
+      
         self.md_mode = False
-
-        
-        
         self.previous_text = True
-
         self.typing_timer = QTimer()
         self.typing_timer.setSingleShot(True)
         self.typing_timer.timeout.connect(self._autosave)
@@ -274,7 +263,6 @@ class NoteWorthy(QWidget):
 #===============================================================================================================================================
 #================================================================style Buttons==================================================================
         for btn in buttons:
-            # btn.setStyleSheet("color: white; background: #444; border: none; padding: 10px;")
             self.sidebar_layout.addWidget(btn)
 #===============================================================================================================================================
 #================================================================Add Widgets to Main Layout=====================================================
@@ -285,13 +273,7 @@ class NoteWorthy(QWidget):
         self.setLayout(self.main_layout)
 #===============================================================================================================================================
 #==============================================Load user preference (default: light mode)=======================================================
-        # Load user preferences
-        # self.mode, self.font_size = self._load_preferences()
-        # self. apply_theme()
-        # self._set_font_size(self.font_size)
-
-        # self._get_last_written()
-        self.init_wrapper()
+        # self.init_wrapper()
 #===============================================================================================================================================
 #===================================================================Funtions====================================================================
     def load_themes(self):
@@ -323,7 +305,6 @@ class NoteWorthy(QWidget):
             self.toggle_btn.setText("")
             self.toggle_btn.setIcon(QIcon(str(self.x_icon)))
 
-
     def paste(self):            
         self.text_edit.paste()
 
@@ -337,7 +318,6 @@ class NoteWorthy(QWidget):
 
     def open_file(self):
         file_name, _ = QFileDialog.getOpenFileName(self, "save file", "", "Text Files (*.txt);;(*.html);;(*.csv);;(*.py);;(*.md)")
-
         if file_name:
             with open(file_name, "r", encoding="utf-8") as file:
                 self.text_edit.setText(file.read())
@@ -353,7 +333,6 @@ class NoteWorthy(QWidget):
         if not word:
             self.definition_output.setText("⚠️ Please enter a word.")
             return
-
         synsets = wordnet.synsets(word)
         if synsets:
             definitions = '\n'.join([f"• {s.definition()}" for s in synsets[:3]])  # Add bullet points
@@ -361,7 +340,6 @@ class NoteWorthy(QWidget):
         else:
             self.definition_output.setText("❌ No definition found.")
        
-
     def update_word_count(self):
         text = self.text_edit.toPlainText()
         words_num = len(text.split()) 
@@ -369,56 +347,40 @@ class NoteWorthy(QWidget):
             f'<img src="{str(self.wc_icon)}" width="40" height="40">'
             f'<span style="font-size: 20px;"> ⁚ {str(words_num)}</span>')
         
-
     def theme(self):
         if self.mode == "light":
             self.sidebar.setStyleSheet(self.dark_mode)
             self.setStyleSheet(self.dark_mode)
             self.theme_btn.setIcon(QIcon(str(self.d_mode)))
             self.mode = "dark"
-            # cache.set("theme", "dark")
         elif self.mode == "dark":
             self.sidebar.setStyleSheet(self.neutral_mode)
             self.setStyleSheet(self.neutral_mode)
             self.theme_btn.setIcon(QIcon(str(self.n_mode)))
             self.mode = "neutral"
-            # cache.set("theme", "neutral")
         elif self.mode == "neutral":
             self.sidebar.setStyleSheet(self.light_mode)
             self.theme_btn.setIcon(QIcon(str(self.l_mode)))
             self.setStyleSheet(self.light_mode)
             self.mode = "light"
-            # cache.set("theme", "light")
-
-    def apply_theme(self):
-        # if self.mode:
-        #     self._dark_mode()
-        # else:
-        #     self._light_mode()
-        pass
 
     def _dark_mode(self):
         """Apply dark mode styles"""
         dark_mode_file = Path(__file__).parent / "themes files/dark_mode.txt"
-
         with open(dark_mode_file, "r") as f:
             dark_mode = f.read()
         self.setStyleSheet(dark_mode)
         self.theme_btn.setText("")
         self.theme_btn.setIcon(QIcon(str(self.l_mode)))
         
-
     def _light_mode(self):
         """Apply light mode styles."""
         light_mode_file = Path(__file__).parent / "themes files/light_mode.txt"
-
         with open(light_mode_file, "r") as f:
             light_mode = f.read()
-
         self.setStyleSheet(light_mode)
         self.theme_btn.setText("")
-        self.theme_btn.setIcon(QIcon(str(self.d_mode)))
-        
+        self.theme_btn.setIcon(QIcon(str(self.d_mode))) 
 
     def _change_font_size(self):
         """Change the font size when the user selects a new size."""
@@ -431,13 +393,11 @@ class NoteWorthy(QWidget):
         """Apply the selected font size."""
         font = QFont("Arial", size)
         self.text_edit.setFont(font)
-
         count = self.splitter.count()
         last_widget = self.splitter.widget(count - 1)
         last_widget.setFont(font)
         self.font_size_box.setCurrentText(str(size))  # Ensure dropdown reflects the selection
         
-    
     def _save_preferences(self):
         """Save user preferences (theme & font size) to a JSON file."""
         data = {
@@ -449,18 +409,11 @@ class NoteWorthy(QWidget):
 
     def _load_preferences(self):
         """Load user preferences (theme & font size) from a JSON file."""
-        # if cache.get("theme"):
-        #     selected_theme = cache.get("theme")
-        # else:
-        #     selected_theme = themes.get_chosen_theme()
-        # self.mode = cache.get("theme") or themes.get_chosen_theme()
-
         try:
             with open(CONFIG_FILE, "r") as file:
                 data = json.load(file)
                 return int(data.get("font_size", 14))  # Default: Light mode, Font size 14
         except (FileNotFoundError, json.JSONDecodeError):
-            # return False, 14  # Default values if file is missing or corrupted
             return
         
     def _add_browser(self):
@@ -487,8 +440,7 @@ class NoteWorthy(QWidget):
             count = self.splitter.count()
             last_widget = self.splitter.widget(count - 1)
             last_widget.setText(html)
-        
-        
+           
     def _restart_timer(self):
         self.typing_timer.start(1000)  # Waits 10 seconds after last keypress
 
@@ -513,10 +465,8 @@ class NoteWorthy(QWidget):
     def launch_lyrical_lab(self):
         self.lyrical_window = LyricsSummarizationUi()
         self.lyrical_window.show()
-        # self.destroy()
     
     def load_thm_pref(self):
-
         if self.mode == "dark":
             self.setStyleSheet(self.dark_mode)
             self.theme_btn.setIcon(QIcon(str(self.d_mode)))
@@ -530,16 +480,13 @@ class NoteWorthy(QWidget):
     def init_wrapper(self):
         self.font_size = self._load_preferences()
         self.load_themes()
-        # self.theme()
         self.load_thm_pref()
-        # self.apply_theme()
         self._set_font_size(self.font_size)
         self._get_last_written()
 
     def exit_button(self):
         self.destroy()
         sys.exit()
-
 #===============================================================================================================================================
     # def contextMenuEvent(self, event):
     #     cursor = self.text_edit.cursorForPosition(event.pos())

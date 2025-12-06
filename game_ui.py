@@ -34,7 +34,6 @@ class UserIfo:
 
     def __init__(self):
         self._name = dashboard.get_user_name()
-        # self._title = ""
         self._overAll_level = self.load_overall_level() 
         self.subjects = []
 #============================================================================================================================================= 
@@ -144,9 +143,6 @@ class AutodidexBank:
         self._wallet_total = dashboard.get_lumens_amount()
         self.user_info = user_info #UserIfo()
 
-#-------------------------------------------------------------loading lumens and xp #points----------------------------------------------------
-        # self._load_wallet_total_and_xp()
-        # self.earn_subject_xp()
 #=========================================================================Getters==============================================================
     @property
     def wallet(self) -> int:
@@ -309,7 +305,6 @@ class PolyMart:
         for key, value in self.store_items.items():
             cost = int(value)
             key = str(key).strip().lower()
-
             if item_name == key:
                 if self.bank_account.wallet >= cost:
                     msg = self.bank_account.spend_lumens(cost)
@@ -330,7 +325,6 @@ class PolyMart:
                 logging.debug("Item found")
                 if dashboard.remove_badge(item_name.title()):
                     self.bank_account.wallet = trade_amount
-                    # self.remove_traded_badge(item_name)
                     badges = dashboard.get_all_badges()
                     cache.set("badges", badges)
                     return f"Transaction Complete Traded {item_name} for {trade_amount}"
@@ -415,15 +409,8 @@ class MainWindow(QMainWindow):
         self.enter_btn.clicked.connect(self.load_user_name)
 
         self.buy_icon = Path(__file__).parent / "Icons/icons8-pay-64.png"
-        # self.trade_icon = Path(__file__).parent / "Icons/icons8-trade-64.png"
-        # self.light_icon = Path(__file__).parent / "Icons/icons8-light-64.png"
-        # self.dark_icon = Path(__file__).parent / "Icons/icons8-dark-mode-48.png"
-        # self.thm_pref = Path(__file__).parent / "v tab files/dashboard_config.json"
-
-        # self.theme_state: Optional[str] = None
-        # self.dark_mode: Optional[str] = None
-        # self.light_mode: Optional[str] = None
-
+        self.trade_icon = Path(__file__).parent / "Icons/icons8-trade-64.png"
+    
         self.light_mode: Optional[str] = None
         self.dark_mode: Optional[str] = None
         self.neutral_mode: Optional[str] = None
@@ -432,11 +419,6 @@ class MainWindow(QMainWindow):
         self.d_mode = Path(__file__).parent / "Icons/icons8-dark-mode-48.png"
         self.l_mode = Path(__file__).parent / "Icons/icons8-light-64.png"
         self.n_mode = Path(__file__).parent / "Icons/icons8-day-and-night-50.png"
-
-        # self.thm_btn = QPushButton("")
-        # self.thm_btn.setIcon(QIcon(str(self.d_mode)))
-        # self.thm_btn.setIconSize(QSize(30, 30))
-        # self.thm_btn.clicked.connect(self.theme)
 
         self.theme_toggle = QPushButton("")
         self.theme_toggle.setIcon(QIcon(str(self.l_mode)))
@@ -545,7 +527,6 @@ class MainWindow(QMainWindow):
                 main_layout = QVBoxLayout()
                 self.setLayout(main_layout)
                 layout = QHBoxLayout()
-                
                 layout.addWidget(self.name_input)
                 layout.addWidget(self.enter_btn)
                 main_layout.addWidget(self.label)
@@ -559,9 +540,6 @@ class MainWindow(QMainWindow):
                 self.setup_ui()
         logging.debug(f"The user state is {self.user_present}")
         logging.debug(f"The name of the user is now {self.user.name}")
-            
-    def subject_clicked(self):
-        logging.debug("Subject clicked")
 
     def load_user_name(self):
         name = self.name_input.text().strip()
@@ -572,7 +550,6 @@ class MainWindow(QMainWindow):
                 state = dashboard.create_new_user(name)
                 self.user_present = state
                 logging.debug("User logged in as: %s", self.user.name)
-
 #------------------------------------------------------------------replacing the window with the actual UI-------------------------------------
                 self.setup_ui()
             except ValueError as e:
@@ -592,7 +569,6 @@ class MainWindow(QMainWindow):
         self.wallet_label.setText(
                 f'<img src="{self.w_icon.as_posix()}" width="40" height="40">'
                 f'<span style="font-size: 20px;"> ⁚ {new_amount} Lumens</span>')
-
         logging.debug(res)
 
     def trade_btn(self):
@@ -621,20 +597,18 @@ class MainWindow(QMainWindow):
 
     def display_badges(self, index):
         """Display badges for a particular subject"""
-       
         badges_list = cache.get("cp_badges")
         logging.debug(f"The badges: {badges_list}")
-
         self.badge_list.clear()
         selected_item = self.subject_combo.itemText(index)
-
-        subject_badges = badges_list[selected_item]
-    
+        try:
+            subject_badges = badges_list[selected_item]
+        except KeyError:
+            subject_badges = ["No badge yet"]
         self.badge_list.addItems(set(subject_badges))
         
     def add_subject(self):
         """Load subjects from db"""
-       
         subjects_list = sorted(self.user.initialize_subjects())
         return subjects_list
 
@@ -656,113 +630,49 @@ class MainWindow(QMainWindow):
         for key, value in badge_trade_values.items():
             item = f"{key} : {value}"
             store_products.append(item)
-
         return store_products
     
-    
-    # def load_themes(self):
-    #     theme_files = {
-    #         "light_mode": Path(__file__).parent / "themes files/light_mode.txt",
-    #         "dark_mode": Path(__file__).parent / "themes files/dark_mode.txt"
-    #     }
-
-    #     for name, path in theme_files.items():
-    #         with open(path, "r") as f:
-    #             setattr(self, name, f.read())
-
     def load_themes(self):
         """loads the themes, and sets them to their data fields"""
-        # light_mode_file = Path(__file__).parent / "themes files/light_mode.txt"
-        # dark_mode_file = Path(__file__).parent / "themes files/dark_mode.txt"
-        # neutral_mode_file = Path(__file__).parent / "themes files/neutral_mode.txt"
-#------------------------------------------------------------------------load light mode-----------------------------------------
-        # with open(light_mode_file, "r") as f:
-        #     light_mode = f.read()
         if cache.get("light"):
             self.light_mode = cache.get("light")
         else:
             self.light_mode = themes.get_theme_mode("light")
         cache.set("light", self.light_mode)
 
-#------------------------------------------------------------------load dark mode------------------------------------------------
-        # with open(dark_mode_file, "r") as f:
-        #     dark_mode = f.read()
         if cache.get("dark"):
             self.dark_mode = cache.get("dark")
         else:
             self.dark_mode = themes.get_theme_mode("dark")
         cache.set("dark", self.dark_mode)
 
-        # with open(neutral_mode_file, "r") as f:
-        #     neutral_mode = f.read()
         if cache.get("neutral"):
             self.neutral_mode = cache.get("neutral")
         else:
             self.neutral_mode = themes.get_theme_mode("neutral")
             cache.set("neutral", self.neutral_mode)
-
-
-
-                
+ 
     def toggle_theme(self):
         """Switches between themes"""
-
-        # if self.theme_state == "light":
-        #     stylesheet_file = Path(__file__).parent / "themes files/neutral_mode.txt"
-        #     self.theme_state = "dark"
-        #     self.theme_toggle.setText("")
-        #     self.theme_toggle.setIcon(QIcon(str(self.light_icon)))
-        # else:
-        #     stylesheet_file = Path(__file__).parent / "themes files/light_mode.txt"
-        #     self.theme_state = "light"
-        #     self.theme_toggle.setText("")
-        #     self.theme_toggle.setIcon(QIcon(str(self.dark_icon)))
-        # self.theme_toggle.setIconSize(QSize(30, 30))
-
-        # with open(stylesheet_file, "r") as f:
-        #     stylesheet = f.read()
         if self.mode == "light":
             self.theme_toggle.setIcon(QIcon(str(self.d_mode)))
             self.setStyleSheet(self.dark_mode)
             self.mode = "dark"
-            # cache.set("theme", "dark")
         elif self.mode == "dark":
             self.theme_toggle.setIcon(QIcon(str(self.n_mode)))
             self.setStyleSheet(self.neutral_mode)
             self.mode = "neutral"
-            # cache.set("theme","neutral")
         elif self.mode == "neutral":
             self.theme_toggle.setIcon(QIcon(str(self.l_mode)))
             self.setStyleSheet(self.light_mode)
             self.mode = "light"
-            # cache.set("theme", "light")
             
-    
-    # def load_thm_pref(self):
-    #     "loads user preferred theme"
-#         try:
-#             with open(self.thm_pref, "r") as f:
-#                 data = json.load(f)
-#                 self.theme_state = data["mode"]
-#         except (FileNotFoundError, json.decoder.JSONDecodeError):
-# #--------------------------------------------------------------------------------set to defaulf------------------------------------------------
-#             self.theme_state = "dark"
-        
-#         if self.theme_state == "dark":
-#             self.setStyleSheet(self.dark_mode)
-#         elif self.theme_state == "light":
-#             self.setStyleSheet(self.light_mode)
-#         return
-        # self.toggle_theme()
-            
-    
     def thm_wrapper(self):
         self.load_themes()
         self.toggle_theme()
 
     def set_init_thm(self):
         """Set initial theme upon opening app"""
-
         if self.mode == "light":
             self.theme_toggle.setIcon(QIcon(str(self.l_mode)))
             self.setStyleSheet(self.light_mode)
@@ -772,11 +682,9 @@ class MainWindow(QMainWindow):
         elif self.mode == "neutral":
             self.theme_toggle.setIcon(QIcon(str(self.n_mode)))
             self.setStyleSheet(self.neutral_mode)
-        # print(f"The theme is {self.mode}")
 
     def check_new_cp(self):
         """Checks for new subjects added"""
-        # if self.user_present == True:
         #remove duplicates from list
         subjects = set(cp_tracker.get_cerebral_pursuits())
         #convert set into list
@@ -786,9 +694,6 @@ class MainWindow(QMainWindow):
     
     def update_wrapper(self):
         self.bank.earn_subject_xp()
-        # level = self.user.load_overall_level()
-        # xp_points = dashboard.get_total_xp()
-        # wallet = dashboard.get_lumens_amount()
         self.level_label.setText(
                 f'<img src="{self.l_icon.as_posix()}" width="40" height="40">'
                 f'<span style="font-size: 20px;"> ⁚ {self.user.level}</span>'
@@ -810,12 +715,10 @@ class MainWindow(QMainWindow):
         self.on_load()
         if self.user_present == True:
             self.setup_ui()
-        # self.thm_wrapper()
         self.load_themes()
         self.set_init_thm()
         self.bank.earn_subject_xp()
-        self.market.load_store_items()
-        
+        self.market.load_store_items()       
 #===========================================================================Run application====================================================
 if __name__ == "__main__":
     app = QApplication(sys.argv)

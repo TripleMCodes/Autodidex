@@ -154,7 +154,7 @@ class Autodidex (QWidget):
 #====================================================================================================================
 #=========================================================set layout=================================================
         self.exit_button = QPushButton("")
-        self.exit_button.setIcon(QIcon(str(Path(__file__).parent / "Icons/icons8-exit-sign-64.png")))
+        self.exit_button.setIcon(QIcon(str(Path(__file__).parent / "Icons/icons8-power-button-50.png")))
         self.exit_button.setIconSize(QSize(50, 50))
         self.exit_button.setToolTip("Exit Autodidex")
         self.exit_button.setStyleSheet("""
@@ -212,66 +212,17 @@ class Autodidex (QWidget):
             self.watcher.addPath(str(self.session_file))
         self.watcher.fileChanged.connect(self.on_file_changed)
         self.intial_sessions_val = self.load_last_saved_session()
-        # print(f'the intial value is {self.intial_sessions_val}')
-
         self.init_wrapper()
-        
 #====================================================================================================================
 #=========================================================class methods==============================================
     def exit_app(self):
         self.cirillo.log_sessions()
-        # self.cpt_tracker.save_last_entered_habits()
-        # self.cpt_tracker.save_checkbox_states()
         self.close()
         self.destroy()
 
-    def save_preference(self):
-        """Save theme mode chosen"""
-        config_file = Path(__file__).parent / "v tab files/dashboard_config.json"
-
-        data = {
-            "mode": self.thm_mode  # This is an Enum 
-        }
-
-        with open(config_file, "w") as f:
-            json.dump(data, f, cls=EnumEncoder)
-
-        logging.debug(f"saving preferred theme as {self.thm_mode}")
-        return
-    
-#     def load_saved_pref(self):
-#         """Loads the saved theme preference and applies the enum properly"""
-#         config_file = Path(__file__).parent / "v tab files/dashboard_config.json"
-
-#         try:
-#             with open(config_file, "r") as f:
-#                 data = json.load(f)
-
-# #---------------------------------------------------Convert the string back to ThemeMode Enum------------------------
-#             self.thm_mode = Theme(data.get("mode", Theme.DARK.value))
-#             logging.debug(f'save theme {self.thm_mode}')
-
-#         except (json.decoder.JSONDecodeError, FileNotFoundError, ValueError, KeyError):
-# #----------------------------------------------If file is corrupt or missing, fallback to default--------------------
-#             self.thm_mode = Theme.DARK
-#             data = {"mode": self.thm_mode.value}
-            
-#             with open(config_file, "w") as f:
-#                 json.dump(data, f, cls=EnumEncoder)
-
-#         return
-
     def load_thm_pref(self):
         """load saved theme preferrence"""
-
         self.mode = cache.get('theme') or themes.get_chosen_theme()
-
-        # if self.mode == "dark":
-        #     self.setStyleSheet(self.dark_mode)
-        # elif self.mode == "light":
-        #     self.setStyleSheet(self.light_mode)
-        # elif self.mode == "neutral":
-        #     self.setStyleSheet(self.neutral_mode)
 
     
     def load_themes(self):
@@ -293,8 +244,6 @@ class Autodidex (QWidget):
         cache.set("neutral", self.neutral_mode)
 
     def thm_toggle(self):
-        # light_mode, dark_mode = self.load_thms()
-
         if self.mode == "light":
             self.setStyleSheet(self.dark_mode)
             self.thm_btn.setText("")
@@ -341,23 +290,16 @@ class Autodidex (QWidget):
         #Since I want to add 6 lumens with each new session
         #I will add lumens with each call of this function
         self.bank =  AutodidexBank(UserIfo)
-        # self.intial_sessions_val = self.cirillo.current_sessions
-        new_sessions_val = self.load_last_saved_session() #self.cirillo.load_current_sessions()
-        print(f'the intial session value is {self.intial_sessions_val} and the new value is {new_sessions_val},')
-        
-
+        new_sessions_val = self.load_last_saved_session() 
         if new_sessions_val > self.intial_sessions_val:
             self.bank.wallet = 3
-            
             self.dash_board.update_ui()
-            print("called from main window")
         
     def load_last_saved_session(self):
         """Loads the number of last saved sessions in a day"""
         with open(self.session_file, "r") as f:
             sessions_data = list(csv.DictReader(f))
             last_row = sessions_data[-1]
-            # print(f"last entered session value: { last_row["sessions"]}")
             return int(last_row["sessions"])
     
     def set_init_thm(self):
@@ -375,26 +317,14 @@ class Autodidex (QWidget):
         print(f"The theme is {self.mode}")
 
     def init_wrapper(self):
-        # self.load_saved_pref()
-        # light_mode, dark_mode = self.load_thms()
-        # if self.thm_mode == Theme.DARK:
-        #     self.setStyleSheet(dark_mode)
-        #     logging.debug("New user present")
-        
-        # else:
-        #     self.setStyleSheet(light_mode)
         self.load_thm_pref()
         self.load_themes()
-        # self.thm_toggle()
         self.set_init_thm()
         self.cpt_tracker.init_wrapper()
         self.dash_board.init_wrapper()
         self.cal_ht.init_wrapper()
         self.noteworthy.init_wrapper()
         self.cirillo.init()
-        logging.debug("Saved user logged in")
-        print(f"The theme is {self.mode}")
-
 #--------------------------------------------------------------------------------------------------------------------
 #================================================================run app=============================================
 if __name__ == "__main__":

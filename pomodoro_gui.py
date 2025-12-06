@@ -49,7 +49,6 @@ class PomodoroGUI(QWidget):
         self.path = Path(__file__).parent
         self.thm_pref = Path(__file__).parent / "v tab files/dashboard_config.json"
         self.file = Path(__file__).parent / "cirillo files/sessions.csv"
-        
         self.sessions = 0  #keeps tracks of sessions achieved while using the app
         self.sessions_tracker = 0 #for tracking when it will be time for the long break
         self.current_sessions = self.load_current_sessions() #holds the number of sessions previouly saved for the same day
@@ -57,16 +56,12 @@ class PomodoroGUI(QWidget):
         self.timer.timeout.connect(self.update_timer)
         self.paused = False
         self.remaining_time = None
-
         self.end_time = None
         self.mode = 'Work'  # or 'Break'
         self.day = None
         self.month = None
         self.year = None
         self.time_studied = 120
-
-        
-        
 #===============================================================================================================================================
 #===========================================================================Sidebar (left)======================================================
         self.sidebar = QWidget()
@@ -116,7 +111,6 @@ class PomodoroGUI(QWidget):
 #========================================================================studying Music=========================================================
         pygame.mixer.init()
         self.current_sound = None
-        
         self.sound_files = {
         "lofi": Path(__file__).parent / "cirillo files/sounds/lofi.mp3",
         "Forest": Path(__file__).parent / "cirillo files/sounds/forestsounds.mp3",
@@ -168,9 +162,6 @@ class PomodoroGUI(QWidget):
             </div>
         ''')
         self.volume_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        
-        
         self.volume_slider = QSlider(Qt.Horizontal)
         self.volume_slider.setRange(0, 100)
         self.volume_slider.setValue(50)  # Default volume: 50%
@@ -192,7 +183,6 @@ class PomodoroGUI(QWidget):
             }
         """)
         self.volume_slider.valueChanged.connect(self.change_volume)
-
         s_icon = Path(__file__).parent / "Icons/icons8-rhythm-48.png"
         self.study_music = QLabel(f'''
             <div style="text-align: center;">
@@ -208,7 +198,6 @@ class PomodoroGUI(QWidget):
                 background-color: #D6EAF8;
             }
         """)
-
 #-----------------------------------------------------------------------------------theme button-------------------------------------------
         self.light_mode: Optional[str] = None
         self.dark_mode: Optional[str] = None
@@ -246,7 +235,6 @@ class PomodoroGUI(QWidget):
             }
         """)
         exit_btn.clicked.connect(self.terminate)
-
         sidebar_layout.addWidget(self.study_music)
         sidebar_layout.addWidget(self.sound_selector)
         sidebar_layout.addWidget(self.volume_label)
@@ -276,8 +264,6 @@ class PomodoroGUI(QWidget):
                 }
             """)
         content_layout.addWidget(self.timer_label)
-         
-
 #----------------------------------------------------------------------Time input controls------------------------------------------------------
         time_layout = QHBoxLayout()
         self.work_input = QSpinBox()
@@ -559,13 +545,7 @@ class PomodoroGUI(QWidget):
             dt = datetime.datetime.today()
             formatted = dt.strftime("%d %B %Y")
             print(f'the date is: {formatted}')
-
 #-------------------------------------------------------------------Filter rows by date-----------------------------------------------
-            # Filter rows by date
-            # for row in sessions_data:
-            #     logging.debug(f"sessions data {sessions_data}")
-            #     logging.debug(f'row is {row}')
-
             last_row = sessions_data[-1]
             print(last_row, formatted)
             logging.debug(last_row)
@@ -582,7 +562,6 @@ class PomodoroGUI(QWidget):
             self.theme_toggle_btn.setText("")
             self.theme_toggle_btn.setIcon(QIcon(str(self.d_icon)))
             self.thm_mode = "dark"
-            # cache.set("theme", "dark")
         elif self.thm_mode == "dark":
             self.setStyleSheet(self.neutral_mode)
             self.theme_toggle_btn.setText("")
@@ -593,9 +572,7 @@ class PomodoroGUI(QWidget):
             self.theme_toggle_btn.setText("")
             self.theme_toggle_btn.setIcon(QIcon(str(self.l_icon)))
             self.thm_mode = "light" 
-            # cache.set("theme", "light")
                           
-
     def start_session(self):
         """Start session, studying sounds"""
         duration = self.work_input.value()
@@ -710,66 +687,41 @@ class PomodoroGUI(QWidget):
     def log_sessions(self):
         """Logs numbers of sessions studied into a csv file"""
         hrs, mins = divmod(self.time_studied, 60)
-
         if self.sessions > 0:
             #load csv data
             with open(self.file) as f:
                 sessions_data = csv.DictReader(f)
-                
                 dt = datetime.datetime.today()
                 formatted = dt.strftime("%d %B %Y")
                 logging.debug(f'the date is: {formatted}')
                 logging.debug(f'the number of previouly save sessions is {self.current_sessions}')
-
                 self.sessions = self.sessions + self.current_sessions
-
 #-------------------------------------------------------------------Filter rows by date-----------------------------------------------
                 # Filter rows by date
                 filtered_rows = [row for row in sessions_data if row["date"] != formatted]
-                
                 with open(self.file, "w", newline="") as f:
                     writer = csv.DictWriter(f, fieldnames=["sessions", "date", "time studied"])
                     writer.writeheader()
                     writer.writerows(filtered_rows)
-
 #-------------------------------------------------------------------Get the number of minutes studied--------------------------------------
-       
             with open(self.file, "a", newline="") as f:
                 log_file = csv.DictWriter(f, fieldnames=["sessions", "date", "time studied"])
-
                 if self.file.stat().st_size == 0:
                     log_file.writeheader()
                 log_file.writerow({"sessions" : str(self.sessions), "date" : str(self.date_format()) ,"time studied": str(f'{hrs:02d} hrs {mins:02d} mins')})
-
             self.current_sessions = self.sessions
             self.sessions = 0
-            
         else:
             return
 
     def load_thm_pref(self):
         """load saved theme preferrence"""
-#         try:
-#             with open(self.thm_pref, "r") as f:
-#                 data = json.load(f)
-#                 thm = data["mode"]
-#             self.thm_mode = thm
-#             logging.debug(f"chosen theme {self.thm_mode}")
-#         except (FileNotFoundError, json.decoder.JSONDecodeError):
-# #---------------------------------------------------------------------set theme to default-------------------------------------------------
-#             self.thm_mode = "dark"
-#             logging.debug("default theme chosen")
-#         if self.thm_mode == "light":
-#             self.setStyleSheet(self.light_mode)
-#         else:
-#             self.setStyleSheet(self.dark_mode)
-
         if self.thm_mode == "dark":
             self.setStyleSheet(self.dark_mode)
             self.theme_toggle_btn.setIcon(QIcon(str(self.d_icon)))
         elif self.thm_mode == "light":
             self.setStyleSheet(self.light_mode)
-            self.theme_toggle_btn.setIcon(QIcon(str(self.l_con)))
+            self.theme_toggle_btn.setIcon(QIcon(str(self.l_icon)))
         elif self.thm_mode == "neutral":
             self.setStyleSheet(self.neutral_mode)
             self.theme_toggle_btn.setIcon(QIcon(str(self.n_icon)))
@@ -783,9 +735,7 @@ class PomodoroGUI(QWidget):
                 if not reader.fieldnames or "date" not in reader.fieldnames or "sessions" not in reader.fieldnames:
                     print("CSV file format is invalid.")
                     return
-
                 date_session_map = defaultdict(int)
-
                 for row in reader:
                     try:
                         date_obj = datetime.datetime.strptime(row['date'], "%d %B %Y")
@@ -793,20 +743,16 @@ class PomodoroGUI(QWidget):
                         date_session_map[date_obj] += session_count
                     except ValueError as e:
                         logging.debug(f"Skipping row due to error: {e}")
-
             if not date_session_map:
                 QMessageBox.information(self, "Notification","No data to plot.")
                 return
-
 #-------------------------------------------------------------------Sort data by date------------------------------------------------------
             sorted_dates = sorted(date_session_map)
             sorted_sessions = [date_session_map[date] for date in sorted_dates]
-
 #---------------------------------------------------------------------Plotting-------------------------------------------------------------
             plt.figure(figsize=(12, 6))
             plt.plot(sorted_dates, sorted_sessions, marker='o', linestyle='-', color='teal')
             plt.fill_between(sorted_dates, sorted_sessions, color='teal', alpha=0.1)
-
             plt.title("📈 Study Sessions Over Time", fontsize=16)
             plt.xlabel("Date", fontsize=12)
             plt.ylabel("Sessions", fontsize=12)
@@ -814,7 +760,6 @@ class PomodoroGUI(QWidget):
             plt.tight_layout()
             plt.xticks(rotation=45)
             plt.show()
-
         except FileNotFoundError:
             print("CSV file not found. Check the path and try again.")
         except Exception as e:
@@ -823,21 +768,17 @@ class PomodoroGUI(QWidget):
     def play_reward_and_close_app(self, file_types):
         """"Plays reward during break"""
         arr = []
-
         for dirpath, _, filenames in os.walk(self.path):
             arr.extend(
                 os.path.join(dirpath, file)
                 for file in filenames
                 if any(file.endswith(ext) for ext in file_types)
             )
-
         if arr:
             arr_path = random.choice(arr)
-
             self.proc = subprocess.Popen(["start", arr_path], shell=True)
             self.break_duration = self.break_input.value()  # in minutes
             QTimer.singleShot(self.break_duration * 60 * 1000, self.on_break_over)
-
         else:
             logging.debug("No media app process found.")
             QMessageBox.information(self, "No media app process found.")
@@ -955,9 +896,7 @@ class PomodoroGUI(QWidget):
     def init(self):
         """calls methods to run the app"""
         self.load_themes()
-        # self.toggle_theme()
         self.load_thm_pref()
-        # logging.debug(self.thm_mode)
 
     def terminate(self):
         """Kill the app"""

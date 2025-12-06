@@ -166,7 +166,6 @@ class CPTracker(QWidget):
         try:
             habits = cp_table.get_cerebral_pursuits() or []
             logging.debug(f"Subjects in the list - {habits}")
-
             # populate from row 0 downward and track next free index in self.counter
             for idx, habit in enumerate(habits):
                 if habit and habit.strip():
@@ -181,7 +180,6 @@ class CPTracker(QWidget):
         
     def load_checkbox_states(self):
         """Load and apply previously saved checkbox states."""
-
         states = cp_table.get_check_marks()
         for col in range(1, 8):
             for row in range(0, 15):
@@ -212,7 +210,6 @@ class CPTracker(QWidget):
             f.write(random_string)
 
     def add_habit(self):
-        
         habit = self.input.text()
         if habit.strip():
             msg = cp_table.insert_cp(habit)
@@ -226,7 +223,6 @@ class CPTracker(QWidget):
             self.input.clear()
             self.counter += 1 
             self.update_dashboard()
-
         else:
                 QMessageBox.warning(self, "WARNING", "Enter a valid habit")
 
@@ -265,12 +261,10 @@ class CPTracker(QWidget):
             return
         if new_subject == old_subject:
             return
-
         msg = cp_table.update_cp(old_subject, new_subject)
         if not msg.get("status"):
             QMessageBox.warning(self, "Warning", msg.get("message", "Failed to rename subject"))
             return
-
         QMessageBox.information(self, "Success", msg.get("message", "Subject renamed"))
         # refresh visible list
         self.refresh_subjects()
@@ -283,7 +277,6 @@ class CPTracker(QWidget):
                                      QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         if reply != QMessageBox.StandardButton.Yes:
             return
-
         msg = cp_table.delete_cp(subject)
         if not msg.get("status"):
             QMessageBox.warning(self, "Warning", msg.get("message", "Failed to delete subject"))
@@ -346,10 +339,8 @@ class CPTracker(QWidget):
                         
     def init_wrapper(self):
         """Initailze necessary methods and check if app needs reset"""
-            
         today = str(datetime.datetime.now().date())
         today = datetime.datetime.strptime(today, "%Y-%m-%d")
-        # today = self.end_date
         try:
             if today >= self.end_date:
                 self.load_last_entered_habits()
@@ -373,7 +364,6 @@ class CPTracker(QWidget):
     def plot_habit_barchart(self, counts):
         habits = list(counts.keys())
         frequencies = list(counts.values())
-
         plt.figure(figsize=(10, 6))
         bars = plt.bar(habits, frequencies, color="mediumpurple", edgecolor="black")
 #----------------------------------------------------------------Add count labels on top of bars---------------------------------
@@ -381,7 +371,6 @@ class CPTracker(QWidget):
             height = bar.get_height()
             plt.text(bar.get_x() + bar.get_width()/2, height + 0.1, f'{int(height)}',
                     ha='center', va='bottom', fontsize=10)
-
         plt.title("Habit Completion Frequency", fontsize=16)
         plt.xlabel("Habits", fontsize=12)
         plt.ylabel("Check-ins", fontsize=12)
@@ -391,28 +380,16 @@ class CPTracker(QWidget):
     
     def load_themes(self):
         """loads the themes, and sets them to their data fields"""
-        # light_mode_file = Path(__file__).parent / "themes files/light_mode.txt"
-        # dark_mode_file = Path(__file__).parent / "themes files/dark_mode.txt"
-        # neutral_mode_file = Path(__file__).parent / "themes files/neutral_mode.txt"
-#------------------------------------------------------------------------load light mode-----------------------------------------
-        # with open(light_mode_file, "r") as f:
-        #     light_mode = f.read()
         if cache.get("light"):
             self.light_mode = cache.get("light")
         else:
             self.light_mode = themes.get_theme_mode("light")
             cache.set("light", self.light_mode)
-#------------------------------------------------------------------load dark mode------------------------------------------------
-        # with open(dark_mode_file, "r") as f:
-        #     dark_mode = f.read()
         if cache.get("dark"):
             self.dark_mode = cache.get("dark")
         else:
             self.dark_mode = themes.get_theme_mode("dark")
             cache.set("dark", self.dark_mode)
-
-        # with open(neutral_mode_file, "r") as f:
-        #     neutral_mode = f.read()
         if cache.get("neutral"):
             self.neutral_mode = cache.get("neutral")
         else:
@@ -420,50 +397,21 @@ class CPTracker(QWidget):
             cache.set("neutral", self.neutral_mode)
 
     def theme(self):
-#---------------------------------------------------------------------to dark mode-----------------------------------------------
         if self.mode == "light":
-            # self.sidebar.setStyleSheet(self.dark_mode)
-            # self.habit_tracker.setStyleSheet(self.dark_mode)
-            # self.input.setStyleSheet(self.dark_mode)
-            # self.enter_btn.setStyleSheet(self.dark_mode)
-            # self.edit_btn.setStyleSheet(self.dark_mode)
             self.thm_btn.setIcon(QIcon(str(self.d_mode)))
             self.setStyleSheet(self.dark_mode)
             self.mode = "dark"
-            # cache.set("theme", "dark")
         elif self.mode == "dark":
-#----------------------------------------------------------------------to light mode---------------------------------------------
-            # self.sidebar.setStyleSheet(self.neutral_mode)
-            # self.habit_tracker.setStyleSheet(self.neutral_mode)
-            # self.input.setStyleSheet(self.neutral_mode)
-            # self.enter_btn.setStyleSheet(self.neutral_mode)
-            # self.edit_btn.setStyleSheet(self.neutral_mode)
             self.thm_btn.setIcon(QIcon(str(self.n_mode)))
             self.setStyleSheet(self.neutral_mode)
             self.mode = "neutral"
-            # cache.set("theme", "neutral")
         elif self.mode == "neutral":
-            # self.sidebar.setStyleSheet(self.light_mode)
-            # self.habit_tracker.setStyleSheet(self.light_mode)
-            # self.input.setStyleSheet(self.light_mode)
-            # self.enter_btn.setStyleSheet(self.light_mode)
-            # self.edit_btn.setStyleSheet(self.light_mode)
             self.thm_btn.setIcon(QIcon(str(self.l_mode)))
             self.setStyleSheet(self.light_mode)
             self.mode = "light"
-            # cache.set("theme", "light")
 
     def load_thm_pref(self):
         """load saved theme preferrence"""
-        # try:
-        #     with open(self.thm_pref, "r") as f:
-        #         data = json.load(f)
-        #         thm = data["mode"]
-        #     self.mode = thm
-        # except (FileNotFoundError, json.decoder.JSONDecodeError):
-#------------------------------------------------------------------set theme to default------------------------------------------
-        # self.mode = cache.get('theme') or themes.get_chosen_theme()
-
         if self.mode == "dark":
             self.setStyleSheet(self.dark_mode)
             self.thm_btn.setIcon(QIcon(str(self.d_mode)))
@@ -476,7 +424,6 @@ class CPTracker(QWidget):
 
     def show_progress(self):
         """Shows the check marks for each cp per week"""
-
         count = cp_table.get_cp_with_check_marks()
         self.plot_habit_barchart(count)
 
