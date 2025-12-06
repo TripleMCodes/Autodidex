@@ -19,9 +19,13 @@ from pomodoro_gui import PomodoroGUI
 import csv
 # from space_invader_widget import SpaceInvaderWidget
 
+from autodidex_cache import DictionaryCache
+from themes_db import Themes
+cache = DictionaryCache()
+themes = Themes()
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
-logging.disable(logging.DEBUG)
+# logging.disable(logging.DEBUG)
 #====================================================================================================================
 #========================================================enums=======================================================
 class Theme(Enum):
@@ -74,14 +78,22 @@ class Autodidex (QWidget):
         settings_layout.addLayout(s_layout)
 #====================================================================================================================
 #==============================================================button icons==========================================
-        self.dark = Path(__file__).parent / "Icons/icons8-dark-mode-48.png"
-        self.light = Path(__file__).parent / "Icons/icons8-light-64.png"
+        self.d_mode = Path(__file__).parent / "Icons/icons8-dark-mode-48.png"
+        self.l_mode = Path(__file__).parent / "Icons/icons8-light-64.png"
+        self.n_mode = Path(__file__).parent / "Icons/icons8-day-and-night-50.png"
+
+
+#===================================================================================================================
+        self.light_mode: Optional[str] = None
+        self.dark_mode: Optional[str] = None
+        self.neutral_mode: Optional[str] = None
+        self.mode = cache.get("theme") or themes.get_chosen_theme()
 #====================================================================================================================
 #===========================================================layout content===========================================
         settings_label = SpinningLabel("⚙️Settings")
         settings_label.setObjectName("onloadlabel")
-        self.thm_btn = QPushButton("Dark mode")
-        self.thm_btn.setIcon(QIcon(str(self.dark)))
+        self.thm_btn = QPushButton("")
+        self.thm_btn.setIcon(QIcon(str(self.d_mode)))
         self.about = QPushButton("About Autodidex")
         self.about.setIcon(QIcon(str(win_icon)))
         settings_list = [self.thm_btn, self.about]
@@ -200,7 +212,7 @@ class Autodidex (QWidget):
             self.watcher.addPath(str(self.session_file))
         self.watcher.fileChanged.connect(self.on_file_changed)
         self.intial_sessions_val = self.load_last_saved_session()
-        print(f'the intial value is {self.intial_sessions_val}')
+        # print(f'the intial value is {self.intial_sessions_val}')
 
         self.init_wrapper()
         
@@ -227,68 +239,96 @@ class Autodidex (QWidget):
         logging.debug(f"saving preferred theme as {self.thm_mode}")
         return
     
-    def load_saved_pref(self):
-        """Loads the saved theme preference and applies the enum properly"""
-        config_file = Path(__file__).parent / "v tab files/dashboard_config.json"
+#     def load_saved_pref(self):
+#         """Loads the saved theme preference and applies the enum properly"""
+#         config_file = Path(__file__).parent / "v tab files/dashboard_config.json"
 
-        try:
-            with open(config_file, "r") as f:
-                data = json.load(f)
+#         try:
+#             with open(config_file, "r") as f:
+#                 data = json.load(f)
 
-#---------------------------------------------------Convert the string back to ThemeMode Enum------------------------
-            self.thm_mode = Theme(data.get("mode", Theme.DARK.value))
-            logging.debug(f'save theme {self.thm_mode}')
+# #---------------------------------------------------Convert the string back to ThemeMode Enum------------------------
+#             self.thm_mode = Theme(data.get("mode", Theme.DARK.value))
+#             logging.debug(f'save theme {self.thm_mode}')
 
-        except (json.decoder.JSONDecodeError, FileNotFoundError, ValueError, KeyError):
-#----------------------------------------------If file is corrupt or missing, fallback to default--------------------
-            self.thm_mode = Theme.DARK
-            data = {"mode": self.thm_mode.value}
+#         except (json.decoder.JSONDecodeError, FileNotFoundError, ValueError, KeyError):
+# #----------------------------------------------If file is corrupt or missing, fallback to default--------------------
+#             self.thm_mode = Theme.DARK
+#             data = {"mode": self.thm_mode.value}
             
-            with open(config_file, "w") as f:
-                json.dump(data, f, cls=EnumEncoder)
+#             with open(config_file, "w") as f:
+#                 json.dump(data, f, cls=EnumEncoder)
 
-        return
+#         return
+
+    def load_thm_pref(self):
+        """load saved theme preferrence"""
+
+        self.mode = cache.get('theme') or themes.get_chosen_theme()
+
+        # if self.mode == "dark":
+        #     self.setStyleSheet(self.dark_mode)
+        # elif self.mode == "light":
+        #     self.setStyleSheet(self.light_mode)
+        # elif self.mode == "neutral":
+        #     self.setStyleSheet(self.neutral_mode)
+
     
-    def load_thms(self):
-        """Loads the styling data for the app"""
+    def load_themes(self):
+        """loads the themes, and sets them to their data fields"""
         
-        light_mode_file = Path(__file__).parent / "themes files/neutral_mode.txt"
-        with open(light_mode_file, "r") as f:
-            light_mode = f.read()
-        
-        dark_mode_file = Path(__file__).parent / "themes files/dark_mode.txt"
-        with open(dark_mode_file, "r") as f:
-            dark_mode = f.read()
+        if cache.get("light"):
+            self.light_mode = cache.get("light")
+        self.light_mode = themes.get_theme_mode("light")
+        cache.set("light", self.light_mode)
 
-        return light_mode, dark_mode
+        if cache.get("dark"):
+            self.dark_mode = cache.get("dark")
+        self.dark_mode = themes.get_theme_mode("dark")
+        cache.set("dark", self.dark_mode)
+
+        if cache.get("neutral"):
+            self.neutral_mode = cache.get("neutral")
+        self.neutral_mode = themes.get_theme_mode("neutral")
+        cache.set("neutral", self.neutral_mode)
 
     def thm_toggle(self):
-        light_mode, dark_mode = self.load_thms()
+        # light_mode, dark_mode = self.load_thms()
 
-        if self.thm_mode == Theme.DARK:
-            self.setStyleSheet(light_mode)
-            self.thm_btn.setText("Dark mode")
-            self.thm_btn.setIcon(QIcon(str(self.dark)))
-            self.thm_mode = Theme.LIGHT
+        if self.mode == "light":
+            self.setStyleSheet(self.dark_mode)
+            self.thm_btn.setText("")
+            self.thm_btn.setIcon(QIcon(str(self.d_mode)))
             self.cirillo.toggle_theme()
             self.cpt_tracker.theme()
             self.dash_board.toggle_theme()
             self.cal_ht.toggle_theme()
-            self.noteworthy.apply_theme()
-        else:
-            self.setStyleSheet(dark_mode)
-            self.thm_btn.setText("Light mode")
-            self.thm_btn.setIcon(QIcon(str(self.light)))
-            self.thm_mode = Theme.DARK
+            self.noteworthy.theme()
+            self.mode = "dark"
+            cache.set("theme", "dark")
+        elif self.mode == "dark":
+            self.setStyleSheet(self.neutral_mode)
+            self.thm_btn.setText("")
+            self.thm_btn.setIcon(QIcon(str(self.n_mode)))
             self.cirillo.toggle_theme()
             self.cpt_tracker.theme()
             self.dash_board.toggle_theme()
             self.cal_ht.toggle_theme()
-            self.noteworthy.apply_theme()
-            
-        self.save_preference()
-        return
-    
+            self.noteworthy.theme()
+            self.mode = "neutral"
+            cache.set("theme", "neutral")
+        elif self.mode == "neutral":
+            self.setStyleSheet(self.light_mode)
+            self.thm_btn.setText("")
+            self.thm_btn.setIcon(QIcon(str(self.l_mode)))
+            self.cirillo.toggle_theme()
+            self.cpt_tracker.theme()
+            self.dash_board.toggle_theme()
+            self.cal_ht.toggle_theme()
+            self.noteworthy.theme()
+            self.mode = "light"
+            cache.set("theme", "light")
+        
     def about_autodidex(self):
         QMessageBox.information(
             self,
@@ -319,21 +359,41 @@ class Autodidex (QWidget):
             last_row = sessions_data[-1]
             # print(f"last entered session value: { last_row["sessions"]}")
             return int(last_row["sessions"])
+    
+    def set_init_thm(self):
+        """Set initial theme upon opening app"""
+
+        if self.mode == "light":
+            self.thm_btn.setIcon(QIcon(str(self.l_mode)))
+            self.setStyleSheet(self.light_mode)
+        elif self.mode == "dark":
+            self.thm_btn.setIcon(QIcon(str(self.d_mode)))
+            self.setStyleSheet(self.dark_mode)
+        elif self.mode == "neutral":
+            self.thm_btn.setIcon(QIcon(str(self.n_mode)))
+            self.setStyleSheet(self.neutral_mode)
+        print(f"The theme is {self.mode}")
 
     def init_wrapper(self):
-        self.load_saved_pref()
-        light_mode, dark_mode = self.load_thms()
-        if self.thm_mode == Theme.DARK:
-            self.setStyleSheet(dark_mode)
-            logging.debug("New user present")
-        else:
-            self.setStyleSheet(light_mode)
+        # self.load_saved_pref()
+        # light_mode, dark_mode = self.load_thms()
+        # if self.thm_mode == Theme.DARK:
+        #     self.setStyleSheet(dark_mode)
+        #     logging.debug("New user present")
+        
+        # else:
+        #     self.setStyleSheet(light_mode)
+        self.load_thm_pref()
+        self.load_themes()
+        # self.thm_toggle()
+        self.set_init_thm()
         self.cpt_tracker.init_wrapper()
         self.dash_board.init_wrapper()
         self.cal_ht.init_wrapper()
         self.noteworthy.init_wrapper()
         self.cirillo.init()
         logging.debug("Saved user logged in")
+        print(f"The theme is {self.mode}")
 
 #--------------------------------------------------------------------------------------------------------------------
 #================================================================run app=============================================

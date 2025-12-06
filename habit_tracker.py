@@ -70,7 +70,7 @@ class CPTracker(QWidget):
         self.toggle_btn.setIconSize(QSize(40, 40))
         self.toggle_btn.clicked.connect(self.toggle_sidebar)
 #-----------------------------------------------------------------app theme state------------------------------------------------
-        self.mode: Optional[str] = None
+        self.mode = cache.get("theme") or themes.get_chosen_theme()
 #-------------------------------------------------------------------Sidebar Buttons----------------------------------------------
         p_icon = Path(__file__).parent / "Icons/icons8-progress-64.png"
         progress_btn = QPushButton("")
@@ -159,7 +159,7 @@ class CPTracker(QWidget):
         self.enable_check_box_change = False #checking checkboxes again when loading the app
         self.end_date = cp_table.get_reset_date()
 #------------------------------------------------------------init wrapper------------------------------------------------------       
-        self.init_wrapper()
+        # self.init_wrapper()
 #==========================================================methods begin here==================================================
     def load_last_entered_habits(self):
         """load the previously cerebral pursuits"""
@@ -399,56 +399,59 @@ class CPTracker(QWidget):
         #     light_mode = f.read()
         if cache.get("light"):
             self.light_mode = cache.get("light")
-        self.light_mode = themes.get_theme_mode("light")
-        cache.set("light", self.light_mode)
+        else:
+            self.light_mode = themes.get_theme_mode("light")
+            cache.set("light", self.light_mode)
 #------------------------------------------------------------------load dark mode------------------------------------------------
         # with open(dark_mode_file, "r") as f:
         #     dark_mode = f.read()
         if cache.get("dark"):
             self.dark_mode = cache.get("dark")
-        self.dark_mode = themes.get_theme_mode("dark")
-        cache.set("dark", self.dark_mode)
+        else:
+            self.dark_mode = themes.get_theme_mode("dark")
+            cache.set("dark", self.dark_mode)
 
         # with open(neutral_mode_file, "r") as f:
         #     neutral_mode = f.read()
         if cache.get("neutral"):
             self.neutral_mode = cache.get("neutral")
-        self.neutral_mode = themes.get_theme_mode("neutral")
-        cache.set("neutral", self.neutral_mode)
+        else:
+            self.neutral_mode = themes.get_theme_mode("neutral")
+            cache.set("neutral", self.neutral_mode)
 
     def theme(self):
 #---------------------------------------------------------------------to dark mode-----------------------------------------------
         if self.mode == "light":
-            self.sidebar.setStyleSheet(self.dark_mode)
-            self.habit_tracker.setStyleSheet(self.dark_mode)
-            self.input.setStyleSheet(self.dark_mode)
-            self.enter_btn.setStyleSheet(self.dark_mode)
+            # self.sidebar.setStyleSheet(self.dark_mode)
+            # self.habit_tracker.setStyleSheet(self.dark_mode)
+            # self.input.setStyleSheet(self.dark_mode)
+            # self.enter_btn.setStyleSheet(self.dark_mode)
             # self.edit_btn.setStyleSheet(self.dark_mode)
-            self.thm_btn.setIcon(QIcon(str(self.l_mode)))
+            self.thm_btn.setIcon(QIcon(str(self.d_mode)))
             self.setStyleSheet(self.dark_mode)
             self.mode = "dark"
-            cache.set("theme", "dark")
+            # cache.set("theme", "dark")
         elif self.mode == "dark":
 #----------------------------------------------------------------------to light mode---------------------------------------------
-            self.sidebar.setStyleSheet(self.neutral_mode)
-            self.habit_tracker.setStyleSheet(self.neutral_mode)
-            self.input.setStyleSheet(self.neutral_mode)
-            self.enter_btn.setStyleSheet(self.neutral_mode)
+            # self.sidebar.setStyleSheet(self.neutral_mode)
+            # self.habit_tracker.setStyleSheet(self.neutral_mode)
+            # self.input.setStyleSheet(self.neutral_mode)
+            # self.enter_btn.setStyleSheet(self.neutral_mode)
             # self.edit_btn.setStyleSheet(self.neutral_mode)
             self.thm_btn.setIcon(QIcon(str(self.n_mode)))
             self.setStyleSheet(self.neutral_mode)
             self.mode = "neutral"
-            cache.set("theme", "neutral")
+            # cache.set("theme", "neutral")
         elif self.mode == "neutral":
-            self.sidebar.setStyleSheet(self.light_mode)
-            self.habit_tracker.setStyleSheet(self.light_mode)
-            self.input.setStyleSheet(self.light_mode)
-            self.enter_btn.setStyleSheet(self.light_mode)
+            # self.sidebar.setStyleSheet(self.light_mode)
+            # self.habit_tracker.setStyleSheet(self.light_mode)
+            # self.input.setStyleSheet(self.light_mode)
+            # self.enter_btn.setStyleSheet(self.light_mode)
             # self.edit_btn.setStyleSheet(self.light_mode)
-            self.thm_btn.setIcon(QIcon(str(self.d_mode)))
+            self.thm_btn.setIcon(QIcon(str(self.l_mode)))
             self.setStyleSheet(self.light_mode)
             self.mode = "light"
-            cache.set("theme", "light")
+            # cache.set("theme", "light")
 
     def load_thm_pref(self):
         """load saved theme preferrence"""
@@ -459,14 +462,17 @@ class CPTracker(QWidget):
         #     self.mode = thm
         # except (FileNotFoundError, json.decoder.JSONDecodeError):
 #------------------------------------------------------------------set theme to default------------------------------------------
-        self.mode = cache.get('theme') or themes.get_chosen_theme()
+        # self.mode = cache.get('theme') or themes.get_chosen_theme()
 
         if self.mode == "dark":
             self.setStyleSheet(self.dark_mode)
+            self.thm_btn.setIcon(QIcon(str(self.d_mode)))
         elif self.mode == "light":
             self.setStyleSheet(self.light_mode)
+            self.thm_btn.setIcon(QIcon(str(self.l_mode)))
         elif self.mode == "neutral":
             self.setStyleSheet(self.neutral_mode)
+            self.thm_btn.setIcon(QIcon(str(self.n_mode)))
 
     def show_progress(self):
         """Shows the check marks for each cp per week"""

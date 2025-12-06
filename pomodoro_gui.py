@@ -527,7 +527,7 @@ class PomodoroGUI(QWidget):
         main_layout.addWidget(self.main_content)
 #===============================================================================================================================================
 #===================================================================method for starting app=====================================================
-        self.init()
+        # self.init()
 #===============================================================================================================================================
 #=================================================================================Methods=======================================================
     def load_themes(self):
@@ -580,9 +580,9 @@ class PomodoroGUI(QWidget):
         if self.thm_mode == "light":
             self.setStyleSheet(self.dark_mode)
             self.theme_toggle_btn.setText("")
-            self.theme_toggle_btn.setIcon(QIcon(str(self.l_icon)))
+            self.theme_toggle_btn.setIcon(QIcon(str(self.d_icon)))
             self.thm_mode = "dark"
-            cache.set("theme", "dark")
+            # cache.set("theme", "dark")
         elif self.thm_mode == "dark":
             self.setStyleSheet(self.neutral_mode)
             self.theme_toggle_btn.setText("")
@@ -591,9 +591,9 @@ class PomodoroGUI(QWidget):
         elif self.thm_mode == "neutral":
             self.setStyleSheet(self.light_mode)
             self.theme_toggle_btn.setText("")
-            self.theme_toggle_btn.setIcon(QIcon(str(self.d_icon)))
-            self.thm_mode = "light"
-            cache.set("theme", "light")
+            self.theme_toggle_btn.setIcon(QIcon(str(self.l_icon)))
+            self.thm_mode = "light" 
+            # cache.set("theme", "light")
                           
 
     def start_session(self):
@@ -749,20 +749,30 @@ class PomodoroGUI(QWidget):
 
     def load_thm_pref(self):
         """load saved theme preferrence"""
-        try:
-            with open(self.thm_pref, "r") as f:
-                data = json.load(f)
-                thm = data["mode"]
-            self.thm_mode = thm
-            logging.debug(f"chosen theme {self.thm_mode}")
-        except (FileNotFoundError, json.decoder.JSONDecodeError):
-#---------------------------------------------------------------------set theme to default-------------------------------------------------
-            self.thm_mode = "dark"
-            logging.debug("default theme chosen")
-        if self.thm_mode == "light":
-            self.setStyleSheet(self.light_mode)
-        else:
+#         try:
+#             with open(self.thm_pref, "r") as f:
+#                 data = json.load(f)
+#                 thm = data["mode"]
+#             self.thm_mode = thm
+#             logging.debug(f"chosen theme {self.thm_mode}")
+#         except (FileNotFoundError, json.decoder.JSONDecodeError):
+# #---------------------------------------------------------------------set theme to default-------------------------------------------------
+#             self.thm_mode = "dark"
+#             logging.debug("default theme chosen")
+#         if self.thm_mode == "light":
+#             self.setStyleSheet(self.light_mode)
+#         else:
+#             self.setStyleSheet(self.dark_mode)
+
+        if self.thm_mode == "dark":
             self.setStyleSheet(self.dark_mode)
+            self.theme_toggle_btn.setIcon(QIcon(str(self.d_icon)))
+        elif self.thm_mode == "light":
+            self.setStyleSheet(self.light_mode)
+            self.theme_toggle_btn.setIcon(QIcon(str(self.l_con)))
+        elif self.thm_mode == "neutral":
+            self.setStyleSheet(self.neutral_mode)
+            self.theme_toggle_btn.setIcon(QIcon(str(self.n_icon)))
 
     def plot_sessions_from_csv(self):
         """Plots the study session and show progress"""
@@ -945,8 +955,8 @@ class PomodoroGUI(QWidget):
     def init(self):
         """calls methods to run the app"""
         self.load_themes()
-        self.toggle_theme()
-        # self.load_thm_pref
+        # self.toggle_theme()
+        self.load_thm_pref()
         # logging.debug(self.thm_mode)
 
     def terminate(self):

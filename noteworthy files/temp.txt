@@ -1,7 +1,22 @@
+Resilience is the measure of a system's ability to survive and persist within a variable enviroment.
+The opposite of resilince is brittleness.
+Resilince arises from a rich structure of many feedback loops that can work in different ways to restore a system even after a large pertubation.
+There are always limits to resilience.
+Resilence is not the same as being constant or static over time.
+An resilent system has a big plateau, a lot of space over which it can wander, with gentle, elastic walls that will bounce it back, if it comes near a dangerous edge.
 
-chorus:
-I just wanna keep my feet off the ground//
-reach for the sky and aim for the moon//
+Systems often have the property of self-organization - the ability to structure themselves, to create new structures, to learn, diversify, and complexify. Even complex forms of self-organisation may arise from relatively simple organising rules - or may not.
 
+In the process of creating  new structures and increasing complexity, one thing that a self-organizing system often generates is a hierarchy.
+In hierarachical systems relationships within each subsystem are denser and stronger than relationships between subsystems.
+The original purpose of a hierarchie is always to help its originating subsystems do their jobs.
+When a system's goals dominate at the expense of the total system's goals, the resulting behavior is called suboptimization.
+Hierarchical systems evolve from the bottom up. The purpose of the upper layers of the hierarchy is to serve the lower layers.
 
-don't tell me the sky is the limit//
+Everything we think we know about the world is a model.
+System structure is the source of system behavior.
+Systems behaviour reveals itself as a series of events over time.
+
+themes = Themes()vvvvvvvthemes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = vThemes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()
+Our knowledge is amazing, our ignorance is even more so.
+

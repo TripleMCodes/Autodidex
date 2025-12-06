@@ -81,7 +81,7 @@ class Calendar_Heatmap(QWidget):
 
         # self.load_themes()
         # self.load_thm_pref()
-        self.init_wrapper()
+        # self.init_wrapper()
 
     def load_themes(self):
         """Loads the themes for the apps"""
@@ -131,19 +131,19 @@ class Calendar_Heatmap(QWidget):
         """toggle between dark and light mode"""
         if self.thm_mode == "light":
             self.setStyleSheet(self.dark_mode)
-            self.theme_toggle_btn.setIcon(QIcon(str(self.l_mode)))
+            self.theme_toggle_btn.setIcon(QIcon(str(self.d_mode)))
             self.thm_mode = "dark"
-            cache.set("theme", "dark")
+            # cache.set("theme", "dark")
         elif self.thm_mode == "dark":
             self.setStyleSheet(self.neutral_mode)
             self.theme_toggle_btn.setIcon(QIcon(str(self.n_mode)))
             self.thm_mode = "neutral"
-            cache.set("theme", "neutral")
+            # cache.set("theme", "neutral")
         elif self.thm_mode == "neutral":
             self.setStyleSheet(self.light_mode)
-            self.theme_toggle_btn.setIcon(QIcon(str(self.d_mode)))
+            self.theme_toggle_btn.setIcon(QIcon(str(self.l_mode)))
             self.thm_mode = "light"
-            cache.set("theme", "light")
+            # cache.set("theme", "light")
             
 
                                                             
@@ -190,12 +190,24 @@ class Calendar_Heatmap(QWidget):
             logging.error(f"Unexpected error while loading first date: {e}")
             return None
     
-    
+    def load_thm_pref(self):
+        """load saved theme preferrence"""
+
+        if self.thm_mode == "dark":
+            self.setStyleSheet(self.dark_mode)
+            self.theme_toggle_btn.setIcon(QIcon(str(self.d_mode)))
+        elif self.thm_mode == "light":
+            self.setStyleSheet(self.light_mode)
+            self.theme_toggle_btn.setIcon(QIcon(str(self.l_mode)))
+        elif self.thm_mode == "neutral":
+            self.setStyleSheet(self.neutral_mode)
+            self.theme_toggle_btn.setIcon(QIcon(str(self.n_mode)))
+
     
     def init_wrapper(self):
         self.load_themes()
-        self.toggle_theme()
-        # self.load_thm_pref()
+        # self.toggle_theme()
+        self.load_thm_pref()
 #==================================================================================================
 #===================================================Run============================================
 if __name__ == "__main__":

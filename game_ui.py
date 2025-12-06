@@ -427,7 +427,7 @@ class MainWindow(QMainWindow):
         self.light_mode: Optional[str] = None
         self.dark_mode: Optional[str] = None
         self.neutral_mode: Optional[str] = None
-        self.mode = cache.get("theme") or themes.get_chosen_theme()
+        self.mode = cache.get("theme")
 
         self.d_mode = Path(__file__).parent / "Icons/icons8-dark-mode-48.png"
         self.l_mode = Path(__file__).parent / "Icons/icons8-light-64.png"
@@ -444,7 +444,7 @@ class MainWindow(QMainWindow):
         self.container = QWidget()
         self.subject_combo = QComboBox()
 
-        self.init_wrapper()
+        # self.init_wrapper()
 #===============================================================================Class Methods==================================================
     def setup_ui(self):
         """"Struture the UI"""
@@ -697,8 +697,9 @@ class MainWindow(QMainWindow):
         #     neutral_mode = f.read()
         if cache.get("neutral"):
             self.neutral_mode = cache.get("neutral")
-        self.neutral_mode = themes.get_theme_mode("neutral")
-        cache.set("neutral", self.neutral_mode)
+        else:
+            self.neutral_mode = themes.get_theme_mode("neutral")
+            cache.set("neutral", self.neutral_mode)
 
 
 
@@ -724,21 +725,21 @@ class MainWindow(QMainWindow):
             self.theme_toggle.setIcon(QIcon(str(self.d_mode)))
             self.setStyleSheet(self.dark_mode)
             self.mode = "dark"
-            cache.set("theme", "dark")
+            # cache.set("theme", "dark")
         elif self.mode == "dark":
             self.theme_toggle.setIcon(QIcon(str(self.n_mode)))
             self.setStyleSheet(self.neutral_mode)
             self.mode = "neutral"
-            cache.set("theme","neutral")
+            # cache.set("theme","neutral")
         elif self.mode == "neutral":
             self.theme_toggle.setIcon(QIcon(str(self.l_mode)))
             self.setStyleSheet(self.light_mode)
             self.mode = "light"
-            cache.set("theme", "light")
+            # cache.set("theme", "light")
             
     
-    def load_thm_pref(self):
-        "loads user preferred theme"
+    # def load_thm_pref(self):
+    #     "loads user preferred theme"
 #         try:
 #             with open(self.thm_pref, "r") as f:
 #                 data = json.load(f)
@@ -752,12 +753,26 @@ class MainWindow(QMainWindow):
 #         elif self.theme_state == "light":
 #             self.setStyleSheet(self.light_mode)
 #         return
-        self.toggle_theme()
+        # self.toggle_theme()
             
     
     def thm_wrapper(self):
         self.load_themes()
         self.toggle_theme()
+
+    def set_init_thm(self):
+        """Set initial theme upon opening app"""
+
+        if self.mode == "light":
+            self.theme_toggle.setIcon(QIcon(str(self.l_mode)))
+            self.setStyleSheet(self.light_mode)
+        elif self.mode == "dark":
+            self.theme_toggle.setIcon(QIcon(str(self.d_mode)))
+            self.setStyleSheet(self.dark_mode)
+        elif self.mode == "neutral":
+            self.theme_toggle.setIcon(QIcon(str(self.n_mode)))
+            self.setStyleSheet(self.neutral_mode)
+        # print(f"The theme is {self.mode}")
 
     def check_new_cp(self):
         """Checks for new subjects added"""
@@ -795,7 +810,9 @@ class MainWindow(QMainWindow):
         self.on_load()
         if self.user_present == True:
             self.setup_ui()
-        self.thm_wrapper()
+        # self.thm_wrapper()
+        self.load_themes()
+        self.set_init_thm()
         self.bank.earn_subject_xp()
         self.market.load_store_items()
         

@@ -245,6 +245,7 @@ class NoteWorthy(QWidget):
         self.dark_mode : Optional[None] = str
         self.light_mode : Optional[None] = str
         self.neutral_mode : Optional[None] = str
+        self.mode = cache.get("theme") or str(themes.get_chosen_theme())
 
         self.theme_btn = QPushButton("")
         self.theme_btn.setIcon(QIcon(str(self.d_mode)))
@@ -373,21 +374,21 @@ class NoteWorthy(QWidget):
         if self.mode == "light":
             self.sidebar.setStyleSheet(self.dark_mode)
             self.setStyleSheet(self.dark_mode)
-            self.theme_btn.setIcon(QIcon(str(self.l_mode)))
+            self.theme_btn.setIcon(QIcon(str(self.d_mode)))
             self.mode = "dark"
-            cache.set("theme", "dark")
+            # cache.set("theme", "dark")
         elif self.mode == "dark":
             self.sidebar.setStyleSheet(self.neutral_mode)
             self.setStyleSheet(self.neutral_mode)
             self.theme_btn.setIcon(QIcon(str(self.n_mode)))
             self.mode = "neutral"
-            cache.set("theme", "neutral")
+            # cache.set("theme", "neutral")
         elif self.mode == "neutral":
             self.sidebar.setStyleSheet(self.light_mode)
-            self.theme_btn.setIcon(QIcon(str(self.d_mode)))
+            self.theme_btn.setIcon(QIcon(str(self.l_mode)))
             self.setStyleSheet(self.light_mode)
             self.mode = "light"
-            cache.set("theme", "light")
+            # cache.set("theme", "light")
 
     def apply_theme(self):
         # if self.mode:
@@ -448,15 +449,16 @@ class NoteWorthy(QWidget):
 
     def _load_preferences(self):
         """Load user preferences (theme & font size) from a JSON file."""
-        if cache.get("theme"):
-            selected_theme = cache.get("theme")
-        else:
-            selected_theme = themes.get_chosen_theme()
+        # if cache.get("theme"):
+        #     selected_theme = cache.get("theme")
+        # else:
+        #     selected_theme = themes.get_chosen_theme()
+        # self.mode = cache.get("theme") or themes.get_chosen_theme()
 
         try:
             with open(CONFIG_FILE, "r") as file:
                 data = json.load(file)
-                return selected_theme, int(data.get("font_size", 14))  # Default: Light mode, Font size 14
+                return int(data.get("font_size", 14))  # Default: Light mode, Font size 14
         except (FileNotFoundError, json.JSONDecodeError):
             # return False, 14  # Default values if file is missing or corrupted
             return
@@ -513,10 +515,23 @@ class NoteWorthy(QWidget):
         self.lyrical_window.show()
         # self.destroy()
     
+    def load_thm_pref(self):
+
+        if self.mode == "dark":
+            self.setStyleSheet(self.dark_mode)
+            self.theme_btn.setIcon(QIcon(str(self.d_mode)))
+        elif self.mode == "light":
+            self.setStyleSheet(self.light_mode)
+            self.theme_btn.setIcon(QIcon(str(self.l_mode)))
+        elif self.mode == "neutral":
+            self.setStyleSheet(self.neutral_mode)
+            self.theme_btn.setIcon(QIcon(str(self.n_mode)))
+    
     def init_wrapper(self):
-        self.mode, self.font_size = self._load_preferences()
+        self.font_size = self._load_preferences()
         self.load_themes()
-        self.theme()
+        # self.theme()
+        self.load_thm_pref()
         # self.apply_theme()
         self._set_font_size(self.font_size)
         self._get_last_written()
