@@ -51,6 +51,7 @@ class UserIfo:
     def name(self, name):
         if name and name[0].isupper():
             self._name = name
+            # self.dashboard.create_new_user(self._name)
         else:
             raise ValueError("Please capitalize the first letter of your name")
         
@@ -433,7 +434,7 @@ class MainWindow(QMainWindow):
         self.container = QWidget()
         self.subject_combo = QComboBox()
 
-        # self.init_wrapper()
+        self.init_wrapper()
 #===============================================================================Class Methods==================================================
     def setup_ui(self):
         """"Struture the UI"""
@@ -553,7 +554,7 @@ class MainWindow(QMainWindow):
         if name:
             try:
                 self.user.name = name
-                self.user.save_username()
+                # self.user.save_username
                 state = self.dashboard.create_new_user(name)
                 self.user_present = state
                 logging.debug("User logged in as: %s", self.user.name)
