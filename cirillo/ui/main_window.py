@@ -20,10 +20,10 @@ from cirillo.ui.timer_display import TimerDisplay
 
 
 SOUND_FILES = {
-    "lofi":   "cirillo files/sounds/lofi.mp3",
-    "Forest": "cirillo files/sounds/forestsounds.mp3",
-    "Rain":   "cirillo files/sounds/25 Minutes Sound Rain Noise to SleepRelaxing Rain.mp3",
-    "Cafe":   "cirillo files/sounds/25 minutes of Cafe Noise.mp3",
+    "lofi":   "cirillo/sounds/lofi.mp3",
+    "Forest": "cirillo/sounds/forestsounds.mp3",
+    "Rain":   "cirillo/sounds/25 Minutes Sound Rain Noise to SleepRelaxing Rain.mp3",
+    "Cafe":   "cirillo/sounds/25 minutes of Cafe Noise.mp3",
 }
 
 
@@ -43,15 +43,15 @@ class PomodoroGUI(QWidget):
 
         # ---- services ----
         self.audio    = AudioService()
-        self.logger   = SessionLogger(self.path / "cirillo files/sessions.csv")
-        self.themes   = ThemeService(self.path)
-        self.reward   = RewardService(self.path)
+        self.logger   = SessionLogger(self.path / "sessions.csv")
+        self.themes   = ThemeService(self.path.parent.parent)
+        self.reward   = RewardService(self.path.parent.parent)
         self.timer_svc = TimerService()
 
         # Session state shared between timer callbacks and logger
         self._current_sessions = self.logger.load_current_sessions()
 
-        # ---- window chrome ----
+        # ---- window chrome ----``
         self.setWindowTitle("Cirillo")
         icon_path = self.path.parent.parent / "Icons/icons8-pomodoro-50.png"
         self.setWindowIcon(QIcon(str(icon_path)))
@@ -60,7 +60,7 @@ class PomodoroGUI(QWidget):
         root = QHBoxLayout()
         self.setLayout(root)
 
-        self.sidebar = Sidebar(self.path.parent)
+        self.sidebar = Sidebar(self.path.parent.parent)
         root.addWidget(self.sidebar)
 
         right_panel = QWidget()
@@ -68,7 +68,7 @@ class PomodoroGUI(QWidget):
         right_panel.setLayout(right_layout)
 
         self.display  = TimerDisplay()
-        self.controls = Controls(self.path.parent)
+        self.controls = Controls(self.path.parent.parent)
 
         right_layout.addWidget(self.display)
         right_layout.addWidget(self.controls)
