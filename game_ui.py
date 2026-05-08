@@ -19,7 +19,9 @@ from autodidex_cache import DictionaryCache
 from themes_db import Themes
 from dash_board_db import Dashboard
 from cp_tracker_db import Cp_tracker
-
+dash_board = Dashboard()
+cp_tracker = Cp_tracker()
+cache = DictionaryCache()
 #=====================================================================logs enable/disable======================================================
 logging.basicConfig(level=logging.DEBUG) 
 # logging.disable(logging.DEBUG)
@@ -29,13 +31,10 @@ logging.basicConfig(level=logging.DEBUG)
 class UserIfo:
 
     def __init__(self):
-        self.dashboard = Dashboard()
-        self._name = self.dashboard.get_user_name()
+        self._name = dash_board.get_user_name()
         self._overAll_level = self.load_overall_level() 
         self.subjects = []
-        self.cache = DictionaryCache() #lazy loading
-        self.cp_tracker = Cp_tracker() #lazy loading
-        self.subjects = self.cp_tracker.get_cerebral_pursuits()
+        self.subjects = cp_tracker.get_cerebral_pursuits()
 #============================================================================================================================================= 
 #==================================================================================Getters=====================================================
     @property
@@ -51,7 +50,6 @@ class UserIfo:
     def name(self, name):
         if name and name[0].isupper():
             self._name = name
-            # self.dashboard.create_new_user(self._name)
         else:
             raise ValueError("Please capitalize the first letter of your name")
         
@@ -67,67 +65,66 @@ class UserIfo:
 
     def load_overall_level(self):
         """Load overall level from db if not cached, otherwise load cached overall level."""
-        self.cache = DictionaryCache() #lazy loading
 
-        level = self.cache.get("overall_level")
+        level = cache.get("overall_level")
         print(f'the overall level is: {level}')
         if level == None:
-            level = self.dashboard.get_overall_level()
-            self.cache.set("overall_level", level)
+            level = dash_board.get_overall_level()
+            cache.set("overall_level", level)
         return level
  
     def overall_level_up(self):
         """Sum all subject XP points, each new gain of 500 XP points gives 1 overall level up."""
-        xp_amount = self.dashboard.get_total_xp()
+        xp_amount = dash_board.get_total_xp()
         new_overall_level = xp_amount // 500
 
-        if new_overall_level > self.cache.get("overall_level"):
+        if new_overall_level > cache.get("overall_level"):
             self._overAll_level = new_overall_level
-            self.dashboard.increment_overall_level(new_overall_level)
+            dash_board.increment_overall_level(new_overall_level)
             self._oveall_level_badge_reward()
-            self.cache.set("overall_level", new_overall_level)
+            cache.set("overall_level", new_overall_level)
             self._overAll_level = new_overall_level
 
     def _oveall_level_badge_reward(self):
         """Give overall badge reward"""
 #--------------------------------------------------------------------badge for over level 5----------------------------------------------------
         if self._overAll_level == 5:
-            self.dashboard.add_new_badge("🎖️ Level 5 Unlocked")
+            dash_board.add_new_badge("🎖️ Level 5 Unlocked")
 #----------------------------------------------------------badge for every tenth level achieved.-----------------------------------------------
         if self._overAll_level % 10 == 0:
-            self.dashboard.add_new_badge("💎 Every Tenth Tier counts")
+            dash_board.add_new_badge("💎 Every Tenth Tier counts")
         
-        cp_with_badges = self.dashboard.get_cp_with_badges()
-        self.cache.set("cp_badges", cp_with_badges)
+        cp_with_badges = dash_board.get_cp_with_badges()
+        cache.set("cp_badges", cp_with_badges)
         
-        badges = self.dashboard.get_all_badges()
-        self.cache.set("badges", badges)
+        badges = dash_board.get_all_badges()
+        cache.set("badges", badges)
 
     def cp_level_badge_reward(self):
         """Reward every level for a particular of a cp"""
 
         reward_badges = [ "🎯 Every Ten Counts", "🏆 1K Subject XP Master"]
 
-        cp_with_levels = self.cp_tracker.get_cp_with_level()
-        cp_with_xp = self.cp_tracker.get_cp_with_xp()
+        cp_with_levels = cp_tracker.get_cp_with_level()
+        cp_with_xp = cp_tracker.get_cp_with_xp()
 
         for k, v in cp_with_levels.items():
             if v % 10 == 0 and v != 0:
-                msg = self.dashboard.add_cp_badge(reward_badges[0], k)
+                msg = dash_board.add_cp_badge(reward_badges[0], k)
                 if msg:
                     logging.debug(msg["message"])
     
         for k, v in cp_with_xp.items():
                 if v % 10 == 0 and v != 0:
-                    msg = self.dashboard.add_cp_badge(reward_badges[1], k)
+                    msg = dash_board.add_cp_badge(reward_badges[1], k)
                     if msg:
                         logging.debug(msg["message"])
         
-        cp_with_badges = self.dashboard.get_cp_with_badges()
-        self.cache.set("cp_badges", cp_with_badges)
+        cp_with_badges = dash_board.get_cp_with_badges()
+        cache.set("cp_badges", cp_with_badges)
         
-        badges = self.dashboard.get_all_badges()
-        self.cache.set("badges", badges)
+        badges = dash_board.get_all_badges()
+        cache.set("badges", badges)
 #==============================================================================================================================================
 #**********************************************************************************************************************************************
 #=====================================================================Autodidex bank class=====================================================
@@ -138,13 +135,10 @@ class AutodidexBank:
         self._wallet_total: Optional[int] = None #intial value
         self._bank_details_file = Path(__file__).parent / "dashboard files/bank_details.json"
         self.badges: Optional[int] = None #intial value
-        self.dashboard = Dashboard()
-        self._xp_total = self.dashboard.get_total_xp()
-        self._wallet_total = self.dashboard.get_lumens_amount()
+        dash_board = Dashboard()
+        self._xp_total = dash_board.get_total_xp()
+        self._wallet_total = dash_board.get_lumens_amount()
         self.user_info = user_info #UserIfo()
-        self.cache = DictionaryCache() #lazy loading
-        self.cp_tracker = Cp_tracker() #lazy loading
-        # self.subjects = self.cp_tracker.get_cerebral_pursuits() #lazy loading
 
 #=========================================================================Getters==============================================================
     @property
@@ -169,8 +163,7 @@ class AutodidexBank:
             raise ValueError("You cannot deposit negative lumens.")
 
         self._wallet_total += lumens
-        self.dashboard.add_lumens(self._wallet_total)
-        # self._save_wallet_total()
+        dash_board.add_lumens(self._wallet_total)
 
         logging.info(f"Deposited {lumens} lumens. New balance: {self._wallet_total}")
 #=================================================================================Setters======================================================
@@ -192,43 +185,43 @@ class AutodidexBank:
     def earn_subject_xp(self):
         """User earns XP in a specific subject."""
 
-        subjects_data = self.cp_tracker.get_cp_with_check_marks()
+        subjects_data = cp_tracker.get_cp_with_check_marks()
         logging.debug(f"subject data is {subjects_data}")
         self.update_user_info(subjects_data)
     
     def update_user_info(self,subjects_data):
         """"Updates the subjesct level"""
 
-        cp_cached_data = self.cache.get("cp_streak")
+        cp_cached_data = cache.get("cp_streak")
 
         if cp_cached_data == None:
-            self.cache.set("cp_streak", subjects_data)
+            cache.set("cp_streak", subjects_data)
         else:
             for cp, streak in subjects_data.items():
                 for cache_cp, cache_streak in cp_cached_data.items():
                     if cp == cache_cp:
                         if cache_streak < streak:
                             xp = self.progress_conversion(streak)
-                            self.dashboard.add_total_xp(xp)
+                            dash_board.add_total_xp(xp)
                             self._xp_total += xp
-                            self.cp_tracker.save_cp_xp(cp, xp)
+                            cp_tracker.save_cp_xp(cp, xp)
                             self.subject_level_up(cp)
                             self.user_info.cp_level_badge_reward()
                             self.user_info.overall_level_up()
                             logging.debug(f'Update added for {cp}')
-        self.cache.set("cp_streak", subjects_data)
+        cache.set("cp_streak", subjects_data)
 
     def subject_level_up(self, subject):
         """Add level up for a subject if new level > current and rewards with 10 lumens"""
         #get subject xp
-        subject_xp = self.cp_tracker.get_cp_specific_xp(subject)
-        current_level = self.cp_tracker.get_cp_specific_level(subject)
+        subject_xp = cp_tracker.get_cp_specific_xp(subject)
+        current_level = cp_tracker.get_cp_specific_level(subject)
         #check for new level
         new_level = subject_xp //  200
 
         #set new level
         if new_level > current_level:
-            self.cp_tracker.increment_cp_level(subject, new_level)
+            cp_tracker.increment_cp_level(subject, new_level)
             #add lumens
             self.wallet = 10
         
@@ -245,7 +238,7 @@ class AutodidexBank:
 
         logging.debug(f"current bank amount: {self._wallet_total}")
         self._wallet_total = self._wallet_total - amount
-        msg = self.dashboard.decrement_lumens(self._wallet_total)
+        msg = dash_board.decrement_lumens(self._wallet_total)
         return msg
 
     
@@ -276,8 +269,7 @@ class PolyMart:
         self.bank_account = bank_account #AutodidexBank(UserIfo())
         self.store_items = {}
         self.trade_items = {}
-        self.cache = DictionaryCache() #lazy loading
-        self.dashboard = Dashboard()
+        dash_board = Dashboard()
 #----------------------------------------------------------------------------------------------------------------------------------------------
 #==============================================================================================================================================
 #======================================================================Class Methods===========================================================
@@ -322,15 +314,15 @@ class PolyMart:
             logging.debug(f'items for trand in polymart: {self.trade_items}')
             logging.debug(f"Item to be traded {item_name}")
 
-            cached_badges = self.cache.get("badges")
+            cached_badges = cache.get("badges")
             if item_name.title() not in cached_badges:
                 return  f"Transection Failed , you don't have `{item_name.title()}` yet."
             if item_name == trade_item:
                 logging.debug("Item found")
-                if self.dashboard.remove_badge(item_name.title()):
+                if dash_board.remove_badge(item_name.title()):
                     self.bank_account.wallet = trade_amount
-                    badges = self.dashboard.get_all_badges()
-                    self.cache.set("badges", badges)
+                    badges = dash_board.get_all_badges()
+                    cache.set("badges", badges)
                     return f"Transaction Complete Traded {item_name} for {trade_amount}"
                 return f"An error occurred. Please try again."
 #-------------------------------------------------------------------------If loop finishes and no item was found-------------------------------
@@ -387,9 +379,6 @@ class MainWindow(QMainWindow):
         self.watcher = QFileSystemWatcher()
         self.watcher.addPath(str(self.trigger_file))
         self.watcher.fileChanged.connect(self.check_new_cp)
-        self.cache = DictionaryCache() #lazy loading
-        self.cp_tracker = Cp_tracker() #lazy loading
-        self.dashboard = Dashboard()
         # self.subjects = self.cp_tracker.get_cerebral_pursuits() 
 
         self.trigger_file_2 = Path(__file__).parent / "update_db_ui.txt"
@@ -401,7 +390,7 @@ class MainWindow(QMainWindow):
         self.bank = AutodidexBank(self.user) 
         self.market = PolyMart(self.bank) 
         self.name_null_value: Optional[str] = None
-        self.user_present = self.dashboard.get_user_state()
+        self.user_present = dash_board.get_user_state()
 
         self.window_load = QWidget()
        
@@ -422,7 +411,7 @@ class MainWindow(QMainWindow):
         self.light_mode: Optional[str] = None
         self.dark_mode: Optional[str] = None
         self.neutral_mode: Optional[str] = None
-        self.mode = self.cache.get("theme")
+        self.mode = cache.get("theme")
 
         self.d_mode = Path(__file__).parent / "Icons/icons8-dark-mode-48.png"
         self.l_mode = Path(__file__).parent / "Icons/icons8-light-64.png"
@@ -434,7 +423,7 @@ class MainWindow(QMainWindow):
         self.container = QWidget()
         self.subject_combo = QComboBox()
 
-        self.init_wrapper()
+        # self.init_wrapper()
 #===============================================================================Class Methods==================================================
     def setup_ui(self):
         """"Struture the UI"""
@@ -542,8 +531,8 @@ class MainWindow(QMainWindow):
                 self.window_load.setLayout(main_layout)
                 self.setCentralWidget(self.window_load)
                 if self.user.name:
-                    self.dashboard.update_is_active_state(1)
-                    self.dashboard.starter_badge()
+                    dash_board.update_is_active_state(1)
+                    dash_board.starter_badge()
             else:
                 self.setup_ui()
         logging.debug(f"The user state is {self.user_present}")
@@ -555,7 +544,7 @@ class MainWindow(QMainWindow):
             try:
                 self.user.name = name
                 # self.user.save_username
-                state = self.dashboard.create_new_user(name)
+                state = dash_board.create_new_user(name)
                 self.user_present = state
                 logging.debug("User logged in as: %s", self.user.name)
 #------------------------------------------------------------------replacing the window with the actual UI-------------------------------------
@@ -605,7 +594,7 @@ class MainWindow(QMainWindow):
 
     def display_badges(self, index):
         """Display badges for a particular subject"""
-        badges_list = self.cache.get("cp_badges")
+        badges_list = cache.get("cp_badges")
         logging.debug(f"The badges: {badges_list}")
         self.badge_list.clear()
         selected_item = self.subject_combo.itemText(index)
@@ -643,23 +632,23 @@ class MainWindow(QMainWindow):
     def load_themes(self):
         """loads the themes, and sets them to their data fields"""
         self.themes = Themes()
-        if self.cache.get("light"):
-            self.light_mode = self.cache.get("light")
+        if cache.get("light"):
+            self.light_mode = cache.get("light")
         else:
             self.light_mode = self.themes.get_theme_mode("light")
-        self.cache.set("light", self.light_mode)
+        cache.set("light", self.light_mode)
 
-        if self.cache.get("dark"):
-            self.dark_mode = self.cache.get("dark")
+        if cache.get("dark"):
+            self.dark_mode = cache.get("dark")
         else:
             self.dark_mode = self.themes.get_theme_mode("dark")
-        self.cache.set("dark", self.dark_mode)
+        cache.set("dark", self.dark_mode)
 
-        if self.cache.get("neutral"):
-            self.neutral_mode = self.cache.get("neutral")
+        if cache.get("neutral"):
+            self.neutral_mode = cache.get("neutral")
         else:
             self.neutral_mode = self.themes.get_theme_mode("neutral")
-            self.cache.set("neutral", self.neutral_mode)
+            cache.set("neutral", self.neutral_mode)
  
     def toggle_theme(self):
         """Switches between themes"""
@@ -695,7 +684,7 @@ class MainWindow(QMainWindow):
     def check_new_cp(self):
         """Checks for new subjects added"""
         #remove duplicates from list
-        subjects = set(self.cp_tracker.get_cerebral_pursuits())
+        subjects = set(cp_tracker.get_cerebral_pursuits())
         #convert set into list
         subjects = list(subjects)
         self.subject_combo.clear()
@@ -717,10 +706,10 @@ class MainWindow(QMainWindow):
             )
     
     def init_wrapper(self):
-        badges = self.dashboard.get_all_badges()
-        cp_with_badges = self.dashboard.get_cp_with_badges()
-        self.cache.set("cp_badges", cp_with_badges)
-        self.cache.set("badges", badges)
+        badges = dash_board.get_all_badges()
+        cp_with_badges = dash_board.get_cp_with_badges()
+        cache.set("cp_badges", cp_with_badges)
+        cache.set("badges", badges)
         self.on_load()
         if self.user_present == True:
             self.setup_ui()

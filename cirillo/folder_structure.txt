@@ -1,0 +1,13 @@
+cirillo/
+├── main.py                        # entry point only
+├── ui/
+│   ├── main_window.py             # thin orchestrator — wires services ↔ widgets
+│   ├── sidebar.py                 # left panel (music, volume, theme, exit)
+│   ├── timer_display.py           # big clock + work/break spinboxes
+│   └── controls.py                # start/pause/stop + reward selector
+└── services/
+    ├── timer_service.py           # Pomodoro state machine (QTimer, mode cycling)
+    ├── audio_service.py           # pygame ambient sound + volume
+    ├── reward_service.py          # media file playback + app-killing on break end
+    ├── session_logger.py          # CSV read/write, date formatting
+    └── theme_service.py           # theme cycling + stylesheet resolution

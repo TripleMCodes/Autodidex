@@ -26,7 +26,9 @@ from PySide6.QtGui import QTextCharFormat, QTextCursor, QColor
 from lyric_n_summarization_ui import LyricsSummarizationUi
 from themes_db import Themes
 from autodidex_cache import DictionaryCache
-
+import logging
+logging.basicConfig(level=logging.DEBUG) 
+# logging.disable(logging.DEBUG)
 cache = DictionaryCache()
 themes = Themes()
 
@@ -34,9 +36,9 @@ themes = Themes()
 try:
     nltk.download('wordnet')
 except Exception as e:
-    print(e)
+    logging.debug(e)
 
-CONFIG_FILE = Path(__file__).parent / "noteworthy files/config.json"  # File to store user preferences
+CONFIG_FILE = Path(__file__).parent / "noteworthy files/config.json"
 
 class SpellCheckTextEdit(QTextEdit):
     def __init__(self, spell_checker, *args, **kwargs):
@@ -76,6 +78,8 @@ class SpellCheckTextEdit(QTextEdit):
                 cursor.setPosition(end, QTextCursor.KeepAnchor)
                 cursor.mergeCharFormat(fmt)
         self.blockSignals(False)  # Re-enable signals
+
+        
 class NoteWorthy(QWidget):
     def __init__(self):
         super().__init__()
@@ -273,7 +277,7 @@ class NoteWorthy(QWidget):
         self.setLayout(self.main_layout)
 #===============================================================================================================================================
 #==============================================Load user preference (default: light mode)=======================================================
-        # self.init_wrapper()
+        self.init_wrapper()
 #===============================================================================================================================================
 #===================================================================Funtions====================================================================
     def load_themes(self):

@@ -26,7 +26,6 @@ from files_formats import file_types
 from autodidex_cache import DictionaryCache
 from themes_db import Themes
 
-
 themes = Themes()
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')

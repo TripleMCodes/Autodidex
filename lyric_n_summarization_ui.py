@@ -386,7 +386,328 @@ class LyricsSummarizationUi(QWidget):
 
         if cache.get("dark"):
             self.dark_mode = cache.get("dark")
-        self.dark_mode = themes.get_theme_mode("dark")
+        # self.dark_mode = themes.get_theme_mode("dark")
+        self.dark_mode = """
+              /* === GLOBAL BASE === */
+* {
+    font-family: "Fira Sans", "Segoe UI", sans-serif;
+    color: #F0E6FF; /* White-ish purple for high contrast text */
+}
+
+/* === MAIN BACKGROUND === */
+QWidget {
+    background-color: #0b001a; /* Deepest Void Purple */
+}
+
+QHBoxLayout#mainframe {
+    background-color: qlineargradient(
+        x1:0, y1:0, x2:1, y2:1,
+        stop:0 #050011,
+        stop:1 #1a0b2e
+    );
+    font-size: 120px;
+}
+
+/* === LABELS === */
+QLabel {
+    color: #e0ccff;
+    font-size: 14px;
+}
+QLabel#onloadlabel {
+    font-size: 80px;
+    font-family: "Arial";
+    font-weight: bold;
+    border: 2px solid #bd00ff; /* Neon border */
+    border-radius: 5px;
+    color: #ffffff;
+    background-color: rgba(189, 0, 255, 0.1); /* Subtle glow background */
+    qproperty-alignment: AlignCenter;
+}
+QLabel#dblabel {
+    font-size: 50px;
+    color: #d500f9; /* Neon Magenta text */
+    font-family: "Arial";
+    font-weight: bold;
+}
+
+/* === BUTTONS === */
+QPushButton {
+    background-color: #1a0b2e;
+    border: 2px solid #7c4dff; /* Electric Violet Border */
+    border-radius: 10px;
+    padding: 8px 16px;
+    color: #ffffff;
+    font-weight: bold;
+    font-size: 14px;
+}
+QPushButton:hover {
+    background-color: #7c4dff; /* Button lights up on hover */
+    border: 2px solid #d500f9; /* Border turns Magenta */
+    color: #ffffff;
+}
+QPushButton:pressed {
+    background-color: #d500f9;
+    border: 2px solid #ffffff;
+    color: #000000;
+}
+
+/* === LINE EDITS === */
+QLineEdit {
+    background-color: #0f0518;
+    border: 1px solid #7c4dff;
+    border-radius: 6px;
+    padding: 6px;
+    color: #00e5ff; /* Cyan text for "terminal" feel */
+    selection-background-color: #d500f9;
+    selection-color: #ffffff;
+}
+QLineEdit:focus {
+    border: 2px solid #00e5ff; /* Cyan glow on focus */
+    background-color: #1c0e2e;
+}
+
+/* === COMBOBOX === */
+QComboBox {
+    background-color: #0f0518;
+    border: 1px solid #7c4dff;
+    border-radius: 6px;
+    padding: 6px;
+    color: #ffffff;
+}
+QComboBox:hover {
+    border: 1px solid #d500f9;
+}
+QComboBox:on {
+    border: 1px solid #00e5ff;
+}
+QComboBox QAbstractItemView {
+    background-color: #0f0518;
+    border: 1px solid #d500f9;
+    selection-background-color: #7c4dff;
+    color: #ffffff;
+    outline: none;
+}
+
+/* === CHECKBOXES === */
+QCheckBox {
+    color: #e0ccff;
+    padding: 4px;
+    spacing: 8px;
+}
+QCheckBox::indicator {
+    border: 1px solid #7c4dff;
+    width: 16px;
+    height: 16px;
+    background-color: #0f0518;
+    border-radius: 4px;
+}
+QCheckBox::indicator:unchecked:hover {
+    border: 1px solid #d500f9;
+}
+QCheckBox::indicator:checked {
+    background-color: #d500f9; /* Neon fill */
+    border: 1px solid #ffffff;
+    image: none; /* You might need a custom checkmark icon or rely on color */
+}
+
+/* === SCROLLBARS === */
+QScrollBar:vertical {
+    background: #0b001a;
+    width: 12px;
+    margin: 0;
+}
+QScrollBar::handle:vertical {
+    background: #7c4dff;
+    min-height: 20px;
+    border-radius: 6px;
+    margin: 2px;
+}
+QScrollBar::handle:vertical:hover {
+    background: #d500f9;
+}
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+    background: none;
+    height: 0px;
+}
+
+QScrollBar:horizontal {
+    background: #0b001a;
+    height: 12px;
+    margin: 0px;
+}
+QScrollBar::handle:horizontal {
+    background: #7c4dff;
+    border-radius: 6px;
+    min-width: 20px;
+    margin: 2px;
+}
+QScrollBar::handle:horizontal:hover {
+    background: #d500f9;
+}
+QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+    width: 0px;
+}
+
+/* === TOOLTIP === */
+QToolTip {
+    background-color: #1a0b2e;
+    color: #00e5ff;
+    border: 1px solid #d500f9;
+    padding: 4px;
+    border-radius: 4px;
+}
+
+/* === MENUBAR === */
+QMenuBar {
+    background-color: #050011;
+    color: #ffffff;
+    border-bottom: 1px solid #7c4dff;
+}
+QMenuBar::item:selected {
+    background-color: #7c4dff;
+    color: #ffffff;
+}
+QMenu {
+    background-color: #0f0518;
+    color: #ffffff;
+    border: 1px solid #d500f9;
+}
+QMenu::item:selected {
+    background-color: #d500f9; /* Magenta select */
+    color: #ffffff;
+}
+
+/* === GROUPBOX === */
+QGroupBox {
+    border: 1px solid #7c4dff;
+    border-radius: 8px;
+    margin-top: 12px;
+    padding: 10px;
+}
+QGroupBox:title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    padding: 0 5px;
+    color: #00e5ff; /* Cyan title */
+    font-weight: bold;
+    background-color: #0b001a; /* Matches background to cover border line */
+}
+
+/* === TABS === */
+QTabWidget::pane {
+    border: 1px solid #7c4dff;
+    background: #0b001a;
+    border-radius: 3px;
+}
+
+QTabBar::tab {
+    background: #1a0b2e;
+    color: #b388ff;
+    border: 1px solid #4a148c;
+    padding: 8px 12px;
+    margin-right: 2px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    min-width: 80px;
+    transition: all 0.2s ease;
+}
+
+QTabBar::tab:selected {
+    background: #7c4dff;
+    color: #ffffff;
+    border: 1px solid #d500f9;
+    border-bottom: none;
+    font-weight: bold;
+}
+
+QTabBar::tab:hover:!selected {
+    background-color: #4a148c;
+    color: #00e5ff;
+    border: 1px solid #00e5ff;
+}
+
+/* === TABLE WIDGET === */
+QTableWidget {
+    background-color: #050011;
+    border: 1px solid #7c4dff;
+    gridline-color: #4a148c;
+    font-family: "Segoe UI", "Arial", sans-serif;
+    font-size: 14px;
+    color: #e0ccff;
+    selection-background-color: #d500f9; /* High vis magenta */
+    selection-color: #ffffff;
+    alternate-background-color: #120024;
+}
+
+QTableWidget::item:hover {
+    background-color: rgba(0, 229, 255, 0.2); /* Cyan hover wash */
+    border: 1px solid #00e5ff;
+}
+
+QHeaderView::section {
+    background-color: #1a0b2e;
+    color: #00e5ff; /* Cyan Header Text */
+    font-weight: bold;
+    border: none;
+    padding: 6px;
+    border-bottom: 2px solid #7c4dff;
+    border-right: 1px solid #4a148c;
+}
+
+QTableCornerButton::section {
+    background-color: #1a0b2e;
+    border: 1px solid #7c4dff;
+}
+
+/* === CALENDAR WIDGET === */
+QCalendarWidget QWidget {
+    background-color: #050011;
+    alternate-background-color: #120024;
+    color: #ffffff;
+}
+
+/* Navigation Bar */
+QCalendarWidget QToolButton {
+    color: #00e5ff;
+    background-color: transparent;
+    font-weight: bold;
+    icon-size: 20px;
+    border: none;
+}
+QCalendarWidget QToolButton:hover {
+    background-color: #4a148c;
+    border-radius: 4px;
+}
+
+/* Header (Days of week) */
+QCalendarWidget QHeaderView::section {
+    background-color: #1a0b2e;
+    color: #d500f9; /* Magenta day names */
+    font-weight: bold;
+}
+
+/* Day Numbers */
+QCalendarWidget QAbstractItemView {
+    background-color: #050011;
+    selection-background-color: #7c4dff;
+    selection-color: #ffffff;
+    color: #e0ccff;
+}
+
+/* Hover over specific day */
+QCalendarWidget QAbstractItemView:item:hover {
+    background-color: #4a148c;
+    color: #00e5ff;
+}
+
+/* Selected Day */
+QCalendarWidget QAbstractItemView:item:selected {
+    background-color: #d500f9;
+    border: 1px solid #ffffff;
+    color: #ffffff;
+}
+
+        """
         cache.set("dark", self.dark_mode)
 
         if cache.get("neutral"):

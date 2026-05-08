@@ -1,22 +1,72 @@
-Resilience is the measure of a system's ability to survive and persist within a variable enviroment.
-The opposite of resilince is brittleness.
-Resilince arises from a rich structure of many feedback loops that can work in different ways to restore a system even after a large pertubation.
-There are always limits to resilience.
-Resilence is not the same as being constant or static over time.
-An resilent system has a big plateau, a lot of space over which it can wander, with gentle, elastic walls that will bounce it back, if it comes near a dangerous edge.
+Active elements of interface design
 
-Systems often have the property of self-organization - the ability to structure themselves, to create new structures, to learn, diversify, and complexify. Even complex forms of self-organisation may arise from relatively simple organising rules - or may not.
+What the interface looks like should be connected to how it works
 
-In the process of creating  new structures and increasing complexity, one thing that a self-organizing system often generates is a hierarchy.
-In hierarachical systems relationships within each subsystem are denser and stronger than relationships between subsystems.
-The original purpose of a hierarchie is always to help its originating subsystems do their jobs.
-When a system's goals dominate at the expense of the total system's goals, the resulting behavior is called suboptimization.
-Hierarchical systems evolve from the bottom up. The purpose of the upper layers of the hierarchy is to serve the lower layers.
+Form <-> function and form <-> experience
 
-Everything we think we know about the world is a model.
-System structure is the source of system behavior.
-Systems behaviour reveals itself as a series of events over time.
+Basic UI functionality
+How does an interface work?
+Logic
+Hierarchy
+system
+A logical system with a hierarchy that easy for user to understand.
 
-themes = Themes()vvvvvvvthemes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = vThemes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()themes = Themes()
-Our knowledge is amazing, our ignorance is even more so.
+How do we know how to interact with an interface?
+Intuition
+Discovery
+Learning
+
+
+Visible and invisible UI
+Advantages of having a slim interface
+* Simple/direct
+* Unambiguous
+* Rapidly adoptable
+* Familiar/predictable
+* Logical
+
+Cons:
+Boring
+ 
+Avantages of having styled interface:
+* Entertaining
+* Engaging
+* Brandable
+* Novel/Individual
+
+Cons
+* Obstruct content
+* Time-consuming
+* Fustrating experience
+* Dates rapidly
+* unnecessary
+
+The best interface is the one that has the best relationship with it's content
+
+Composition and structure
+What kind of experience?
+How you shape the elements of the interface can how shape what kind of experience you want the user to have.
+
+How a UI looks can be dictated by functionality and content, if it is mostly about functionality.
+
+Sometime the UI can be on content specific design
+
+
+What makes a button a button?
+Anything can be a button.
+A self contained object that you know it interactive.
+It only works as a button if the users knows it's a button.
+fast forms: immediately recognizable.
+Familiar forms = fast forms
+Size: 
+The size of your button has relationship with the thing it is interacting with.
+ The size of the button is going to have a relationship with the size of the screen.
+The shape of it can be informed by a lot of decisions.
+The button can work as an individual signifier or as part of a system.
+
+
+
+
+How else do we navigate throught digital content.
+02:43
 

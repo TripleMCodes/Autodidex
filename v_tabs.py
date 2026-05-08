@@ -174,7 +174,7 @@ class Autodidex (QWidget):
             }
         """)
 
-        self.exit_button.clicked.connect(self.exit_app)
+        self.exit_button.clicked.connect(self.exit_app) 
         self.layout.addWidget(self.tab_widget)
         self.layout.addWidget(self.exit_button, alignment=Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignLeft)
         self.setLayout(self.layout)    
@@ -199,7 +199,7 @@ class Autodidex (QWidget):
             "📬 Contact: khona6047@gmail.com\n"
             "🚀 Keep learning. Keep creating. Stay worthy."
         )
-#====================================================================================================================
+#===================================================================================================================================
 #===========================================================load special values and methods=========================================
         self.session_file = Path(__file__).parent / "cirillo files/sessions.csv"
         self.watcher = QFileSystemWatcher()
@@ -288,7 +288,7 @@ class Autodidex (QWidget):
         new_sessions_val = self.load_last_saved_session() 
         if new_sessions_val > self.intial_sessions_val:
             self.bank.wallet = 3
-            self.dash_board.update_ui()
+            self.dash_board.update()
         
     def load_last_saved_session(self):
         """Loads the number of last saved sessions in a day"""
@@ -315,7 +315,7 @@ class Autodidex (QWidget):
         self.load_thm_pref()
         self.load_themes()
         self.set_init_thm()
-        self.cpt_tracker.init_wrapper()
+        self.cpt_tracker.init_wrapper() 
         self.dash_board.init_wrapper()
         self.cal_ht.init_wrapper()
         self.noteworthy.init_wrapper()
