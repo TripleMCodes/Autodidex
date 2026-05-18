@@ -17,7 +17,6 @@ from habit_tracker.services.trigger_service import TriggerService
 from habit_tracker.ui.sidebar     import Sidebar
 from habit_tracker.ui.habit_table import HabitTable
 
-
 class CPTracker(QWidget):
     """
     Thin orchestration shell.
@@ -30,7 +29,7 @@ class CPTracker(QWidget):
 
     def __init__(self):
         super().__init__()
-        self._path = Path(__file__).parent.parent
+        self._path = Path(__file__).parent.parent.parent
 
         # ---- services ----
         self._habits   = HabitService()
