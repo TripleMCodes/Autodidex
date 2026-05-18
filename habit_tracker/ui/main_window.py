@@ -10,12 +10,12 @@ from PySide6.QtWidgets import (
     QMessageBox, QVBoxLayout, QWidget,
 )
 
-from services.habit_service  import HabitService
-from services.theme_service  import ThemeService
-from services.trigger_service import TriggerService
+from habit_tracker.services.habit_service  import HabitService
+from habit_tracker.services.theme_service  import ThemeService
+from habit_tracker.services.trigger_service import TriggerService
 
-from ui.sidebar     import Sidebar
-from ui.habit_table import HabitTable
+from habit_tracker.ui.sidebar     import Sidebar
+from habit_tracker.ui.habit_table import HabitTable
 
 
 class CPTracker(QWidget):

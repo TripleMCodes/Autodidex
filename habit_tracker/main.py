@@ -1,6 +1,6 @@
 import sys
 from PySide6.QtWidgets import QApplication
-from ui.main_window import CPTracker
+from habit_tracker.ui.main_window import CPTracker
 
 
 def main():
