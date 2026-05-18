@@ -97,12 +97,12 @@ class PomodoroGUI(QWidget):
         self.controls.stop_btn.clicked.connect(self._quit_session)
 
         # timer service callbacks
-        self.timer_svc.on_tick          = self.display.set_time
+        self.timer_svc.on_tick = self.display.set_time
         self.timer_svc.on_work_complete = self._on_work_complete
         self.timer_svc.on_break_complete = self._on_break_complete
 
     # ------------------------------------------------------------------
-    # Session flow
+    # Session flow``
     # ------------------------------------------------------------------
     def _start_session(self):
         self.timer_svc.start_work(self.display.work_duration)
