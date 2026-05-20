@@ -423,7 +423,7 @@ class MainWindow(QMainWindow):
         self.container = QWidget()
         self.subject_combo = QComboBox()
 
-        # self.init_wrapper()
+        self.init_wrapper()
 #===============================================================================Class Methods==================================================
     def setup_ui(self):
         """"Struture the UI"""
