@@ -8,7 +8,7 @@ from PySide6.QtWidgets import (
     QSplitter, QTextEdit, QVBoxLayout, QWidget,
 )
 
-from ui.spell_check_edit import SpellCheckTextEdit
+from note_worthy.ui.spell_check_edit import SpellCheckTextEdit
 
 
 class EditorArea(QWidget):
