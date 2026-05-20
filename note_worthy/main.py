@@ -1,6 +1,6 @@
 import sys
 from PySide6.QtWidgets import QApplication
-from ui.main_window import NoteWorthy
+from note_worthy.ui.main_window import NoteWorthy
 
 
 def main():

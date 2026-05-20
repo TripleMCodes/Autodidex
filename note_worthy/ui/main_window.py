@@ -9,17 +9,17 @@ from PySide6.QtWidgets import (
 
 from lyric_n_summarization_ui import LyricsSummarizationUi
 
-from services.definition_service  import DefinitionService
-from services.note_service        import NoteService
-from services.preferences_service import PreferencesService
-from services.theme_service       import ThemeService
+from note_worthy.services.definition_service  import DefinitionService
+from note_worthy.services.note_service        import NoteService
+from note_worthy.services.preferences_service import PreferencesService
+from note_worthy.services.theme_service       import ThemeService
 
-from ui.editor_area import EditorArea
-from ui.sidebar     import Sidebar
+from note_worthy.ui.editor_area import EditorArea
+from note_worthy.ui.sidebar     import Sidebar
 
 
-CONFIG_FILE = Path(__file__).parent / "noteworthy files/config.json"
-TEMP_FILE   = Path(__file__).parent / "noteworthy files/temp.txt"
+CONFIG_FILE = Path(__file__).parent.parent.parent / "noteworthy files/config.json"
+TEMP_FILE   = Path(__file__).parent.parent.parent / "noteworthy files/temp.txt"
 
 AUTOSAVE_DELAY_MS = 1000
 
@@ -36,7 +36,7 @@ class NoteWorthy(QWidget):
 
     def __init__(self):
         super().__init__()
-        self._path = Path(__file__).parent
+        self._path = Path(__file__).parent.parent.parent
 
         # ---- services ----
         self._notes       = NoteService(TEMP_FILE)
