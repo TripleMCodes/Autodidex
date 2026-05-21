@@ -18,6 +18,7 @@ from PySide6.QtWidgets import (QApplication, QHBoxLayout, QLabel, QMessageBox,
 import csv
 
 from dashboard.ui import main_window
+from habit_tracker.ui.main_window import CPTracker
 from cirillo.ui import main_window as cirillo
 from dashboard.ui.spinning_label import SpinningLabel
 
@@ -114,7 +115,7 @@ class Autodidex (QWidget):
 #====================================================================================================================
 #=============================================================tabs===================================================
         self.dash_board = main_window.MainWindow()
-        # self.cpt_tracker = CPTracker()
+        self.cpt_tracker = CPTracker()
         # self.noteworthy = NoteWorthy()
         self.cirillo = cirillo.PomodoroGUI()
         
@@ -135,8 +136,11 @@ class Autodidex (QWidget):
         self.tab_widget.addTab(self.dash_board, QIcon(str(dashboard)), "")
         self.tab_widget.setTabToolTip(0, "Dashboard")
 
-        # self.tab_widget.addTab(self.cpt_tracker, QIcon(str(habit_tracker)), "")
-        # self.tab_widget.setTabToolTip(1, "Habit Tracker")
+        self.tab_widget.addTab(self.cpt_tracker, QIcon(str(habit_tracker)), "")
+        self.tab_widget.setTabToolTip(1, "Habit Tracker")
+
+        self.tab_widget.addTab(self.cirillo,  QIcon(str(pomodoro)), "")
+        self.tab_widget.setTabToolTip(2, "Cirillo")
 
         # self.tab_widget.addTab(self.cirillo, QIcon(str(pomodoro)), "")
         # self.tab_widget.setTabToolTip(2, "Pomodoro")
@@ -150,8 +154,7 @@ class Autodidex (QWidget):
         self.tab_widget.addTab(self.settings_tab, QIcon(str(settings)), "")
         self.tab_widget.setTabToolTip(3, "Settings")
 
-        self.tab_widget.addTab(self.cirillo,  QIcon(str(pomodoro)), "")
-        self.tab_widget.setTabToolTip(1, "Cirillo")
+        
 
         # self.tab_widget.addTab(self.space_invader, QIcon(str(space_invader_icon)), "")
         # self.tab_widget.setTabToolTip(6, "Space Invader")
@@ -252,7 +255,7 @@ class Autodidex (QWidget):
             self.thm_btn.setText("")
             self.thm_btn.setIcon(QIcon(str(self.d_mode)))
             self.cirillo._toggle_theme()
-            # self.cpt_tracker.theme()
+            self.cpt_tracker._toggle_theme()
             self.dash_board._toggle_theme()
             # self.cal_ht.toggle_theme()
             # self.noteworthy.theme()
@@ -263,7 +266,7 @@ class Autodidex (QWidget):
             self.thm_btn.setText("")
             self.thm_btn.setIcon(QIcon(str(self.n_mode)))
             self.cirillo._toggle_theme()
-            # self.cpt_tracker.theme()
+            self.cpt_tracker._toggle_theme()
             self.dash_board._toggle_theme()
             # self.cal_ht.toggle_theme()
             # self.noteworthy.theme()
@@ -274,7 +277,7 @@ class Autodidex (QWidget):
             self.thm_btn.setText("")
             self.thm_btn.setIcon(QIcon(str(self.l_mode)))
             self.cirillo._toggle_theme()
-            # self.cpt_tracker.theme()
+            self.cpt_tracker._toggle_theme()
             self.dash_board._toggle_theme()
             # self.cal_ht.toggle_theme()
             # self.noteworthy.theme()
