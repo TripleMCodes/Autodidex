@@ -10,12 +10,17 @@ from PySide6.QtCore import QSize, Qt
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (QApplication, QHBoxLayout, QLabel, QMessageBox,
                                QPushButton, QTabWidget, QVBoxLayout, QWidget)
-from calander import Calendar_Heatmap
-from game_ui import MainWindow, SpinningLabel, AutodidexBank, UserIfo
-from habit_tracker import CPTracker
-from note_worthy import NoteWorthy
-from pomodoro_gui import PomodoroGUI
+# from calander import Calendar_Heatmap
+# from game_ui import MainWindow, SpinningLabel, AutodidexBank, UserIfo
+# from habit_tracker import CPTracker
+# from note_worthy import NoteWorthy
+# from pomodoro_gui import PomodoroGUI
 import csv
+
+from dashboard.ui import main_window
+from cirillo.ui import main_window as cirillo
+from dashboard.ui.spinning_label import SpinningLabel
+
 # from space_invader_widget import SpaceInvaderWidget
 from autodidex_cache import DictionaryCache
 from themes_db import Themes
@@ -108,12 +113,12 @@ class Autodidex (QWidget):
         self.settings_tab.setLayout(settings_layout)
 #====================================================================================================================
 #=============================================================tabs===================================================
-        self.noteworthy = NoteWorthy()
-        self.cirillo = PomodoroGUI()
+        self.dash_board = main_window.MainWindow()
+        # self.cpt_tracker = CPTracker()
+        # self.noteworthy = NoteWorthy()
+        self.cirillo = cirillo.PomodoroGUI()
         
-        self.cpt_tracker = CPTracker()
-        self.cal_ht = Calendar_Heatmap()
-        self.dash_board = MainWindow()
+        # self.cal_ht = Calendar_Heatmap()
         # self.space_invader = SpaceInvaderWidget()
         
 #====================================================================================================================
@@ -130,20 +135,23 @@ class Autodidex (QWidget):
         self.tab_widget.addTab(self.dash_board, QIcon(str(dashboard)), "")
         self.tab_widget.setTabToolTip(0, "Dashboard")
 
-        self.tab_widget.addTab(self.cpt_tracker, QIcon(str(habit_tracker)), "")
-        self.tab_widget.setTabToolTip(1, "Habit Tracker")
+        # self.tab_widget.addTab(self.cpt_tracker, QIcon(str(habit_tracker)), "")
+        # self.tab_widget.setTabToolTip(1, "Habit Tracker")
 
-        self.tab_widget.addTab(self.cirillo, QIcon(str(pomodoro)), "")
-        self.tab_widget.setTabToolTip(2, "Pomodoro")
+        # self.tab_widget.addTab(self.cirillo, QIcon(str(pomodoro)), "")
+        # self.tab_widget.setTabToolTip(2, "Pomodoro")
 
-        self.tab_widget.addTab(self.noteworthy, QIcon(str(noteworthy)), "")
-        self.tab_widget.setTabToolTip(3, "NoteWorthy")
+        # self.tab_widget.addTab(self.noteworthy, QIcon(str(noteworthy)), "")
+        # self.tab_widget.setTabToolTip(3, "NoteWorthy")
 
-        self.tab_widget.addTab(self.cal_ht, QIcon(str(calendar)), "")
-        self.tab_widget.setTabToolTip(4, "Calendar")
+        # self.tab_widget.addTab(self.cal_ht, QIcon(str(calendar)), "")
+        # self.tab_widget.setTabToolTip(4, "Calendar")
 
         self.tab_widget.addTab(self.settings_tab, QIcon(str(settings)), "")
-        self.tab_widget.setTabToolTip(5, "Settings")
+        self.tab_widget.setTabToolTip(3, "Settings")
+
+        self.tab_widget.addTab(self.cirillo,  QIcon(str(pomodoro)), "")
+        self.tab_widget.setTabToolTip(1, "Cirillo")
 
         # self.tab_widget.addTab(self.space_invader, QIcon(str(space_invader_icon)), "")
         # self.tab_widget.setTabToolTip(6, "Space Invader")
@@ -201,7 +209,7 @@ class Autodidex (QWidget):
         )
 #===================================================================================================================================
 #===========================================================load special values and methods=========================================
-        self.session_file = Path(__file__).parent / "cirillo files/sessions.csv"
+        self.session_file = Path(__file__).parent / "cirillo/sessions.csv"
         self.watcher = QFileSystemWatcher()
         if self.session_file.exists():
             self.watcher.addPath(str(self.session_file))
@@ -211,7 +219,7 @@ class Autodidex (QWidget):
 #====================================================================================================================
 #=========================================================class methods==============================================
     def exit_app(self):
-        self.cirillo.log_sessions()
+        # self.cirillo.log_sessions()
         self.close()
         self.destroy()
 
@@ -243,33 +251,33 @@ class Autodidex (QWidget):
             self.setStyleSheet(self.dark_mode)
             self.thm_btn.setText("")
             self.thm_btn.setIcon(QIcon(str(self.d_mode)))
-            self.cirillo.toggle_theme()
-            self.cpt_tracker.theme()
-            self.dash_board.toggle_theme()
-            self.cal_ht.toggle_theme()
-            self.noteworthy.theme()
+            self.cirillo._toggle_theme()
+            # self.cpt_tracker.theme()
+            self.dash_board._toggle_theme()
+            # self.cal_ht.toggle_theme()
+            # self.noteworthy.theme()
             self.mode = "dark"
             self.cache.set("theme", "dark")
         elif self.mode == "dark":
             self.setStyleSheet(self.neutral_mode)
             self.thm_btn.setText("")
             self.thm_btn.setIcon(QIcon(str(self.n_mode)))
-            self.cirillo.toggle_theme()
-            self.cpt_tracker.theme()
-            self.dash_board.toggle_theme()
-            self.cal_ht.toggle_theme()
-            self.noteworthy.theme()
+            self.cirillo._toggle_theme()
+            # self.cpt_tracker.theme()
+            self.dash_board._toggle_theme()
+            # self.cal_ht.toggle_theme()
+            # self.noteworthy.theme()
             self.mode = "neutral"
             self.cache.set("theme", "neutral")
         elif self.mode == "neutral":
             self.setStyleSheet(self.light_mode)
             self.thm_btn.setText("")
             self.thm_btn.setIcon(QIcon(str(self.l_mode)))
-            self.cirillo.toggle_theme()
-            self.cpt_tracker.theme()
-            self.dash_board.toggle_theme()
-            self.cal_ht.toggle_theme()
-            self.noteworthy.theme()
+            self.cirillo._toggle_theme()
+            # self.cpt_tracker.theme()
+            self.dash_board._toggle_theme()
+            # self.cal_ht.toggle_theme()
+            # self.noteworthy.theme()
             self.mode = "light"
             self.cache.set("theme", "light")
         
@@ -284,18 +292,19 @@ class Autodidex (QWidget):
         #This function is called twice when file session is called
         #Since I want to add 6 lumens with each new session
         #I will add lumens with each call of this function
-        self.bank =  AutodidexBank(UserIfo)
+        # self.bank =  AutodidexBank(UserIfo)
         new_sessions_val = self.load_last_saved_session() 
         if new_sessions_val > self.intial_sessions_val:
             self.bank.wallet = 3
-            self.dash_board.update()
+            # self.dash_board.update()
         
     def load_last_saved_session(self):
         """Loads the number of last saved sessions in a day"""
-        with open(self.session_file, "r") as f:
-            sessions_data = list(csv.DictReader(f))
-            last_row = sessions_data[-1]
-            return int(last_row["sessions"])
+        # with open(self.session_file, "r") as f:
+        #     sessions_data = list(csv.DictReader(f))
+        #     last_row = sessions_data[-1]
+        #     return int(last_row["sessions"])
+        pass
     
     def set_init_thm(self):
         """Set initial theme upon opening app"""
@@ -315,11 +324,12 @@ class Autodidex (QWidget):
         self.load_thm_pref()
         self.load_themes()
         self.set_init_thm()
-        self.cpt_tracker.init_wrapper() 
-        self.dash_board.init_wrapper()
-        self.cal_ht.init_wrapper()
-        self.noteworthy.init_wrapper()
-        self.cirillo.init()
+        # self.cpt_tracker.init_wrapper() 
+        # self.dash_board.init_wrapper()
+        # self.cal_ht.init_wrapper()
+        # self.noteworthy.init_wrapper()
+        # self.cirillo.init()
+        # self.pomodoro.
 #--------------------------------------------------------------------------------------------------------------------
 #================================================================run app=============================================
 if __name__ == "__main__":
