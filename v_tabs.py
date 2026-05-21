@@ -21,6 +21,7 @@ from dashboard.ui import main_window
 from habit_tracker.ui.main_window import CPTracker
 from cirillo.ui import main_window as cirillo
 from note_worthy.ui.main_window import NoteWorthy
+from calender.ui.main_window import CalendarHeatmap
 from dashboard.ui.spinning_label import SpinningLabel
 
 # from space_invader_widget import SpaceInvaderWidget
@@ -119,8 +120,8 @@ class Autodidex (QWidget):
         self.cpt_tracker = CPTracker()
         self.cirillo = cirillo.PomodoroGUI()
         self.noteworthy = NoteWorthy()
+        self.cal_ht = CalendarHeatmap()
         
-        # self.cal_ht = Calendar_Heatmap()
         # self.space_invader = SpaceInvaderWidget()
         
 #====================================================================================================================
@@ -146,15 +147,11 @@ class Autodidex (QWidget):
         self.tab_widget.addTab(self.noteworthy, QIcon(str(noteworthy)), "")
         self.tab_widget.setTabToolTip(3, "NoteWorthy")
 
-        # self.tab_widget.addTab(self.cirillo, QIcon(str(pomodoro)), "")
-        # self.tab_widget.setTabToolTip(2, "Pomodoro")
-
-
-        # self.tab_widget.addTab(self.cal_ht, QIcon(str(calendar)), "")
-        # self.tab_widget.setTabToolTip(4, "Calendar")
+        self.tab_widget.addTab(self.cal_ht, QIcon(str(calendar)), "")
+        self.tab_widget.setTabToolTip(4, "Calendar")
 
         self.tab_widget.addTab(self.settings_tab, QIcon(str(settings)), "")
-        self.tab_widget.setTabToolTip(4, "Settings")
+        self.tab_widget.setTabToolTip(5, "Settings")
 
         
 
@@ -259,7 +256,7 @@ class Autodidex (QWidget):
             self.cirillo._toggle_theme()
             self.cpt_tracker._toggle_theme()
             self.dash_board._toggle_theme()
-            # self.cal_ht.toggle_theme()
+            self.cal_ht._toggle_theme()
             self.noteworthy._toggle_theme()
             self.mode = "dark"
             self.cache.set("theme", "dark")
@@ -271,7 +268,7 @@ class Autodidex (QWidget):
             self.cpt_tracker._toggle_theme()
             self.dash_board._toggle_theme()
             self.noteworthy._toggle_theme()
-            # self.cal_ht.toggle_theme()
+            self.cal_ht._toggle_theme()
             self.mode = "neutral"
             self.cache.set("theme", "neutral")
         elif self.mode == "neutral":
@@ -282,7 +279,7 @@ class Autodidex (QWidget):
             self.cpt_tracker._toggle_theme()
             self.dash_board._toggle_theme()
             self.noteworthy._toggle_theme()
-            # self.cal_ht.toggle_theme()
+            self.cal_ht._toggle_theme()
             self.mode = "light"
             self.cache.set("theme", "light")
         

@@ -61,6 +61,7 @@ class CalendarHeatmap(QWidget):
             QLabel {
                 font-size: 16px; font-weight: 600; color: #f5f5f5;
                 background-color: #19191b; padding: 10px 15px;
+        
                 border: 1px solid #C5D2E0; border-radius: 8px; margin: 10px 0;
             }
         """)

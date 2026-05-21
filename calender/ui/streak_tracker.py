@@ -21,7 +21,7 @@ class StreakTracker(QWidget):
     def __init__(self, sessions_file: Path, parent=None):
         super().__init__(parent)
         self.setWindowTitle("GitHub-Style Streak Tracker")
-        self.resize(800, 250)
+        # self.resize(800, 250)
 
         self._reader    = SessionReader(sessions_file)
         self._layout    = QVBoxLayout(self)
