@@ -3,7 +3,7 @@ import logging
 try:
     import nltk
     from nltk.corpus import wordnet
-    nltk.download("wordnet", quiet=True)
+    # nltk.download("wordnet", quiet=True)
     _WORDNET_AVAILABLE = True
 except Exception as e:
     logging.warning(f"DefinitionService: WordNet unavailable: {e}")
