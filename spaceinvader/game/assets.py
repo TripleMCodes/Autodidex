@@ -64,7 +64,6 @@ class AssetLoader:
         cls.nuke_img    = _img("nuke.png",    NUKE_SIZE)
         cls.heart_img   = _img("heart.png",             (32, 32))
 
-        # Icon — use the local copy instead of the hardcoded D:/ absolute path
         icon_file = img_path / "ufo.png"
         cls.icon_img = pygame.image.load(icon_file)
 
