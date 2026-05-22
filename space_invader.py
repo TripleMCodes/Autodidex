@@ -387,5 +387,5 @@ def main():
     show_start_screen()
     Game().run()
 
-# if __name__ == "__main__":
-#     main()
+if __name__ == "__main__":
+    main()
