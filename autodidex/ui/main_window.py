@@ -7,12 +7,12 @@ from PySide6.QtWidgets import (
     QApplication, QMessageBox, QTabWidget, QVBoxLayout, QWidget,
 )
 
-from services.tab_registry   import build_tab_definitions
-from services.theme_service  import ThemeService
-from services.session_watcher import SessionWatcher
+from autodidex.services.tab_registry   import build_tab_definitions
+from autodidex.services.theme_service  import ThemeService
+from autodidex.services.session_watcher import SessionWatcher
 
-from ui.settings_tab import SettingsTab, ABOUT_TEXT
-from ui.exit_button  import make_exit_button
+from autodidex.ui.settings_tab import SettingsTab, ABOUT_TEXT
+from autodidex.ui.exit_button  import make_exit_button
 
 
 class Autodidex(QWidget):
@@ -28,7 +28,7 @@ class Autodidex(QWidget):
 
     def __init__(self):
         super().__init__()
-        self._path = Path(__file__).parent.parent  # repo root
+        self._path = Path(__file__).parent.parent.parent
 
         # ---- services ----
         self._themes = ThemeService(self._path)
@@ -69,7 +69,7 @@ class Autodidex(QWidget):
         root.addWidget(exit_btn, alignment=Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignLeft)
 
         # ---- session watcher (awards lumens on new Cirillo sessions) ----
-        session_file = self._path / "cirillo" / "cirillo files" / "sessions.csv"
+        session_file = self._path / "cirillo" / "sessions.csv"
         self._watcher = SessionWatcher(session_file, self._on_new_session)
 
         # ---- apply saved theme ----
@@ -108,7 +108,7 @@ class Autodidex(QWidget):
             dashboard._bank.wallet = 3
         # Uncomment to also refresh the dashboard UI after awarding:
         # if dashboard and hasattr(dashboard, "_on_db_ui_update"):
-        #     dashboard._on_db_ui_update()
+            # dashboard._on_db_ui_update()
 
     # ------------------------------------------------------------------
     # About

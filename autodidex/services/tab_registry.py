@@ -41,13 +41,13 @@ def build_tab_definitions(base_path: Path, settings_widget: QWidget) -> list[Tab
         return NoteWorthy()
 
     def _calendar():
-        from streak_calendar.ui.main_window import CalendarHeatmap
+        from calender.ui.main_window import CalendarHeatmap
         return CalendarHeatmap()
 
     # Uncomment to re-enable Space Invader:
-    # def _space_invader():
-    #     from space_invader.widget import SpaceInvaderWidget
-    #     return SpaceInvaderWidget()
+    def _space_invader():
+        from spaceinvader.widget import SpaceInvaderWidget
+        return SpaceInvaderWidget()
 
     return [
         TabDefinition("Dashboard",    "icons8-dashboard-64.png",   _dashboard),
@@ -56,5 +56,5 @@ def build_tab_definitions(base_path: Path, settings_widget: QWidget) -> list[Tab
         TabDefinition("NoteWorthy",   "icons8-notebook-64.png",    _noteworthy),
         TabDefinition("Calendar",     "icons8-calendar-64.png",    _calendar),
         TabDefinition("Settings",     "icons8-settings-64.png",    lambda: settings_widget),
-        # TabDefinition("Space Invader","spaceinvader/img/ufo.png", _space_invader),
+        TabDefinition("Space Invader","ufo.png", _space_invader),
     ]

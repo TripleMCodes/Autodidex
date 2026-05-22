@@ -88,23 +88,23 @@ class DashboardPanel(QWidget):
 
         # heatmap (owns its own file watcher)
         # h_layout = QVBoxLayout()
-        self._reader  = SessionReader(SESSIONS_FILE)
+        # self._reader  = SessionReader(SESSIONS_FILE)
 
-        # streak range label
-        first_date = self._reader.load_first_date()
-        self._label = QLabel(f"Shows streak from {first_date} to {date.today()}")
-        self._label.setAlignment(Qt.AlignHCenter)
-        self._label.setStyleSheet("""
-            QLabel {
-                font-size: 16px; font-weight: 600; color: #f5f5f5;
-                background-color: #19191b; padding: 10px 15px;
-                border: 1px solid #C5D2E0; border-radius: 8px; margin: 10px 0;
-            }
-        """)
-        h_layout.addWidget(self._label)
-        self._streak = StreakTracker(SESSIONS_FILE)
-        h_layout.addWidget(self._streak)
-        # layout.addLayout(h_layout)
+        # # streak range label
+        # first_date = self._reader.load_first_date()
+        # self._label = QLabel(f"Shows streak from {first_date} to {date.today()}")
+        # self._label.setAlignment(Qt.AlignHCenter)
+        # self._label.setStyleSheet("""
+        #     QLabel {
+        #         font-size: 16px; font-weight: 600; color: #f5f5f5;
+        #         background-color: #19191b; padding: 10px 15px;
+        #         border: 1px solid #C5D2E0; border-radius: 8px; margin: 10px 0;
+        #     }
+        # """)
+        # h_layout.addWidget(self._label)
+        # self._streak = StreakTracker(SESSIONS_FILE)
+        # h_layout.addWidget(self._streak)
+        # # layout.addLayout(h_layout)
 
 
         # ---- PolyMart section ----

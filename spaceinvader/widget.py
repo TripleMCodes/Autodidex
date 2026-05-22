@@ -17,7 +17,7 @@ import threading
 from PySide6.QtCore    import Qt
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton
 
-import main as space_invader_main
+import spaceinvader.main as space_invader_main
 
 
 class SpaceInvaderWidget(QWidget):
