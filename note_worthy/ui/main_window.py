@@ -4,7 +4,7 @@ from pathlib import Path
 from PySide6.QtCore import QSize, QTimer
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
-    QApplication, QFileDialog, QHBoxLayout, QMessageBox, QPushButton, QVBoxLayout, QWidget,
+    QApplication, QFileDialog, QHBoxLayout, QMessageBox, QPushButton, QStackedWidget, QVBoxLayout, QWidget,
 )
 
 from lyric_n_summarization_ui import LyricsSummarizationUi
@@ -16,12 +16,18 @@ from note_worthy.services.theme_service       import ThemeService
 
 from note_worthy.ui.editor_area import EditorArea
 from note_worthy.ui.sidebar     import Sidebar
+from note_worthy.ui.notes_sidebar import NotesSide
 
 
 CONFIG_FILE = Path(__file__).parent.parent.parent / "noteworthy files/config.json"
 TEMP_FILE   = Path(__file__).parent.parent.parent / "noteworthy files/temp.txt"
 
 AUTOSAVE_DELAY_MS = 1000
+
+
+class SidebarMode:
+    TOOLS = 0
+    NOTES = 1
 
 
 class NoteWorthy(QWidget):
@@ -60,25 +66,38 @@ class NoteWorthy(QWidget):
         # ---- build layout ----
 
 
+        self.current_sidebar_face = SidebarMode.TOOLS
+
+
         root = QHBoxLayout(self)
+        self.sidebar_stack = QStackedWidget()
+        
         mid_btn_layout = QVBoxLayout()
+
+
         mid_btn_layout.setSpacing(0)
         mid_btn_layout.setContentsMargins(0, 0, 0, 0)
         flip_btn = QPushButton("Flip")
         flip_btn.setFixedHeight(30)
+        flip_btn.clicked.connect(self.flip_siderbar_face)
     
 
         self._sidebar = Sidebar(self._path)
+        self._notes_side = NotesSide()
         self._toggle_btn = self._make_toggle_btn()
         self._editor = EditorArea(self._path)
 
         # add buttons to mid layout
         mid_btn_layout.addWidget(self._toggle_btn)
-      
         mid_btn_layout.addWidget(flip_btn)
 
-        root.addWidget(self._sidebar)
+
+        self.sidebar_stack.addWidget(self._sidebar)
+        self.sidebar_stack.addWidget(self._notes_side)
+
+        # root.addWidget(self._sidebar)
         # root.addWidget(self._toggle_btn)
+        root.addWidget(self.sidebar_stack)
         root.addLayout(mid_btn_layout)
         root.addLayout(self._editor.layout() or self._editor_vbox())
         # EditorArea is a QWidget — add it directly
@@ -218,6 +237,30 @@ class NoteWorthy(QWidget):
     def _launch_lyrical_lab(self):
         self._lyrical_window = LyricsSummarizationUi()
         self._lyrical_window.show()
+
+
+
+    #-------------------------------------------------------------
+    # sidebar behavior
+    #-------------------------------------------------------------
+    def set_sidebar_mode(self, mode: int) -> None:
+        self.current_sidebar_face = mode
+        self.sidebar_stack.setCurrentIndex(mode)
+        if mode == SidebarMode.NOTES:
+            print("Displaying Notes")
+        else:
+            print("Displaying tools")
+
+    def flip_siderbar_face(self):
+        next_mode = SidebarMode.NOTES if self.current_sidebar_face == SidebarMode.TOOLS else SidebarMode.TOOLS
+        self.set_sidebar_mode(next_mode)
+        if next_mode == SidebarMode.NOTES:
+            # self.flip_sidebar_btn.setIcon(self.tools_icon)
+            print("The next widget is NOTES")
+        else:
+            # self.flip_sidebar_btn.setIcon(self.song_list_icon)
+            print("The next widget TOOLS")
+
 
     # ------------------------------------------------------------------
     # Exit

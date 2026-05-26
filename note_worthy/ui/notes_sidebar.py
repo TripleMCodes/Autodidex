@@ -7,7 +7,7 @@ from PySide6.QtWidgets import QComboBox, QPushButton, QVBoxLayout, QWidget
 class NotesSide(QWidget):
 
 
-    def __init__(self, base_path, parent=None):
+    def __init__(self, base_path=None, parent=None):
         super().__init__(parent)
         self.base_path = base_path
         self._build_ui()
