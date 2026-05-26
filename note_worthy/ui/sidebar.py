@@ -19,13 +19,16 @@ class Sidebar(QWidget):
     def __init__(self, base_path: Path, parent=None):
         super().__init__(parent)
         self.base_path = base_path
-        self.setFixedWidth(200)
+        # self.setFixedWidth(200)
         self._build_ui()
 
     # ------------------------------------------------------------------
     def _build_ui(self):
         layout = QVBoxLayout(self)
         layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+
+        self.flip_button = QPushButton("Flip")
+        layout.addWidget(self.flip_button)
 
         def _btn(icon_name: str, tooltip: str) -> QPushButton:
             btn = QPushButton("")

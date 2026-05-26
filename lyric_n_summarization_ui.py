@@ -16,9 +16,9 @@ from PySide6.QtGui import QFont
 from PySide6.QtGui import QTextCursor
 import logging
 from PySide6.QtGui import QIcon
-from wordfinder import WordFinder
+from old_files.wordfinder import WordFinder
 from lyrics_n_summarization import OpenRouterClient
-from recorder import VoiceRecorder
+from old_files.recorder import VoiceRecorder
 import json
 import pyphen
 import pronouncing

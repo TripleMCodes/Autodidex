@@ -4,7 +4,7 @@ from pathlib import Path
 from PySide6.QtCore import QSize, QTimer
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
-    QApplication, QFileDialog, QHBoxLayout, QMessageBox, QPushButton, QWidget,
+    QApplication, QFileDialog, QHBoxLayout, QMessageBox, QPushButton, QVBoxLayout, QWidget,
 )
 
 from lyric_n_summarization_ui import LyricsSummarizationUi
@@ -58,14 +58,28 @@ class NoteWorthy(QWidget):
         self.setWindowIcon(QIcon(str(win_icon)))
 
         # ---- build layout ----
-        root = QHBoxLayout(self)
 
-        self._sidebar      = Sidebar(self._path)
-        self._toggle_btn   = self._make_toggle_btn()
-        self._editor       = EditorArea(self._path)
+
+        root = QHBoxLayout(self)
+        mid_btn_layout = QVBoxLayout()
+        mid_btn_layout.setSpacing(0)
+        mid_btn_layout.setContentsMargins(0, 0, 0, 0)
+        flip_btn = QPushButton("Flip")
+        flip_btn.setFixedHeight(30)
+    
+
+        self._sidebar = Sidebar(self._path)
+        self._toggle_btn = self._make_toggle_btn()
+        self._editor = EditorArea(self._path)
+
+        # add buttons to mid layout
+        mid_btn_layout.addWidget(self._toggle_btn)
+      
+        mid_btn_layout.addWidget(flip_btn)
 
         root.addWidget(self._sidebar)
-        root.addWidget(self._toggle_btn)
+        # root.addWidget(self._toggle_btn)
+        root.addLayout(mid_btn_layout)
         root.addLayout(self._editor.layout() or self._editor_vbox())
         # EditorArea is a QWidget — add it directly
         root.addWidget(self._editor)
