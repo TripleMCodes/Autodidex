@@ -2,7 +2,7 @@ import sys
 from pathlib import Path
 
 from PySide6.QtCore import QSize, QTimer
-from PySide6.QtGui import QIcon
+from PySide6.QtGui import QIcon, Qt
 from PySide6.QtWidgets import (
     QApplication, QFileDialog, QHBoxLayout, QMessageBox, QPushButton, QStackedWidget, QVBoxLayout, QWidget,
 )
@@ -77,6 +77,7 @@ class NoteWorthy(QWidget):
 
         mid_btn_layout.setSpacing(0)
         mid_btn_layout.setContentsMargins(0, 0, 0, 0)
+        mid_btn_layout.setAlignment(Qt.AlignTop)
         flip_btn = QPushButton("Flip")
         flip_btn.setFixedHeight(30)
         flip_btn.clicked.connect(self.flip_siderbar_face)
@@ -95,13 +96,16 @@ class NoteWorthy(QWidget):
         self.sidebar_stack.addWidget(self._sidebar)
         self.sidebar_stack.addWidget(self._notes_side)
 
-        # root.addWidget(self._sidebar)
-        # root.addWidget(self._toggle_btn)
+      
         root.addWidget(self.sidebar_stack)
         root.addLayout(mid_btn_layout)
         root.addLayout(self._editor.layout() or self._editor_vbox())
         # EditorArea is a QWidget — add it directly
         root.addWidget(self._editor)
+
+        root.setStretch(0, 1)   # sidebar_stack → 10%
+        root.setStretch(1, 0)   # mid_btn_layout → minimum width    
+        root.setStretch(2, 9)   # editor → 90%
         self.setLayout(root)
 
         # ---- wire signals ----
@@ -227,7 +231,9 @@ class NoteWorthy(QWidget):
         if self._sidebar.isVisible():
             self._sidebar.hide()
             self._toggle_btn.setIcon(QIcon(str(menu_icon)))
+            self.sidebar_stack.hide()
         else:
+            self.sidebar_stack.show()
             self._sidebar.show()
             self._toggle_btn.setIcon(QIcon(str(x_icon)))
 
