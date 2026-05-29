@@ -27,8 +27,8 @@ class Sidebar(QWidget):
         layout = QVBoxLayout(self)
         layout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
-        self.flip_button = QPushButton("Flip")
-        layout.addWidget(self.flip_button)
+        # self.flip_button = QPushButton("Flip")
+        # layout.addWidget(self.flip_button)
 
         def _btn(icon_name: str, tooltip: str) -> QPushButton:
             btn = QPushButton("")
