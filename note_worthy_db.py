@@ -86,6 +86,61 @@ class Notes():
             logging.error(f"Error occurred while updating note content: {e}")
             return {"message": "Failed to update note content"}
 
+    def get_all_notebooks(self):
+        """retrieves all notebooks from the database"""
+        query = f"""SELECT name FROM {self.notebooks_table_name};"""
+        try:
+            self.conn_cursor.execute(query)
+            notebooks = self.conn_cursor.fetchall()
+            notebook_list = [notebook[0] for notebook in notebooks]
+            return {"notebooks": notebook_list, "notebook_number": len(notebook_list)}
+        except sqlite3.Error as e:
+            logging.error(f"Error occurred while retrieving notebooks: {e}")
+            return {"message": "Failed to retrieve notebooks"}
+    
+    def get_all_notes(self):
+        """retrieves all notes from the database"""
+        query = f"""SELECT title, content FROM {self.notes_table_name};"""
+        try:
+            self.conn_cursor.execute(query)
+            notes = self.conn_cursor.fetchall()
+            return {"notes": [{"title": note[0], "content": note[1]} for note in notes], "note_number": len(notes)}
+        except sqlite3.Error as e:
+            logging.error(f"Error occurred while retrieving notes: {e}")
+            return {"message": "Failed to retrieve notes"}
+    
+    def get_notebooks_with_notes(self):
+        """retrieves notebooks with their notes from the database"""
+        query = f"""SELECT
+                notes.id,
+                notes.title,
+                notes.content,
+                notes.created_at,
+                notes.updated_at,
+                notebooks.name AS notebook_name
+            FROM notes
+            JOIN notebooks ON notes.notebook_id = notebooks.id"""
+        try:
+            self.conn_cursor.execute(query)
+            results = self.conn_cursor.fetchall()
+            notebooks_with_notes = {}
+            for note_id, title, content, created_at, updated_at, notebook_name in results:
+                if notebook_name not in notebooks_with_notes:
+                    notebooks_with_notes[notebook_name] = []
+                notebooks_with_notes[notebook_name].append({
+                    "id": note_id,
+                    "title": title,
+                    "content": content,
+                    "created_at": created_at,
+                    "updated_at": updated_at
+                })
+            return {"notebooks_with_notes": notebooks_with_notes}
+        except sqlite3.Error as e:
+            logging.error(f"Error occurred while retrieving notebooks with notes: {e}")
+            return {"message": "Failed to retrieve notebooks with notes"}
+
+
+
     def _check_note_book(self, name:str) -> bool | sqlite3.Error:
         """check for the note book name in database, returns True if notebook found"""
         query = f"""SELECT EXISTS(
