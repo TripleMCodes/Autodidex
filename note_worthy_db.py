@@ -23,7 +23,7 @@ class Notes():
         """Add a new note book"""
         
         name_check = self._check_note_book(name)
-        if name_check:
+        if not name_check:
             query = f"INSERT INTO {self.notebooks_table_name} (name) VALUES (?);"
             try:
                 self.conn_cursor.execute(query, (name,))
@@ -33,6 +33,23 @@ class Notes():
                 logging.debug("Couldn't create notebook, error: {e}")
         else:
             return {'message': "Notebook name already exists"}
+    
+    def Insert_a_new_note(self, notebook_name:str, title:str, content:str):
+        """Add a new note to a specific notebook"""
+        notebook_id_query = f"""SELECT id FROM {self.notebooks_table_name} WHERE name = ?;"""
+        try:
+            self.conn_cursor.execute(notebook_id_query, (notebook_name,))
+            notebook_id = self.conn_cursor.fetchone()
+            if notebook_id is None:
+                return {"message": "Notebook not found"}
+            notebook_id = notebook_id[0]
+            insert_note_query = f"""INSERT INTO {self.notes_table_name} (notebook_id, title, content) VALUES (?, ?, ?);"""
+            self.conn_cursor.execute(insert_note_query, (notebook_id, title, content))
+            self._commit_data()
+            return {"message": "Note added successfully"}
+        except sqlite3.Error as e:
+            logging.error(f"Error occurred while adding note: {e}")
+            return {"message": "Failed to add note"}
 
     def _check_note_book(self, name:str):
         """check for the note book name in database"""
@@ -52,4 +69,8 @@ class Notes():
         
 if __name__ == "__main__":
     notes = Notes()
-    print(notes._check_note_book("Test Notebook"))
+    print(notes._check_note_book("Test Notebook 2"))
+    # created_notebook = notes.Insert_a_new_notebook("Test Notebook 2")
+    # print(created_notebook)
+    added_note = notes.Insert_a_new_note("Test Notebook 2", "Test Note", "This is a test note.")
+    print(added_note)
