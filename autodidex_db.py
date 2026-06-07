@@ -3,6 +3,7 @@ import pickle
 from pathlib import Path
 import datetime
 import logging
+import sqlite3
 import pyinputplus as pyip
 from typing import Any
 from typing import Optional

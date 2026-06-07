@@ -85,6 +85,24 @@ class Notes():
         except sqlite3.Error as e:
             logging.error(f"Error occurred while updating note content: {e}")
             return {"message": "Failed to update note content"}
+    
+    def update_note_title(self, notebook_name:str, old_title:str, new_title:str):
+        """updates the title of a note"""
+        notebook_id_query = f"""SELECT id FROM {self.notebooks_table_name} WHERE name = ?;"""
+        try:
+            self.conn_cursor.execute(notebook_id_query, (notebook_name,))
+            notebook_id = self.conn_cursor.fetchone()
+            if notebook_id is None:
+                return {"message": "Notebook not found"}
+            notebook_id = notebook_id[0]
+            update_note_query = f"""UPDATE {self.notes_table_name} SET title = ? WHERE notebook_id = ? AND title = ?;"""
+            self.conn_cursor.execute(update_note_query, (new_title, notebook_id, old_title))
+            self._commit_data()
+            return {"message": "Note title updated successfully"}
+        except sqlite3.Error as e:
+            logging.error(f"Error occurred while updating note title: {e}")
+            return {"message": "Failed to update note title"}
+    
 
     def get_all_notebooks(self):
         """retrieves all notebooks from the database"""
