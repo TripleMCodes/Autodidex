@@ -157,8 +157,107 @@ class Notes():
             logging.error(f"Error occurred while retrieving notebooks with notes: {e}")
             return {"message": "Failed to retrieve notebooks with notes"}
 
+    def get_single_notebook_with_notes(self, notebook_name:str):
+        """retrieves a single notebook with its notes from the database"""
+        query = f"""SELECT
+                notes.id,
+                notes.title,
+                notes.content,
+                notes.created_at,
+                notes.updated_at,
+                notebooks.name AS notebook_name
+            FROM notes
+            JOIN notebooks ON notes.notebook_id = notebooks.id
+            WHERE notebooks.name = ?;"""
+        try:
+            self.conn_cursor.execute(query, (notebook_name,))
+            results = self.conn_cursor.fetchall()
+            if not results:
+                return {"message": "Notebook not found"}
+            notebook_with_notes = {
+                "notebook_name": notebook_name,
+                "notes": []
+            }
+            for note_id, title, content, created_at, updated_at, _ in results:
+                notebook_with_notes["notes"].append({
+                    "id": note_id,
+                    "title": title,
+                    "content": content,
+                    "created_at": created_at,
+                    "updated_at": updated_at
+                })
+            return {"notebook_with_notes": notebook_with_notes}
+        except sqlite3.Error as e:
+            logging.error(f"Error occurred while retrieving single notebook with notes: {e}")
+            return {"message": "Failed to retrieve single notebook with notes"}
+        
+    def get_single_note(self, notebook_name:str, note_title:str):
+        """retrieves a single note from a specific notebook"""
+        query = f"""SELECT
+                notes.id,
+                notes.title,
+                notes.content,
+                notes.created_at,
+                notes.updated_at,
+                notebooks.name AS notebook_name
+            FROM notes
+            JOIN notebooks ON notes.notebook_id = notebooks.id
+            WHERE notebooks.name = ? AND notes.title = ?;"""
+        try:
+            self.conn_cursor.execute(query, (notebook_name, note_title))
+            result = self.conn_cursor.fetchone()
+            if not result:
+                return {"message": "Note not found"}
+            note_id, title, content, created_at, updated_at, _ = result
+            return {
+                "note": {
+                    "id": note_id,
+                    "title": title,
+                    "content": content,
+                    "created_at": created_at,
+                    "updated_at": updated_at
+                }
+            }
+        except sqlite3.Error as e:
+            logging.error(f"Error occurred while retrieving single note: {e}")
+            return {"message": "Failed to retrieve single note"}
 
-
+    def delete_notebook(self, notebook_name:str):
+        """deletes a notebook and its associated notes from the database"""
+        notebook_id_query = f"""SELECT id FROM {self.notebooks_table_name} WHERE name = ?;"""
+        try:
+            self.conn_cursor.execute(notebook_id_query, (notebook_name,))
+            notebook_id = self.conn_cursor.fetchone()
+            if notebook_id is None:
+                return {"message": "Notebook not found"}
+            notebook_id = notebook_id[0]
+            delete_notes_query = f"""DELETE FROM {self.notes_table_name} WHERE notebook_id = ?;"""
+            self.conn_cursor.execute(delete_notes_query, (notebook_id,))
+            delete_notebook_query = f"""DELETE FROM {self.notebooks_table_name} WHERE id = ?;"""
+            self.conn_cursor.execute(delete_notebook_query, (notebook_id,))
+            self._commit_data()
+            return {"message": "Notebook and its notes deleted successfully"}
+        except sqlite3.Error as e:
+            logging.error(f"Error occurred while deleting notebook: {e}")
+            return {"message": "Failed to delete notebook"}
+    
+    def delete_note(self, notebook_name:str, note_title:str):
+        """deletes a specific note from a specific notebook"""
+        notebook_id_query = f"""SELECT id FROM {self.notebooks_table_name} WHERE name = ?;"""
+        try:
+            self.conn_cursor.execute(notebook_id_query, (notebook_name,))
+            notebook_id = self.conn_cursor.fetchone()
+            if notebook_id is None:
+                return {"message": "Notebook not found"}
+            notebook_id = notebook_id[0]
+            delete_note_query = f"""DELETE FROM {self.notes_table_name} WHERE notebook_id = ? AND title = ?;"""
+            self.conn_cursor.execute(delete_note_query, (notebook_id, note_title))
+            self._commit_data()
+            return {"message": "Note deleted successfully"}
+        except sqlite3.Error as e:
+            logging.error(f"Error occurred while deleting note: {e}")
+            return {"message": "Failed to delete note"}
+        
     def _check_note_book(self, name:str) -> bool | sqlite3.Error:
         """check for the note book name in database, returns True if notebook found"""
         query = f"""SELECT EXISTS(
