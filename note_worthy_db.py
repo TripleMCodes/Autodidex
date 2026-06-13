@@ -275,7 +275,55 @@ class Notes():
         except sqlite3.Error as e:
             logging.error(f"Error occurred while checking note book: {e}")
             return False
-        
+
+    def _get_notebook_id(self, notebook_name:str) -> int | None:
+        """Helper method to get notebook id from notebook name"""
+        query = f"""SELECT id FROM {self.notebooks_table_name} WHERE name = ?;"""
+        try:
+            self.conn_cursor.execute(query, (notebook_name,))
+            result = self.conn_cursor.fetchone()
+            if result is None:
+                return None
+            return result[0]
+        except sqlite3.Error as e:
+            logging.error(f"Error occurred while getting notebook id: {e}")
+            return None
+
+    def _get_note_id(self, notebook_id:int, note_title:str) -> int | None:
+        """Helper method to get note id from notebook id and note title"""
+        query = f"""SELECT id FROM {self.notes_table_name} WHERE notebook_id = ? AND title = ?;"""
+        try:
+            self.conn_cursor.execute(query, (notebook_id, note_title))
+            result = self.conn_cursor.fetchone()
+            if result is None:
+                return None
+            return result[0]
+        except sqlite3.Error as e:
+            logging.error(f"Error occurred while getting note id: {e}")
+            return None
+
+class NotesService():
+    def __init__(self):
+        self._db = Notes()
+
+    def add_notebook(self, name: str):
+        return self._db.Insert_a_new_notebook(name)
+
+    def add_note(self, notebook_id: int, title: str):
+        return self._db.Insert_a_new_note(notebook_id, title)
+
+    def rename_notebook(self, notebook_id: int, new_name: str):
+        return self._db.update_notebook_name(notebook_id, new_name)
+
+    def rename_note(self, note_id: int, new_name: str):
+        return self._db.update_note_name(note_id, new_name)
+
+    def delete_notebook(self, notebook_id: int):
+        return self._db.delete_notebook_by_id(notebook_id)
+
+    def delete_note(self, note_id: int):
+        return self._db.delete_note_by_id(note_id)
+
 if __name__ == "__main__":
     notes = Notes()
     print(notes._check_note_book("Test Notebook 2"))

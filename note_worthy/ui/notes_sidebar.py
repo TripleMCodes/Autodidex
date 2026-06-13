@@ -77,7 +77,7 @@ class NotesSide(QWidget):
         if not (ok and name.strip()):
             return
 
-        notebook_id = self._db_add_notebook(name.strip())   # ← you implement
+        notebook_id = self._service.add_notebook(name.strip())
         if notebook_id is None:
             return
 
@@ -95,7 +95,7 @@ class NotesSide(QWidget):
             return
 
         notebook_id = notebook_item.data(0, Qt.ItemDataRole.UserRole)["id"]
-        note_id     = self._db_add_note(notebook_id, title.strip())   # ← you implement
+        note_id     = self._service.add_note(notebook_id, title.strip())
         if note_id is None:
             return
 
@@ -150,21 +150,21 @@ class NotesSide(QWidget):
 
         meta = item.data(0, Qt.ItemDataRole.UserRole)
         if kind == "notebook":
-            self._db_rename_notebook(meta["id"], new_name.strip())   # ← you implement
+            self._service.rename_notebook(meta["id"], new_name.strip())   # ← you implement
         else:
-            self._db_rename_note(meta["id"], new_name.strip())        # ← you implement
+            self._service.rename_note(meta["id"], new_name.strip())        # ← you implement
 
         item.setText(0, new_name.strip())
 
     def _delete_notebook(self, item):
         meta = item.data(0, Qt.ItemDataRole.UserRole)
-        self._db_delete_notebook(meta["id"])                          # ← you implement
+        self._service.delete_notebook(meta["id"])                          # ← you implement
         self.tree.invisibleRootItem().removeChild(item)
 
     def _delete_note(self, item):
         meta   = item.data(0, Qt.ItemDataRole.UserRole)
         parent = item.parent()
-        self._db_delete_note(meta["id"])                              # ← you implement
+        self._service.delete_note(meta["id"])                              # ← you implement
         if parent:
             parent.removeChild(item)
 
