@@ -50,6 +50,16 @@ class NotesService:
         """Get a single note from a notebook"""
         res = self._notes_db_class.get_single_note(notebook_name, note)
         return res
+    
+    def delete_notebook(self, notebook_name:str) -> dict:
+        """Delete a notebook and all its notes"""
+        res = self._notes_db_class.delete_notebook(notebook_name)
+        return res  
+    
+    def delete_note(self, notebook_name:str, note:str) -> dict:
+        """Delete a single note from a notebook"""
+        res = self._notes_db_class.delete_note(notebook_name, note)
+        return res
 
 if __name__ == "__main__":
     n = NotesService()
