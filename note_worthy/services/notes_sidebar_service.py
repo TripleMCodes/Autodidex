@@ -1,19 +1,47 @@
 from note_worthy_db import Notes
+from pydantic import BaseModel, Field, field_validator
+
+class Note(BaseModel):
+    title: str = Field(..., description="Title of the note")
+    content: str = Field(..., description="Content of the note")
+
+class NoteBook(BaseModel):
+    name: str = Field(..., description="Name of the notebook")
+    notes: list[Note] = Field(default_factory=list, description="List of notes in the notebook")
+
+class NewNoteBook(BaseModel):
+    name: str = Field(..., description="Name of the notebook")
+
+class NewNote(BaseModel):
+    notebook_name: str = Field(..., description="Name of the notebook to add the note to")
+    title: str = Field(..., description="Title of the note")
+    content: str = Field(..., description="Content of the note")
+
+class RenameNoteBook(BaseModel):
+    old_name: str = Field(..., description="Current name of the notebook")
+    new_name: str = Field(..., description="New name for the notebook")
+
+class RenameNote(BaseModel):
+    notebook_name: str = Field(..., description="Name of the notebook containing the note")
+    old_title: str = Field(..., description="Current title of the note")
+    new_title: str = Field(..., description="New title for the note")   
+
 
 class NotesService:
-
 
     def __init__(self):
         self._notes_db_class = Notes()
 
     def create_notebook(self, notebook_name) -> dict:
         """create a new notebook"""
-        res = self._notes_db_class.Insert_a_new_notebook(notebook_name)
+        new_notebook = NewNoteBook(name=notebook_name)
+        res = self._notes_db_class.Insert_a_new_notebook(new_notebook)
         return res
     
     def create_note(self, notebook_name:str, title:str, content:str) -> dict:
         """Create a new note in a notebook"""
-        res = self._notes_db_class.Insert_a_new_note(notebook_name, title, content)
+        new_note = NewNote(notebook_name=notebook_name, title=title, content=content)
+        res = self._notes_db_class.Insert_a_new_note(new_note)
         return res
     
     def rename_notebook(self, old_name:str, new_name:str) -> dict:

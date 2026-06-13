@@ -1,4 +1,5 @@
 from pathlib import Path
+from pydantic import BaseModel, Field, field_validator
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon
@@ -13,6 +14,17 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from note_worthy.services.notes_sidebar_service import (
+    Note,
+    NoteBook,
+    NewNoteBook,
+    NewNote,
+    RenameNoteBook,
+    RenameNote
+)  
+from note_worthy_db import NotesService 
+
+
 
 class NotesSide(QWidget):
 
@@ -20,6 +32,7 @@ class NotesSide(QWidget):
         super().__init__(parent)
         self.base_path = base_path
         self._build_ui()
+        self._service = NotesService()
 
     # ------------------------------------------------------------------ #
     #  UI                                                                  #
