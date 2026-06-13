@@ -257,6 +257,8 @@ class Notes():
         except sqlite3.Error as e:
             logging.error(f"Error occurred while deleting note: {e}")
             return {"message": "Failed to delete note"}
+
+    
         
     def _check_note_book(self, name:str) -> bool | sqlite3.Error:
         """check for the note book name in database, returns True if notebook found"""
