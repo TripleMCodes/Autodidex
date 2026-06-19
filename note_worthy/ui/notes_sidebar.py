@@ -1,7 +1,9 @@
 from pathlib import Path
+from pprint import pprint
 from pydantic import BaseModel, Field, field_validator
 
-from PySide6.QtCore import Qt
+
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
     QHBoxLayout,
@@ -10,6 +12,7 @@ from PySide6.QtWidgets import (
     QPushButton,
     QTreeWidget,
     QTreeWidgetItem,
+    QTextEdit,
     QVBoxLayout,
     QWidget,
 )
@@ -27,12 +30,13 @@ from note_worthy.services.notes_sidebar_service import NotesService
 
 
 class NotesSide(QWidget):
+    note_selected = Signal(str)
 
     def __init__(self, base_path=None, parent=None):
         super().__init__(parent)
         self.base_path = base_path
-        self._build_ui()
         self._service = NotesService()
+        self._build_ui()
 
     # ------------------------------------------------------------------ #
     #  UI                                                                  #
@@ -61,13 +65,71 @@ class NotesSide(QWidget):
         self.tree.setHeaderHidden(True)
         self.tree.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         layout.addWidget(self.tree)
-
+        # editor to display note content
+        self.editor = QTextEdit()
+        self.editor.setReadOnly(True)
+        layout.addWidget(self.editor)
         # --- connections ---
         self.add_notebook_btn.clicked.connect(self._on_add_notebook)
         self.add_note_btn.clicked.connect(self._on_add_note)
         self.tree.itemSelectionChanged.connect(self._on_selection_changed)
+        self.tree.itemClicked.connect(self._on_item_clicked)
         self.tree.customContextMenuRequested.connect(self._on_context_menu)
 
+        # load existing notebooks and notes from the database
+        res = self._service.get_notebooks()  # ← you implement this to populate the tree  
+        # print(f"Notebooks data returned from service: {res}")  # Debug print
+        if res is not None:
+            for nb in res["notebooks"]:
+                nb_item = QTreeWidgetItem(self.tree, [nb["name"]])
+                nb_item.setData(0, Qt.ItemDataRole.UserRole, {"type": "notebook", "name": nb_item.text(0), "id": nb["id"]})
+                for note in nb.get("notes", []):
+                    note_item = QTreeWidgetItem([note["title"]])
+                    # store content in the item's user data so we can show it without extra DB calls
+                    note_item.setData(0, Qt.ItemDataRole.UserRole, {"type": "note", "id": note["id"], "name": note["title"], "content": note.get("content", "")})
+                    nb_item.addChild(note_item)
+        
+      # data format
+    #   { 'notebooks': [ { 'id': 2,
+    #                'name': 'Updated Test Notebook',
+    #                'notes': [ { 'content': 'This is a test note.',
+    #                             'created_at': '2026-06-05 16:54:42',
+    #                             'id': 1,
+    #                             'title': 'Test Note',
+    #                             'updated_at': '2026-06-05 16:54:42'}]},
+    #              {'id': 6, 'name': 'black', 'notes': []},
+    #              {'id': 8, 'name': 'book', 'notes': []},
+    #              {'id': 1, 'name': 'book 1', 'notes': []},
+    #              {'id': 11, 'name': 'book oc c', 'notes': []},
+    #              {'id': 3, 'name': 'chud', 'notes': []},
+    #              {'id': 9, 'name': 'lakfdl', 'notes': []},
+    #              { 'id': 5,
+    #                'name': 'my book',
+    #                'notes': [ { 'content': "don't throw rocks at the throne if "
+    #                                        "you can't wear the crown",
+    #                             'created_at': '2026-06-18 22:50:10',
+    #                             'id': 5,
+    #                             'title': 'some thoughts',
+    #                             'updated_at': '2026-06-18 22:50:10'}]},
+    #              { 'id': 7,
+    #                'name': 'physics',
+    #                'notes': [ { 'content': 'f = ma',
+    #                             'created_at': '2026-06-18 22:42:20',
+    #                             'id': 2,
+    #                             'title': 'equation 1',
+    #                             'updated_at': '2026-06-18 22:42:20'},
+    #                           { 'content': 'f = ma',
+    #                             'created_at': '2026-06-18 22:43:18',
+    #                             'id': 3,
+    #                             'title': 'equation 1',
+    #                             'updated_at': '2026-06-18 22:43:18'},
+    #                           { 'content': 'f = ma',
+    #                             'created_at': '2026-06-18 22:45:29',
+    #                             'id': 4,
+    #                             'title': 'equation 1',
+    #                             'updated_at': '2026-06-18 22:45:29'}]},
+    #              {'id': 10, 'name': 'problem', 'notes': []},
+    #              {'id': 4, 'name': 'something', 'notes': []}]}
     # ------------------------------------------------------------------ #
     #  Toolbar actions                                                     #
     # ------------------------------------------------------------------ #
@@ -197,6 +259,27 @@ class NotesSide(QWidget):
         if parent:
             return parent
         return None
+
+    # def _on_item_clicked(self, item: QTreeWidgetItem, column: int):
+    #     """Show the content of a clicked note in the editor (or clear for notebooks)."""
+    #     meta = item.data(0, Qt.ItemDataRole.UserRole) or {}
+    #     if meta.get("type") == "note":
+    #         content = meta.get("content", "")
+    #         self.editor.setPlainText(content)
+    #     else:
+    #         # clicked a notebook; clear the editor or optionally show notebook summary
+    #         self.editor.clear()
+
+    def _on_item_clicked(self, item: QTreeWidgetItem, column: int):
+        meta = item.data(0, Qt.ItemDataRole.UserRole) or {}
+        if meta.get("type") == "note":
+            content = meta.get("content", "")
+            self.editor.setPlainText(content)
+            pprint(f"Note content: {content}")  # Debug print   
+            # emit for the main editor
+            self.note_selected.emit(str(content))
+        else:
+            self.editor.clear()
 
     # ------------------------------------------------------------------ #
     #  DB stubs — fill these in                                            #

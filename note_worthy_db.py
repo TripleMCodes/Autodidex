@@ -2,11 +2,13 @@ import sqlite3
 from pathlib import Path
 import logging
 from pydantic import BaseModel, Field, field_validator
-
+import pprint
+import json
 
 logging.basicConfig(level=logging.DEBUG)
 
-
+pp = pprint.PrettyPrinter(indent=2)
+    
 class NewNoteBookReponse(BaseModel):
     message: str = Field(..., description="Response message for notebook creation")
     notebook_id: int | None = Field(None, description="ID of the newly created notebook, if successful")
@@ -149,6 +151,53 @@ class Notes():
         except sqlite3.Error as e:
             logging.error(f"Error occurred while retrieving notes: {e}")
             return {"message": "Failed to retrieve notes"}
+
+    def get_notebooks_with_and_without_notes(self):
+        """Retrieve all notebooks and their notes (empty list if none) in a single SQL query.
+
+        Uses a LEFT JOIN and SQLite json functions to aggregate notes per notebook. Returns a
+        list of notebooks where each notebook contains a `notes` list (possibly empty).
+        """
+        query = f"""
+        SELECT
+            n.id AS notebook_id,
+            n.name AS notebook_name,
+            CASE WHEN COUNT(notes.id) = 0 THEN '[]'
+                 ELSE json_group_array(
+                    json_object(
+                        'id', notes.id,
+                        'title', notes.title,
+                        'content', notes.content,
+                        'created_at', notes.created_at,
+                        'updated_at', notes.updated_at
+                    )
+                 )
+            END AS notes_json
+        FROM {self.notebooks_table_name} n
+        LEFT JOIN {self.notes_table_name} notes ON notes.notebook_id = n.id
+        GROUP BY n.id, n.name
+        ORDER BY n.name;
+        """
+        try:
+            self.conn_cursor.execute(query)
+            rows = self.conn_cursor.fetchall()
+            notebooks = []
+            for notebook_id, notebook_name, notes_json in rows:
+                try:
+                    parsed = json.loads(notes_json) if notes_json else []
+                except Exception:
+                    parsed = []
+                # remove any accidental null entries
+                notes_list = [n for n in parsed if n is not None]
+                notebooks.append({
+                    "id": notebook_id,
+                    "name": notebook_name,
+                    "notes": notes_list
+                })
+            return {"notebooks": notebooks}
+        except sqlite3.Error as e:
+            logging.error(f"Error occurred while retrieving notebooks with/without notes: {e}")
+            return {"message": "Failed to retrieve notebooks with notes"}
     
     def get_notebooks_with_notes(self):
         """retrieves notebooks with their notes from the database"""
@@ -349,10 +398,13 @@ class NotesService():
 
 if __name__ == "__main__":
     notes = Notes()
-    print(notes._check_note_book("Test Notebook 2"))
+    # print(notes.get_all_notebooks())
+    # print(notes._check_note_book("Test Notebook 2"))
     # created_notebook = notes.Insert_a_new_notebook("Test Notebook 2")
     # print(created_notebook)
-    # added_note = notes.Insert_a_new_note("Test Notebook 2", "Test Note", "This is a test note.")
-    # print(added_note)
+    # added_note = notes.Insert_a_new_note("my book", "some thoughts", "don't throw rocks at the throne if you can't wear the crown")
+    # pp.pprint(added_note)
+    # pp.pprint(notes.get_notebooks_with_notes())
+    # pp.pprint(notes.get_notebooks_with_and_without_notes())
     # updated_notebook = notes.update_notebook_name("Test Notebook 2", "Updated Test Notebook")  
     # print(updated_notebook)

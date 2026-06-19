@@ -108,6 +108,8 @@ class NoteWorthy(QWidget):
         root.setStretch(2, 9)   # editor → 90%
         self.setLayout(root)
 
+
+        
         # ---- wire signals ----
         self._connect_signals()
 
@@ -121,6 +123,9 @@ class NoteWorthy(QWidget):
         # editor → services
         self._editor.text_changed.connect(self._on_text_changed)
         self._editor.definition_requested.connect(self._on_definition_requested)
+        # connect the existing NotesSide instance (don't recreate it here)
+        self._notes_side.note_selected.connect(self._editor.set_text)
+
 
         # sidebar buttons → handlers
         self._sidebar.file_btn.clicked.connect(self._open_file)

@@ -95,6 +95,7 @@ class EditorArea(QWidget):
         return self.text_edit.toPlainText()
 
     def set_text(self, text: str):
+        print(f"Setting editor text to: {text}")  # Debug print
         self.text_edit.setText(text)
 
     def set_font_size(self, size: int):
