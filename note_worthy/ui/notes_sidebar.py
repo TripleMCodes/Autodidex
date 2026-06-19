@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (
     QInputDialog,
     QMenu,
     QPushButton,
+    QMessageBox,
     QTreeWidget,
     QTreeWidgetItem,
     QTextEdit,
@@ -76,18 +77,20 @@ class NotesSide(QWidget):
         self.tree.itemClicked.connect(self._on_item_clicked)
         self.tree.customContextMenuRequested.connect(self._on_context_menu)
 
-        # load existing notebooks and notes from the database
-        res = self._service.get_notebooks()  # ← you implement this to populate the tree  
-        # print(f"Notebooks data returned from service: {res}")  # Debug print
-        if res is not None:
-            for nb in res["notebooks"]:
-                nb_item = QTreeWidgetItem(self.tree, [nb["name"]])
-                nb_item.setData(0, Qt.ItemDataRole.UserRole, {"type": "notebook", "name": nb_item.text(0), "id": nb["id"]})
-                for note in nb.get("notes", []):
-                    note_item = QTreeWidgetItem([note["title"]])
-                    # store content in the item's user data so we can show it without extra DB calls
-                    note_item.setData(0, Qt.ItemDataRole.UserRole, {"type": "note", "id": note["id"], "name": note["title"], "content": note.get("content", "")})
-                    nb_item.addChild(note_item)
+        # # load existing notebooks and notes from the database
+        # res = self._service.get_notebooks()  # ← you implement this to populate the tree  
+        # # print(f"Notebooks data returned from service: {res}")  # Debug print
+        # if res is not None:
+        #     for nb in res["notebooks"]:
+        #         nb_item = QTreeWidgetItem(self.tree, [nb["name"]])
+        #         nb_item.setData(0, Qt.ItemDataRole.UserRole, {"type": "notebook", "name": nb_item.text(0), "id": nb["id"]})
+        #         for note in nb.get("notes", []):
+        #             note_item = QTreeWidgetItem([note["title"]])
+        #             # store content in the item's user data so we can show it without extra DB calls
+        #             note_item.setData(0, Qt.ItemDataRole.UserRole, {"type": "note", "id": note["id"], "name": note["title"], "content": note.get("content", "")})
+        #             nb_item.addChild(note_item)
+
+        self._load_notes()
         
       # data format
     #   { 'notebooks': [ { 'id': 2,
@@ -148,6 +151,22 @@ class NotesSide(QWidget):
         item.setData(0, Qt.ItemDataRole.UserRole, {"type": "notebook", "id": notebook_id["message"]["notebook_id"], "name": name.strip()})
         self.tree.addTopLevelItem(item)
 
+    
+
+    def _load_notes(self):
+        # load existing notebooks and notes from the database
+        res = self._service.get_notebooks()  # ← you implement this to populate the tree  
+        # print(f"Notebooks data returned from service: {res}")  # Debug print
+        if res is not None:
+            for nb in res["notebooks"]:
+                nb_item = QTreeWidgetItem(self.tree, [nb["name"]])
+                nb_item.setData(0, Qt.ItemDataRole.UserRole, {"type": "notebook", "name": nb_item.text(0), "id": nb["id"]})
+                for note in nb.get("notes", []):
+                    note_item = QTreeWidgetItem([note["title"]])
+                    # store content in the item's user data so we can show it without extra DB calls
+                    note_item.setData(0, Qt.ItemDataRole.UserRole, {"type": "note", "id": note["id"], "name": note["title"], "content": note.get("content", "")})
+                    nb_item.addChild(note_item)
+
     def _on_add_note(self):
         notebook_item = self._selected_notebook()
         if notebook_item is None:
@@ -157,19 +176,30 @@ class NotesSide(QWidget):
         if not (ok and title.strip()):
             return
 
-        notebook_id = notebook_item.data(0, Qt.ItemDataRole.UserRole)["id"]
-        note_id = None
-        print(f"Notebook data: {notebook_item.data(0, Qt.ItemDataRole.UserRole)}")  # Debug print
-        print(f"Notebook ID: {notebook_item.data(0, Qt.ItemDataRole.UserRole)['id']}") # Debug print
-        print(f"ID of the notebook: {notebook_id}")  # Debug print
-        # note_id     = self._service.add_note(notebook_id, title.strip())
-        if note_id is None:
+        # Get notebook name from the item's metadata
+        notebook_meta = notebook_item.data(0, Qt.ItemDataRole.UserRole) or {}
+        notebook_name = notebook_meta.get("name")
+        print(f"Notebook data: {notebook_meta}")  # Debug print
+        print(f"Notebook name: {notebook_name}")  # Debug print
+        content = "" # empty note
+        res = self._service.create_note(notebook_name, title.strip(), content)
+        print(f"the response is {res}")
+        if res is None:
             return
-
-        child = QTreeWidgetItem([title.strip()])
-        child.setData(0, Qt.ItemDataRole.UserRole, {"type": "note", "id": note_id})
-        notebook_item.addChild(child)
-        notebook_item.setExpanded(True)
+        
+        # Add the new note directly to the tree without reloading
+        if res and hasattr(res, 'note_id') and res.note_id:
+            note_item = QTreeWidgetItem([title.strip()])
+            note_item.setData(0, Qt.ItemDataRole.UserRole, {
+                "type": "note",
+                "id": res.note_id,
+                "name": title.strip(),
+                "content": content
+            })
+            notebook_item.addChild(note_item)
+            notebook_item.setExpanded(True)
+        
+        QMessageBox(self, "Creation Status", res.message)
 
     # ------------------------------------------------------------------ #
     #  Context menu                                                        #
@@ -183,6 +213,7 @@ class NotesSide(QWidget):
         meta  = item.data(0, Qt.ItemDataRole.UserRole) or {}
         itype = meta.get("type")
         menu  = QMenu(self)
+        
 
         if itype == "notebook":
             rename_action = menu.addAction("Rename notebook")
@@ -220,22 +251,29 @@ class NotesSide(QWidget):
 
         meta = item.data(0, Qt.ItemDataRole.UserRole)
         if kind == "notebook":
-            self._service.rename_notebook(meta["id"], new_name.strip())   # ← you implement
+            self._service.rename_notebook(meta["name"], new_name.strip())
         else:
-            self._service.rename_note(meta["id"], new_name.strip())        # ← you implement
+            # For notes, need to get parent notebook name
+            parent = item.parent()
+            if parent:
+                parent_meta = parent.data(0, Qt.ItemDataRole.UserRole)
+                parent_notebook_name = parent_meta.get("name")
+                self._service.rename_note(parent_notebook_name, meta["name"], new_name.strip())
 
         item.setText(0, new_name.strip())
 
     def _delete_notebook(self, item):
         meta = item.data(0, Qt.ItemDataRole.UserRole)
-        self._service.delete_notebook(meta["id"])                          # ← you implement
+        self._service.delete_notebook(meta["name"])
         self.tree.invisibleRootItem().removeChild(item)
 
     def _delete_note(self, item):
         meta   = item.data(0, Qt.ItemDataRole.UserRole)
         parent = item.parent()
-        self._service.delete_note(meta["id"])                              # ← you implement
         if parent:
+            parent_meta = parent.data(0, Qt.ItemDataRole.UserRole)
+            parent_notebook_name = parent_meta.get("name")
+            self._service.delete_note(parent_notebook_name, meta["name"])
             parent.removeChild(item)
 
     # ------------------------------------------------------------------ #
@@ -287,11 +325,15 @@ class NotesSide(QWidget):
 
     def _db_add_notebook(self, name: str):
         """Insert a new notebook row. Return its integer ID."""
-        raise NotImplementedError
+        notebook = self._on_selected_notebook()
 
-    def _db_add_note(self, notebook_id: int, title: str):
+        # raise NotImplementedError
+
+    def _db_add_note(self, notebook_id: int, title: str, content:str):
         """Insert a new note row. Return its integer ID."""
-        raise NotImplementedError
+        res = self._service.create_note(notebook_id, title, content)
+        QMessageBox.information(self, "Creation Status", res.message)
+
 
     def _db_rename_notebook(self, notebook_id: int, new_name: str):
         raise NotImplementedError

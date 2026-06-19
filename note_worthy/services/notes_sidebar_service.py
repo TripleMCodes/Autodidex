@@ -17,7 +17,7 @@ class NewNoteBook(BaseModel):
 class NewNote(BaseModel):
     notebook_name: str = Field(..., description="Name of the notebook to add the note to")
     title: str = Field(..., description="Title of the note")
-    content: str = Field(..., description="Content of the note")
+    content: str|None = Field(..., description="Content of the note")
 
 class RenameNoteBook(BaseModel):
     old_name: str = Field(..., description="Current name of the notebook")
@@ -43,7 +43,7 @@ class NotesService:
     def create_note(self, notebook_name:str, title:str, content:str) -> dict:
         """Create a new note in a notebook"""
         new_note = NewNote(notebook_name=notebook_name, title=title, content=content)
-        res = self._notes_db_class.Insert_a_new_note(new_note)
+        res = self._notes_db_class.Insert_a_new_note(new_note.notebook_name, new_note.title, new_note.content)
         return res
     
     def rename_notebook(self, old_name:str, new_name:str) -> dict:
