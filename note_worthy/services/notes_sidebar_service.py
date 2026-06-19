@@ -56,9 +56,14 @@ class NotesService:
         res = self._notes_db_class.rename_note(notebook_name, old_title, new_title)
         return res
 
-    def get_notebooks(self) -> dict:
+    def get_notebooks_and_notes(self) -> dict:
         """Gets notebooks and their respective notes"""
         res = self._notes_db_class.get_notebooks_with_notes()
+        return res
+
+    def get_notebooks(self) -> dict:
+        """Get all notebooks with or without notes"""
+        res = self._notes_db_class.get_notebooks_with_and_without_notes()
         return res
     
     def get_all_notes(self) -> dict:
