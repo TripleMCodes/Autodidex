@@ -1,5 +1,7 @@
 from note_worthy_db import Notes
 from pydantic import BaseModel, Field, field_validator
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
 class Note(BaseModel):
     title: str = Field(..., description="Title of the note")

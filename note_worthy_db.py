@@ -1,10 +1,26 @@
 import sqlite3
 from pathlib import Path
 import logging
+from pydantic import BaseModel, Field, field_validator
+
 
 logging.basicConfig(level=logging.DEBUG)
 
 
+class NewNoteBookReponse(BaseModel):
+    message: str = Field(..., description="Response message for notebook creation")
+    notebook_id: int | None = Field(None, description="ID of the newly created notebook, if successful")
+
+class NewNoteResponse(BaseModel):
+    message: str = Field(..., description="Response message for note creation")
+    note_id: int | None = Field(None, description="ID of the newly created note, if successful")
+
+class UpdateNoteBookResponse(BaseModel):
+    message: str = Field(..., description="Response message for notebook update")
+    notebook_id: int | None = Field(None, description="ID of the updated notebook, if successful")
+
+class ErrorResponse(BaseModel):
+    message: str = Field(..., description="Response message for failed request")    
 class Notes():
     """A class that deal with user-note queries"""
 
@@ -19,7 +35,7 @@ class Notes():
         """Commits data to the data base (does not close connection)"""
         self.conn.commit()
 
-    def Insert_a_new_notebook(self, name:str):
+    def Insert_a_new_notebook(self, name:str) -> NewNoteBookReponse | ErrorResponse:
         """Add a new note book"""
         
         name_check = self._check_note_book(name)
@@ -28,12 +44,14 @@ class Notes():
             try:
                 self.conn_cursor.execute(query, (name,))
                 self._commit_data()
-                return {"message": "Notebook created successfully"}
+                res = NewNoteBookReponse(message="Notebook created successfully", notebook_id=self.conn_cursor.lastrowid)
+                return res
             except sqlite3.Error as e:
                 logging.debug("Couldn't create notebook, error: {e}")
         else:
-            return {'message': "Notebook name already exists"}
-    
+            res = ErrorResponse(message="Notebook name already exists")
+            return res
+        
     def Insert_a_new_note(self, notebook_name:str, title:str, content:str):
         """Add a new note to a specific notebook"""
         notebook_id_query = f"""SELECT id FROM {self.notebooks_table_name} WHERE name = ?;"""
@@ -46,10 +64,12 @@ class Notes():
             insert_note_query = f"""INSERT INTO {self.notes_table_name} (notebook_id, title, content) VALUES (?, ?, ?);"""
             self.conn_cursor.execute(insert_note_query, (notebook_id, title, content))
             self._commit_data()
-            return {"message": "Note added successfully"}
+            res = NewNoteResponse(message="Note added successfully", note_id=self.conn_cursor.lastrowid)
+            return res
         except sqlite3.Error as e:
             logging.error(f"Error occurred while adding note: {e}")
-            return {"message": "Failed to add note"}
+            res = ErrorResponse(message="Failed to add note")
+            return res
 
     
     def update_notebook_name(self, old_name:str, new_name:str):
@@ -62,13 +82,16 @@ class Notes():
             try:
                 self.conn_cursor.execute(query, (new_name, old_name))
                 self._commit_data()
-                return {"message": "Notebook name updated successfully"}
+                res = UpdateNoteBookResponse(message="Notebook name updated successfully", notebook_id=self.conn_cursor.lastrowid)
+                return res
             except sqlite3.Error as e:
                 logging.error(f"Error occurred while updating notebook name: {e}")
-                return {"message": "Failed to update notebook name"}
+                res = ErrorResponse(message="Failed to update notebook name")
+                return res
         else:
-            return {'message': "New notebook name already exists"}
-        
+            res = ErrorResponse(message="New notebook name already exists")
+            return res
+
     def update_note_content(self, notebook_name:str, note_title:str, new_content:str):
         """updates the content of a note"""
         notebook_id_query = f"""SELECT id FROM {self.notebooks_table_name} WHERE name = ?;"""

@@ -22,7 +22,7 @@ from note_worthy.services.notes_sidebar_service import (
     RenameNoteBook,
     RenameNote
 )  
-from note_worthy_db import NotesService 
+from note_worthy.services.notes_sidebar_service import NotesService
 
 
 
@@ -77,12 +77,13 @@ class NotesSide(QWidget):
         if not (ok and name.strip()):
             return
 
-        notebook_id = self._service.add_notebook(name.strip())
+        notebook_id = self._service.create_notebook(name.strip())
+        print(f"Notebook Data returned from service: {notebook_id}")  # Debug print
         if notebook_id is None:
             return
 
         item = QTreeWidgetItem(self.tree, [name.strip()])
-        item.setData(0, Qt.ItemDataRole.UserRole, {"type": "notebook", "id": notebook_id})
+        item.setData(0, Qt.ItemDataRole.UserRole, {"type": "notebook", "id": notebook_id["message"]["notebook_id"], "name": name.strip()})
         self.tree.addTopLevelItem(item)
 
     def _on_add_note(self):
@@ -95,7 +96,11 @@ class NotesSide(QWidget):
             return
 
         notebook_id = notebook_item.data(0, Qt.ItemDataRole.UserRole)["id"]
-        note_id     = self._service.add_note(notebook_id, title.strip())
+        note_id = None
+        print(f"Notebook data: {notebook_item.data(0, Qt.ItemDataRole.UserRole)}")  # Debug print
+        print(f"Notebook ID: {notebook_item.data(0, Qt.ItemDataRole.UserRole)['id']}") # Debug print
+        print(f"ID of the notebook: {notebook_id}")  # Debug print
+        # note_id     = self._service.add_note(notebook_id, title.strip())
         if note_id is None:
             return
 
@@ -120,12 +125,15 @@ class NotesSide(QWidget):
         if itype == "notebook":
             rename_action = menu.addAction("Rename notebook")
             delete_action = menu.addAction("Delete notebook")
+            add_note_action = menu.addAction("Add note")
             chosen = menu.exec(self.tree.viewport().mapToGlobal(pos))
 
             if chosen == rename_action:
                 self._rename_item(item, kind="notebook")
             elif chosen == delete_action:
                 self._delete_notebook(item)
+            elif chosen == add_note_action:
+                self._on_add_note()
 
         elif itype == "note":
             rename_action = menu.addAction("Rename note")
