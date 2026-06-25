@@ -77,19 +77,6 @@ class NotesSide(QWidget):
         self.tree.itemClicked.connect(self._on_item_clicked)
         self.tree.customContextMenuRequested.connect(self._on_context_menu)
 
-        # # load existing notebooks and notes from the database
-        # res = self._service.get_notebooks()  # ← you implement this to populate the tree  
-        # # print(f"Notebooks data returned from service: {res}")  # Debug print
-        # if res is not None:
-        #     for nb in res["notebooks"]:
-        #         nb_item = QTreeWidgetItem(self.tree, [nb["name"]])
-        #         nb_item.setData(0, Qt.ItemDataRole.UserRole, {"type": "notebook", "name": nb_item.text(0), "id": nb["id"]})
-        #         for note in nb.get("notes", []):
-        #             note_item = QTreeWidgetItem([note["title"]])
-        #             # store content in the item's user data so we can show it without extra DB calls
-        #             note_item.setData(0, Qt.ItemDataRole.UserRole, {"type": "note", "id": note["id"], "name": note["title"], "content": note.get("content", "")})
-        #             nb_item.addChild(note_item)
-
         self._load_notes()
         
       # data format
@@ -201,22 +188,7 @@ class NotesSide(QWidget):
         
         QMessageBox(self, "Creation Status", res.message)
 
-    # def _save_note(self, note: str):
-    #     item = self._selected_notebook()
-    #     notebook_meta = item.data(0, Qt.ItemDataRole.UserRole) or {}
-    #     note_meta = self._selected_note()
-    #     note_data = note_meta.data(0, Qt.ItemDataRole.UserRole) or {}
-    #     if notebook_meta.get("type") == "notebook":
-    #         print(f"this is a note.")
-    #         if note_data:
-    #             print("note found")
-    #             print(f"this is the note {note}")
-    #             print(f"note id {note_data.get("id")}")
-    #             print(f"notebook id {notebook_meta.get("id")}")
-    #             notebook_id, note_id = int(notebook_meta.get("id")), int(note_data.get("id"))
-    #             res = self._service.update_note(notebook_id, note_id, note)
-    #             return res
-
+    
     def _save_note(self, note: str):
         item = self._selected_notebook()
         notebook_meta = item.data(0, Qt.ItemDataRole.UserRole) or {}
@@ -340,16 +312,7 @@ class NotesSide(QWidget):
             return item
         else:
             print("note not found")
-
-    # def _on_item_clicked(self, item: QTreeWidgetItem, column: int):
-    #     """Show the content of a clicked note in the editor (or clear for notebooks)."""
-    #     meta = item.data(0, Qt.ItemDataRole.UserRole) or {}
-    #     if meta.get("type") == "note":
-    #         content = meta.get("content", "")
-    #         self.editor.setPlainText(content)
-    #     else:
-    #         # clicked a notebook; clear the editor or optionally show notebook summary
-    #         self.editor.clear()
+            
 
     def _on_item_clicked(self, item: QTreeWidgetItem, column: int):
         meta = item.data(0, Qt.ItemDataRole.UserRole) or {}

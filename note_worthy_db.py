@@ -96,13 +96,8 @@ class Notes():
 
     def update_note_content(self, notebook_id:int, note_id:int, new_content:str):
         """updates the content of a note"""
-        # notebook_id_query = f"""SELECT id FROM {self.notebooks_table_name} WHERE name = ?;"""
+        
         try:
-            # self.conn_cursor.execute(notebook_id_query, (notebook_name,))
-            # notebook_id = self.conn_cursor.fetchone()
-            # if notebook_id is None:
-            #     return {"message": "Notebook not found"}
-            # notebook_id = notebook_id[0]
             update_note_query = f"""UPDATE {self.notes_table_name} SET content = ? WHERE notebook_id = ? AND id = ?;"""
             self.conn_cursor.execute(update_note_query, (new_content, notebook_id, note_id))
             self._commit_data()
