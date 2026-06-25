@@ -201,6 +201,31 @@ class NotesSide(QWidget):
         
         QMessageBox(self, "Creation Status", res.message)
 
+    def _save_note(self, note: str):
+        item = self._selected_notebook()
+        notebook_meta = item.data(0, Qt.ItemDataRole.UserRole) or {}
+        note_meta = self._selected_note()
+        note_data = note_meta.data(0, Qt.ItemDataRole.UserRole) or {}
+        if notebook_meta.get("type") == "notebook":
+            print(f"this is a note.")
+            if note_data:
+                print("note found")
+                print(f"this is the note {note}")
+                print(f"note id {note_data.get("id")}")
+                print(f"notebook id {notebook_meta.get("id")}")
+                notebook_id, note_id = int(notebook_meta.get("id")), int(note_data.get("id"))
+                res = self._service.update_note(notebook_id, note_id, note)
+                return res
+            # print(f"note name {meta.get("title")} and id {meta.get("id")}")
+            # parent = item.parent()
+            # if parent:
+            #     parent_meta = parent.data(0, Qt.ItemDataRole.UserRole)
+            #     parent_notebook_name = parent_meta.get("name")
+            #     print(f"the notebook name is {parent_notebook_name}")
+            #     # self._service.rename_note(parent_notebook_name, meta["name"], new_name.strip())
+
+
+
     # ------------------------------------------------------------------ #
     #  Context menu                                                        #
     # ------------------------------------------------------------------ #
@@ -297,6 +322,18 @@ class NotesSide(QWidget):
         if parent:
             return parent
         return None
+
+    def _selected_note(self):
+        """Return the note selected"""
+        items = self.tree.selectedItems()
+        if not items:
+            return None
+        item = items[0]
+        meta = item.data(0, Qt.ItemDataRole.UserRole) or {}
+        if meta.get("type") == "note":
+            return item
+        else:
+            print("note not found")
 
     # def _on_item_clicked(self, item: QTreeWidgetItem, column: int):
     #     """Show the content of a clicked note in the editor (or clear for notebooks)."""

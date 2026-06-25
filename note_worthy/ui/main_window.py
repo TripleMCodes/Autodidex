@@ -168,16 +168,19 @@ class NoteWorthy(QWidget):
     # File operations
     # ------------------------------------------------------------------
     def _save_file(self):
-        path, _ = QFileDialog.getSaveFileName(
-            self, "Save file", "",
-            "Text Files (*.txt);;HTML (*.html);;CSV (*.csv);;Python (*.py);;Markdown (*.md)"
-        )
-        if path:
-            try:
-                self._notes.write_file(path, self._editor.get_text())
-            except OSError as e:
-                QMessageBox.critical(self, "Save error", str(e))
-
+        note = self._editor.get_text()
+        res = self._notes_side._save_note(note)
+        # path, _ = QFileDialog.getSaveFileName(
+        #     self, "Save file", "",
+        #     "Text Files (*.txt);;HTML (*.html);;CSV (*.csv);;Python (*.py);;Markdown (*.md)"
+        # )
+        # if path:
+        #     try:
+        #         self._notes.write_file(path, self._editor.get_text())
+        #     except OSError as e:
+        #         QMessageBox.critical(self, "Save error", str(e))
+        QMessageBox.information(self, "Saving Status", res["message"])
+        
     def _open_file(self):
         path, _ = QFileDialog.getOpenFileName(
             self, "Open file", "",

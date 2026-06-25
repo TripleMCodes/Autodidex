@@ -71,3 +71,4 @@ class Sidebar(QWidget):
         ]
         for w in widgets:
             layout.addWidget(w)
+            

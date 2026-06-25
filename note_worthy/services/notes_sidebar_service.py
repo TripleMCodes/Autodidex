@@ -45,6 +45,11 @@ class NotesService:
         new_note = NewNote(notebook_name=notebook_name, title=title, content=content)
         res = self._notes_db_class.Insert_a_new_note(new_note.notebook_name, new_note.title, new_note.content)
         return res
+
+    def update_note(self, notebook_id:int, note_id:int, content:str) -> dict:
+        """update note content"""
+        res = self._notes_db_class.update_note_content(notebook_id, note_id, content)
+        return res
     
     def rename_notebook(self, old_name:str, new_name:str) -> dict:
         """Rename notebook name"""
