@@ -6,6 +6,7 @@ from PySide6.QtGui import QIcon, Qt
 from PySide6.QtWidgets import (
     QApplication, QFileDialog, QHBoxLayout, QMessageBox, QPushButton, QStackedWidget, QVBoxLayout, QWidget,
 )
+from PySide6.QtGui import QShortcut, QKeySequence
 
 from lyric_n_summarization_ui import LyricsSummarizationUi
 
@@ -138,6 +139,10 @@ class NoteWorthy(QWidget):
         self._sidebar.undo_btn.clicked.connect(self._editor.text_edit.undo)
         self._sidebar.clear_btn.clicked.connect(self._editor.text_edit.clear)
         self._sidebar.save_btn.clicked.connect(self._save_file)
+        --- save shortcut ---
+        self.save_shortcut = QShortcut(QKeySequence("Ctrl+S"), self)
+        self.save_shortcut.activated.connect(self._save_file)
+
         self._sidebar.md_btn.clicked.connect(self._toggle_markdown)
         self._sidebar.exit_btn.clicked.connect(self._exit)
 
@@ -180,7 +185,7 @@ class NoteWorthy(QWidget):
         #     except OSError as e:
         #         QMessageBox.critical(self, "Save error", str(e))
         QMessageBox.information(self, "Saving Status", res["message"])
-        
+
     def _open_file(self):
         path, _ = QFileDialog.getOpenFileName(
             self, "Open file", "",
