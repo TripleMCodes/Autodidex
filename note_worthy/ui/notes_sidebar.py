@@ -201,29 +201,35 @@ class NotesSide(QWidget):
         
         QMessageBox(self, "Creation Status", res.message)
 
+    # def _save_note(self, note: str):
+    #     item = self._selected_notebook()
+    #     notebook_meta = item.data(0, Qt.ItemDataRole.UserRole) or {}
+    #     note_meta = self._selected_note()
+    #     note_data = note_meta.data(0, Qt.ItemDataRole.UserRole) or {}
+    #     if notebook_meta.get("type") == "notebook":
+    #         print(f"this is a note.")
+    #         if note_data:
+    #             print("note found")
+    #             print(f"this is the note {note}")
+    #             print(f"note id {note_data.get("id")}")
+    #             print(f"notebook id {notebook_meta.get("id")}")
+    #             notebook_id, note_id = int(notebook_meta.get("id")), int(note_data.get("id"))
+    #             res = self._service.update_note(notebook_id, note_id, note)
+    #             return res
+
     def _save_note(self, note: str):
         item = self._selected_notebook()
         notebook_meta = item.data(0, Qt.ItemDataRole.UserRole) or {}
         note_meta = self._selected_note()
         note_data = note_meta.data(0, Qt.ItemDataRole.UserRole) or {}
         if notebook_meta.get("type") == "notebook":
-            print(f"this is a note.")
             if note_data:
-                print("note found")
-                print(f"this is the note {note}")
-                print(f"note id {note_data.get("id")}")
-                print(f"notebook id {notebook_meta.get("id")}")
                 notebook_id, note_id = int(notebook_meta.get("id")), int(note_data.get("id"))
                 res = self._service.update_note(notebook_id, note_id, note)
+                if res:
+                    note_data["content"] = note
+                    note_meta.setData(0, Qt.ItemDataRole.UserRole, note_data)
                 return res
-            # print(f"note name {meta.get("title")} and id {meta.get("id")}")
-            # parent = item.parent()
-            # if parent:
-            #     parent_meta = parent.data(0, Qt.ItemDataRole.UserRole)
-            #     parent_notebook_name = parent_meta.get("name")
-            #     print(f"the notebook name is {parent_notebook_name}")
-            #     # self._service.rename_note(parent_notebook_name, meta["name"], new_name.strip())
-
 
 
     # ------------------------------------------------------------------ #

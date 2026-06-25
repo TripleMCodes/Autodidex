@@ -19,8 +19,8 @@ class NewNoteResponse(BaseModel):
 
 class UpdateNoteBookResponse(BaseModel):
     message: str = Field(..., description="Response message for notebook update")
-    notebook_id: int | None = Field(None, description="ID of the updated notebook, if successful")
-
+    note_id: int | None = Field(None, description="ID of the updated notebook, if successful")
+    
 class ErrorResponse(BaseModel):
     message: str = Field(..., description="Response message for failed request")    
 class Notes():
@@ -106,7 +106,10 @@ class Notes():
             update_note_query = f"""UPDATE {self.notes_table_name} SET content = ? WHERE notebook_id = ? AND id = ?;"""
             self.conn_cursor.execute(update_note_query, (new_content, notebook_id, note_id))
             self._commit_data()
-            return {"message": "Note content updated successfully"}
+            # return {"message": "Note content updated successfully"}
+            res = UpdateNoteBookResponse(message="Notebook saved successfully", note_id=self.conn_cursor.lastrowid)
+            res = res.dict()
+            return res
         except sqlite3.Error as e:
             logging.error(f"Error occurred while updating note content: {e}")
             return {"message": "Failed to update note content"}
