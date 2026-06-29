@@ -58,7 +58,7 @@ class NotesService:
 
     def rename_note(self, notebook_name:str, old_title:str, new_title:str) -> dict:
         """Rename a note in a notebook"""
-        res = self._notes_db_class.rename_note(notebook_name, old_title, new_title)
+        res = self._notes_db_class.update_note_title(notebook_name, old_title, new_title)
         return res
 
     def get_notebooks_and_notes(self) -> dict:

@@ -139,7 +139,7 @@ class NoteWorthy(QWidget):
         self._sidebar.undo_btn.clicked.connect(self._editor.text_edit.undo)
         self._sidebar.clear_btn.clicked.connect(self._editor.text_edit.clear)
         self._sidebar.save_btn.clicked.connect(self._save_file)
-        --- save shortcut ---
+        # --- save shortcut ---
         self.save_shortcut = QShortcut(QKeySequence("Ctrl+S"), self)
         self.save_shortcut.activated.connect(self._save_file)
 

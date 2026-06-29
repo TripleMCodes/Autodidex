@@ -274,10 +274,12 @@ class NotesSide(QWidget):
         meta   = item.data(0, Qt.ItemDataRole.UserRole)
         parent = item.parent()
         if parent:
-            parent_meta = parent.data(0, Qt.ItemDataRole.UserRole)
-            parent_notebook_name = parent_meta.get("name")
-            self._service.delete_note(parent_notebook_name, meta["name"])
-            parent.removeChild(item)
+            response = QMessageBox.question(self, "Confirm action", "Are you sure you want to delete this note?", QMessageBox.Yes | QMessageBox.No)
+            if response == QMessageBox.Yes:
+                parent_meta = parent.data(0, Qt.ItemDataRole.UserRole)
+                parent_notebook_name = parent_meta.get("name")
+                self._service.delete_note(parent_notebook_name, meta["name"])
+                parent.removeChild(item)
 
     # ------------------------------------------------------------------ #
     #  Selection                                                           #
