@@ -372,6 +372,86 @@ class Notes():
             logging.error(f"Error occurred while getting note id: {e}")
             return None
 
+    # ------------------------------------------------------------------ #
+    #  Note links                                                          #
+    # ------------------------------------------------------------------ #
+
+    def link_notes(self, source_note_id: int, target_note_id: int) -> dict:
+        """Create a bidirectional link between two notes.
+
+        Inserts both (source→target) and (target→source) rows so that
+        a single query on either note_id returns all its linked notes.
+        The UNIQUE constraint silently ignores duplicate inserts.
+        """
+        if source_note_id == target_note_id:
+            return {"message": "Cannot link a note to itself"}
+        query = """
+            INSERT OR IGNORE INTO note_links (source_note_id, target_note_id)
+            VALUES (?, ?), (?, ?);
+        """
+        try:
+            self.conn_cursor.execute(
+                query,
+                (source_note_id, target_note_id, target_note_id, source_note_id),
+            )
+            self._commit_data()
+            return {"message": "Notes linked successfully"}
+        except sqlite3.Error as e:
+            logging.error(f"Error linking notes: {e}")
+            return {"message": f"Failed to link notes: {e}"}
+
+    def unlink_notes(self, source_note_id: int, target_note_id: int) -> dict:
+        """Remove the link between two notes (both directions)."""
+        query = """
+            DELETE FROM note_links
+            WHERE (source_note_id = ? AND target_note_id = ?)
+               OR (source_note_id = ? AND target_note_id = ?);
+        """
+        try:
+            self.conn_cursor.execute(
+                query,
+                (source_note_id, target_note_id, target_note_id, source_note_id),
+            )
+            self._commit_data()
+            return {"message": "Notes unlinked successfully"}
+        except sqlite3.Error as e:
+            logging.error(f"Error unlinking notes: {e}")
+            return {"message": f"Failed to unlink notes: {e}"}
+
+    def get_links_for_note(self, note_id: int) -> dict:
+        """Return all notes linked to *note_id*, with their titles and notebook names."""
+        query = """
+            SELECT
+                n.id          AS note_id,
+                n.title       AS note_title,
+                n.content     AS note_content,
+                nb.id         AS notebook_id,
+                nb.name       AS notebook_name
+            FROM note_links nl
+            JOIN notes      n  ON n.id  = nl.target_note_id
+            JOIN notebooks  nb ON nb.id = n.notebook_id
+            WHERE nl.source_note_id = ?
+            ORDER BY nb.name, n.title;
+        """
+        try:
+            self.conn_cursor.execute(query, (note_id,))
+            rows = self.conn_cursor.fetchall()
+            links = [
+                {
+                    "note_id":       row[0],
+                    "note_title":    row[1],
+                    "note_content":  row[2],
+                    "notebook_id":   row[3],
+                    "notebook_name": row[4],
+                }
+                for row in rows
+            ]
+            return {"links": links}
+        except sqlite3.Error as e:
+            logging.error(f"Error retrieving links for note {note_id}: {e}")
+            return {"message": f"Failed to retrieve links: {e}"}
+
+
 class NotesService():
     def __init__(self):
         self._db = Notes()
@@ -394,6 +474,8 @@ class NotesService():
     def delete_note(self, note_id: int):
         return self._db.delete_note_by_id(note_id)
 
+   
+
 if __name__ == "__main__":
     notes = Notes()
     # print(notes.get_all_notebooks())
@@ -406,3 +488,4 @@ if __name__ == "__main__":
     # pp.pprint(notes.get_notebooks_with_and_without_notes())
     # updated_notebook = notes.update_notebook_name("Test Notebook 2", "Updated Test Notebook")  
     # print(updated_notebook)
+    print(notes.get_links_for_note(1))
