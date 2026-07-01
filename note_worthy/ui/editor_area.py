@@ -39,9 +39,15 @@ class EditorArea(QWidget):
 
         # ---- splitter + editor ----
         self.splitter = QSplitter(Qt.Horizontal)
-        self.splitter.setMinimumSize(QSize(500, 500))
+        # allow the splitter to shrink so the editor can take majority space
+        self.splitter.setMinimumSize(QSize(200, 200))
 
         self.text_edit = SpellCheckTextEdit()
+        # prefer expanding so the editor occupies available space
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.text_edit.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        # give the main text editor most of the splitter space
+        self.splitter.setStretchFactor(0, 1)
         self.text_edit.setPlaceholderText("Type your notes here...")
         self.text_edit.setContextMenuPolicy(Qt.CustomContextMenu)
         self.text_edit.textChanged.connect(self.text_changed.emit)
@@ -53,30 +59,34 @@ class EditorArea(QWidget):
         wc_icon = self.base_path / "Icons/icons8-word-file-64.png"
         self._wc_icon_path = str(wc_icon)
         self.word_count_label = QLabel(
-            f'<img src="{self._wc_icon_path}" width="40" height="40">'
-            f'<span style="font-size:20px;"> ⁚ 0</span>'
+            f'<img src="{self._wc_icon_path}" width="24" height="24">'
+            f'<span style="font-size:12px;"> ⁚ 0</span>'
         )
         self.word_count_label.setToolTip("word count")
+        # make the label compact and right-aligned so it doesn't take excess space
+        self.word_count_label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        self.word_count_label.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
+        self.word_count_label.setMaximumHeight(24)
         layout.addWidget(self.word_count_label)
 
         # ---- dictionary panel ----
-        self.word_input = QLineEdit()
-        self.word_input.setPlaceholderText("Enter a word for definition...")
-        layout.addWidget(self.word_input)
+        # self.word_input = QLineEdit()
+        # self.word_input.setPlaceholderText("Enter a word for definition...")
+        # layout.addWidget(self.word_input)
 
-        enter_icon = self.base_path / "Icons/icons8-enter-64.png"
-        self.search_btn = QPushButton("")
-        self.search_btn.setIcon(QIcon(str(enter_icon)))
-        self.search_btn.setIconSize(QSize(30, 30))
-        self.search_btn.clicked.connect(
-            lambda: self.definition_requested.emit(self.word_input.text())
-        )
-        layout.addWidget(self.search_btn)
+        # enter_icon = self.base_path / "Icons/icons8-enter-64.png"
+        # self.search_btn = QPushButton("")
+        # self.search_btn.setIcon(QIcon(str(enter_icon)))
+        # self.search_btn.setIconSize(QSize(30, 30))
+        # self.search_btn.clicked.connect(
+        #     lambda: self.definition_requested.emit(self.word_input.text())
+        # )
+        # layout.addWidget(self.search_btn)
 
-        self.definition_label = QLabel()
-        self.definition_label.setWordWrap(True)
-        self.definition_label.setMinimumSize(14, 18)
-        layout.addWidget(self.definition_label)
+        # self.definition_label = QLabel()
+        # self.definition_label.setWordWrap(True)
+        # self.definition_label.setMinimumSize(14, 18)
+        # layout.addWidget(self.definition_label)
 
     # ------------------------------------------------------------------
     # Public helpers called by main_window
@@ -84,8 +94,8 @@ class EditorArea(QWidget):
     def update_word_count(self):
         count = len(self.text_edit.toPlainText().split())
         self.word_count_label.setText(
-            f'<img src="{self._wc_icon_path}" width="40" height="40">'
-            f'<span style="font-size:20px;"> ⁚ {count}</span>'
+            f'<img src="{self._wc_icon_path}" width="24" height="24">'
+            f'<span style="font-size:12px;"> ⁚ {count}</span>'
         )
 
     def show_definition(self, text: str):
@@ -113,6 +123,8 @@ class EditorArea(QWidget):
             preview = QTextEdit()
             preview.setReadOnly(True)
             self.splitter.addWidget(preview)
+            # preview should take less space than the editor
+            self.splitter.setStretchFactor(1, 0)
             self._md_mode = True
             self._refresh_preview()
             self._refresh_preview()   # double-refresh matches original behaviour

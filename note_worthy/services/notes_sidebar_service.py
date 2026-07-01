@@ -101,9 +101,26 @@ class NotesService:
         res = self._notes_db_class.delete_note(notebook_name, note)
         return res
 
+
+    def link_notes(self, source_note_id: int, target_note_id: int) -> dict:
+        """Link two notes together (bidirectional)."""
+        return self._notes_db_class.link_notes(source_note_id, target_note_id)
+
+    def unlink_notes(self, source_note_id: int, target_note_id: int) -> dict:
+        """Remove the link between two notes."""
+        return self._notes_db_class.unlink_notes(source_note_id, target_note_id)
+
+    def get_note_links(self, note_id: int) -> dict:
+        """Return all notes linked to *note_id*."""
+        return self._notes_db_class.get_links_for_note(note_id)
 if __name__ == "__main__":
     n = NotesService()
     # res = n.get_notebooks()
     # print(res)
     # print(n.get_all_notes())
     print(n.get_notebook_with_notes("Updated Test Notebook"))
+    # ------------------------------------------------------------------ #
+    #  Note links                                                          #
+    # ------------------------------------------------------------------ #
+
+    

@@ -60,7 +60,8 @@ class NoteWorthy(QWidget):
 
         # ---- window chrome ----
         self.setWindowTitle("Note Worthy")
-        self.setGeometry(100, 100, 600, 400)
+        # start with a wider window so the editor has room by default
+        self.setGeometry(100, 100, 900, 600)
         win_icon = self._path / "Icons/icons8-notebook-64.png"
         self.setWindowIcon(QIcon(str(win_icon)))
 
@@ -79,8 +80,11 @@ class NoteWorthy(QWidget):
         mid_btn_layout.setSpacing(0)
         mid_btn_layout.setContentsMargins(0, 0, 0, 0)
         mid_btn_layout.setAlignment(Qt.AlignTop)
-        flip_btn = QPushButton("Flip")
-        flip_btn.setFixedHeight(30)
+
+        flip_icon = self._path / "Icons/icons8-rotate-right-64.png"
+        flip_btn = QPushButton()
+        flip_btn.setIcon(QIcon(str(flip_icon)))
+        flip_btn.setFixedHeight(50)
         flip_btn.clicked.connect(self.flip_siderbar_face)
     
 
@@ -100,13 +104,13 @@ class NoteWorthy(QWidget):
       
         root.addWidget(self.sidebar_stack)
         root.addLayout(mid_btn_layout)
-        root.addLayout(self._editor.layout() or self._editor_vbox())
-        # EditorArea is a QWidget — add it directly
+        # EditorArea is a QWidget — add it directly (don't add its internal layout)
         root.addWidget(self._editor)
 
-        root.setStretch(0, 1)   # sidebar_stack → 10%
-        root.setStretch(1, 0)   # mid_btn_layout → minimum width    
-        root.setStretch(2, 9)   # editor → 90%
+        # Give the editor the majority of horizontal space
+        root.setStretch(0, 0)   # sidebar
+        root.setStretch(1, 0)   # middle buttons
+        root.setStretch(2, 1)  # editor (majority)
         self.setLayout(root)
 
 
