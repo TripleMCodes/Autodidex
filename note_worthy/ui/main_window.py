@@ -113,8 +113,6 @@ class NoteWorthy(QWidget):
         root.setStretch(2, 1)  # editor (majority)
         self.setLayout(root)
 
-
-        
         # ---- wire signals ----
         self._connect_signals()
 
@@ -128,7 +126,7 @@ class NoteWorthy(QWidget):
         # editor → services
         self._editor.text_changed.connect(self._on_text_changed)
         self._editor.definition_requested.connect(self._on_definition_requested)
-        # connect the existing NotesSide instance (don't recreate it here)
+        # connect the existing NotesSide instance
         self._notes_side.note_selected.connect(self._editor.set_text)
 
 
@@ -136,20 +134,11 @@ class NoteWorthy(QWidget):
         self._sidebar.file_btn.clicked.connect(self._open_file)
         self._sidebar.theme_btn.clicked.connect(self._toggle_theme)
         self._sidebar.font_size_box.currentIndexChanged.connect(self._change_font_size)
-        self._sidebar.copy_btn.clicked.connect(self._editor.text_edit.copy)
-        self._sidebar.cut_btn.clicked.connect(self._editor.text_edit.cut)
-        self._sidebar.paste_btn.clicked.connect(self._editor.text_edit.paste)
-        self._sidebar.lyrical_btn.clicked.connect(self._launch_lyrical_lab)
-        self._sidebar.undo_btn.clicked.connect(self._editor.text_edit.undo)
-        self._sidebar.clear_btn.clicked.connect(self._editor.text_edit.clear)
         self._sidebar.save_btn.clicked.connect(self._save_file)
         # --- save shortcut ---
         self.save_shortcut = QShortcut(QKeySequence("Ctrl+S"), self)
         self.save_shortcut.activated.connect(self._save_file)
-
         self._sidebar.md_btn.clicked.connect(self._toggle_markdown)
-        self._sidebar.exit_btn.clicked.connect(self._exit)
-
         # toggle button
         self._toggle_btn.clicked.connect(self._toggle_sidebar)
 
@@ -179,15 +168,6 @@ class NoteWorthy(QWidget):
     def _save_file(self):
         note = self._editor.get_text()
         res = self._notes_side._save_note(note)
-        # path, _ = QFileDialog.getSaveFileName(
-        #     self, "Save file", "",
-        #     "Text Files (*.txt);;HTML (*.html);;CSV (*.csv);;Python (*.py);;Markdown (*.md)"
-        # )
-        # if path:
-        #     try:
-        #         self._notes.write_file(path, self._editor.get_text())
-        #     except OSError as e:
-        #         QMessageBox.critical(self, "Save error", str(e))
         QMessageBox.information(self, "Saving Status", res["message"])
 
     def _open_file(self):
@@ -254,15 +234,6 @@ class NoteWorthy(QWidget):
             self._sidebar.show()
             self._toggle_btn.setIcon(QIcon(str(x_icon)))
 
-    # ------------------------------------------------------------------
-    # Lyrical Lab
-    # ------------------------------------------------------------------
-    def _launch_lyrical_lab(self):
-        self._lyrical_window = LyricsSummarizationUi()
-        self._lyrical_window.show()
-
-
-
     #-------------------------------------------------------------
     # sidebar behavior
     #-------------------------------------------------------------
@@ -278,19 +249,9 @@ class NoteWorthy(QWidget):
         next_mode = SidebarMode.NOTES if self.current_sidebar_face == SidebarMode.TOOLS else SidebarMode.TOOLS
         self.set_sidebar_mode(next_mode)
         if next_mode == SidebarMode.NOTES:
-            # self.flip_sidebar_btn.setIcon(self.tools_icon)
             print("The next widget is NOTES")
         else:
-            # self.flip_sidebar_btn.setIcon(self.song_list_icon)
             print("The next widget TOOLS")
-
-
-    # ------------------------------------------------------------------
-    # Exit
-    # ------------------------------------------------------------------
-    def _exit(self):
-        self.destroy()
-        sys.exit()
 
     # ------------------------------------------------------------------
     # Toggle button factory

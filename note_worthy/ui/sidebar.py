@@ -27,9 +27,6 @@ class Sidebar(QWidget):
         layout = QVBoxLayout(self)
         layout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
-        # self.flip_button = QPushButton("Flip")
-        # layout.addWidget(self.flip_button)
-
         def _btn(icon_name: str, tooltip: str) -> QPushButton:
             btn = QPushButton("")
             btn.setIcon(QIcon(str(self.base_path / icon_name)))
@@ -48,26 +45,15 @@ class Sidebar(QWidget):
         self.copy_btn    = _btn("Icons/icons8-copy-64.png",         "copy")
         self.cut_btn     = _btn("Icons/icons8-cut-48.png",          "cut")
         self.paste_btn   = _btn("Icons/icons8-paste-64.png",        "paste")
-        self.lyrical_btn = _btn("Icons/icons8-redo-64.png",         "lyrical lab")
-        self.undo_btn    = _btn("Icons/icons8-undo-64.png",         "undo")
-        self.clear_btn   = _btn("Icons/icons8-clear-64.png",        "clear")
         self.save_btn    = _btn("Icons/icons8-save-64.png",         "save")
         self.md_btn      = _btn("Icons/icons8-markdown-64.png",     "markdown preview")
-        self.exit_btn    = _btn("Icons/icons8-exit-sign-64.png",    "exit")
 
         widgets = [
             self.file_btn,
             self.theme_btn,
             self.font_size_box,
-            self.copy_btn,
-            self.cut_btn,
-            self.paste_btn,
-            self.lyrical_btn,
-            self.undo_btn,
-            self.clear_btn,
             self.save_btn,
             self.md_btn,
-            self.exit_btn,
         ]
         for w in widgets:
             layout.addWidget(w)

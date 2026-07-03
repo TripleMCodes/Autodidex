@@ -87,9 +87,9 @@ class PomodoroGUI(QWidget):
         # sidebar
         self.sidebar.sound_selector.currentTextChanged.connect(self._on_sound_changed)
         self.sidebar.volume_slider.valueChanged.connect(self.audio.set_volume)
-        self.sidebar.progress_btn.clicked.connect(self._plot_progress)
+        # self.sidebar.progress_btn.clicked.connect(self._plot_progress)
         self.sidebar.theme_btn.clicked.connect(self._toggle_theme)
-        self.sidebar.exit_btn.clicked.connect(lambda: sys.exit())
+        # self.sidebar.exit_btn.clicked.connect(lambda: sys.exit())
 
         # controls
         self.controls.start_btn.clicked.connect(self._start_session)
@@ -211,23 +211,23 @@ class PomodoroGUI(QWidget):
     # ------------------------------------------------------------------
     # Progress plot
     # ------------------------------------------------------------------
-    def _plot_progress(self):
-        data = self.logger.load_all()
-        if not data:
-            QMessageBox.information(self, "Notification", "No data to plot.")
-            return
-        dates   = sorted(data)
-        counts  = [data[d] for d in dates]
-        plt.figure(figsize=(12, 6))
-        plt.plot(dates, counts, marker="o", linestyle="-", color="teal")
-        plt.fill_between(dates, counts, color="teal", alpha=0.1)
-        plt.title("📈 Study Sessions Over Time", fontsize=16)
-        plt.xlabel("Date", fontsize=12)
-        plt.ylabel("Sessions", fontsize=12)
-        plt.grid(True, linestyle="--", alpha=0.6)
-        plt.tight_layout()
-        plt.xticks(rotation=45)
-        plt.show()
+    # def _plot_progress(self):
+    #     data = self.logger.load_all()
+    #     if not data:
+    #         QMessageBox.information(self, "Notification", "No data to plot.")
+    #         return
+    #     dates   = sorted(data)
+    #     counts  = [data[d] for d in dates]
+    #     plt.figure(figsize=(12, 6))
+    #     plt.plot(dates, counts, marker="o", linestyle="-", color="teal")
+    #     plt.fill_between(dates, counts, color="teal", alpha=0.1)
+    #     plt.title("📈 Study Sessions Over Time", fontsize=16)
+    #     plt.xlabel("Date", fontsize=12)
+    #     plt.ylabel("Sessions", fontsize=12)
+    #     plt.grid(True, linestyle="--", alpha=0.6)
+    #     plt.tight_layout()
+    #     plt.xticks(rotation=45)
+    #     plt.show()
 
 
 # ------------------------------------------------------------------

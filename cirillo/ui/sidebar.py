@@ -26,9 +26,6 @@ class Sidebar(QWidget):
         layout.setSpacing(12)
         self.setLayout(layout)
 
-
-        
-
         # ---- study music icon label ----
         s_icon = self.base_path / "Icons/icons8-rhythm-48.png"
         self.study_music_label = QLabel(
@@ -60,34 +57,19 @@ class Sidebar(QWidget):
         self.volume_slider.setValue(50)
         self.volume_slider.setStyleSheet(self._slider_style())
 
-        # ---- progress button ----
-        self.progress_btn = QPushButton("")
-        p_icon = self.base_path / "Icons/icons8-progress-64.png"
-        self.progress_btn.setIcon(QIcon(str(p_icon)))
-        self.progress_btn.setIconSize(QSize(30, 30))
-        self.progress_btn.setStyleSheet(self._green_btn_style())
-
         # ---- theme toggle ----
         self.theme_btn = QPushButton("")
         self.theme_btn.setIconSize(QSize(30, 30))
         self.theme_btn.setStyleSheet("")
 
-        # ---- exit button ----
-        self.exit_btn = QPushButton("")
-        exit_icon = self.base_path / "Icons/icons8-exit-sign-64.png"
-        self.exit_btn.setIcon(QIcon(str(exit_icon)))
-        self.exit_btn.setIconSize(QSize(30, 30))
-        self.exit_btn.setStyleSheet(self._red_btn_style())
-
+       
         # ---- assemble ----
         for w in (
             self.study_music_label,
             self.sound_selector,
             self.volume_label,
             self.volume_slider,
-            self.progress_btn,
             self.theme_btn,
-            self.exit_btn,
         ):
             layout.addWidget(w)
         layout.addStretch()
