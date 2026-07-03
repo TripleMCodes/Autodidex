@@ -1,7 +1,7 @@
 from datetime import date, timedelta
 
 from PySide6.QtWidgets import (
-    QGridLayout, QLabel, QScrollArea, QVBoxLayout, QWidget,
+    QGridLayout, QLabel, QScrollArea, QSizePolicy, QVBoxLayout, QWidget,
 )
 
 from calender.services.color_service import ColorService
@@ -43,6 +43,12 @@ class HeatmapWidget(QWidget):
 
         grid = QGridLayout(container)
         grid.setSpacing(4)
+
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        # self.setMinimumHeight(7 * 20 + 6 * 4 + 20)
+        # self.setMinimumWidth(8 * 20 + 7 * 4 + 20)
+        self.setMinimumHeight(50)
+        self.setMinimumWidth(10)
 
         # Rewind to the nearest Sunday so the grid aligns like GitHub
         current = start_date

@@ -24,20 +24,22 @@ class Sidebar(QWidget):
         layout = QVBoxLayout(self)
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        p_icon = self.base_path / "Icons/icons8-progress-64.png"
-        self.progress_btn = QPushButton("")
-        self.progress_btn.setIcon(QIcon(str(p_icon)))
-        self.progress_btn.setIconSize(QSize(30, 30))
-        self.progress_btn.setToolTip("progress")
+        # p_icon = self.base_path / "Icons/icons8-progress-64.png"
+        # self.progress_btn = QPushButton("")
+        # self.progress_btn.setIcon(QIcon(str(p_icon)))
+        # self.progress_btn.setIconSize(QSize(30, 30))
+        # self.progress_btn.setToolTip("progress")
 
         self.theme_btn = QPushButton("")
         self.theme_btn.setIconSize(QSize(30, 30))
 
-        exit_icon = self.base_path / "Icons/icons8-exit-sign-64.png"
-        self.exit_btn = QPushButton("")
-        self.exit_btn.setIcon(QIcon(str(exit_icon)))
-        self.exit_btn.setIconSize(QSize(30, 30))
-        self.exit_btn.setToolTip("exit")
+        # exit_icon = self.base_path / "Icons/icons8-exit-sign-64.png"
+        # self.exit_btn = QPushButton("")
+        # self.exit_btn.setIcon(QIcon(str(exit_icon)))
+        # self.exit_btn.setIconSize(QSize(30, 30))
+        # self.exit_btn.setToolTip("exit")
 
-        for btn in (self.progress_btn, self.theme_btn, self.exit_btn):
-            layout.addWidget(btn)
+        # for btn in (self.theme_btn):
+        #     layout.addWidget(btn)
+
+        layout.addWidget(self.theme_btn)

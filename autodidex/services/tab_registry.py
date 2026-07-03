@@ -44,10 +44,13 @@ def build_tab_definitions(base_path: Path, settings_widget: QWidget) -> list[Tab
         from calender.ui.main_window import CalendarHeatmap
         return CalendarHeatmap()
 
-    # Uncomment to re-enable Space Invader:
     def _space_invader():
         from spaceinvader.widget import SpaceInvaderWidget
         return SpaceInvaderWidget()
+
+    def _progress():
+        from autodidex_progress.ui.main_window import ProgressWindow
+        return ProgressWindow()
 
     return [
         TabDefinition("Dashboard",    "icons8-dashboard-64.png",   _dashboard),
@@ -55,6 +58,7 @@ def build_tab_definitions(base_path: Path, settings_widget: QWidget) -> list[Tab
         TabDefinition("Cirillo",      "icons8-pomodoro-50.png",    _cirillo),
         TabDefinition("NoteWorthy",   "icons8-notebook-64.png",    _noteworthy),
         TabDefinition("Calendar",     "icons8-calendar-64.png",    _calendar),
+        TabDefinition("Progress", "icons8-progress-64.png", _progress),
         TabDefinition("Settings",     "icons8-settings-64.png",    lambda: settings_widget),
         TabDefinition("Space Invader","ufo.png", _space_invader),
     ]

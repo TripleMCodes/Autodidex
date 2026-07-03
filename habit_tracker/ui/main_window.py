@@ -2,7 +2,7 @@ import logging
 import sys
 from pathlib import Path
 
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 from PySide6.QtCore import QSize
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
@@ -14,7 +14,7 @@ from habit_tracker.services.habit_service  import HabitService
 from habit_tracker.services.theme_service  import ThemeService
 from habit_tracker.services.trigger_service import TriggerService
 
-from habit_tracker.ui.sidebar     import Sidebar
+from habit_tracker.ui.sidebar import Sidebar
 from habit_tracker.ui.habit_table import HabitTable
 
 class CPTracker(QWidget):
@@ -63,16 +63,16 @@ class CPTracker(QWidget):
         self._connect_signals()
 
         # ---- initialise state ----
-        # self._init_wrapper()   # uncomment to enable on startup
+        self._init_wrapper()   # uncomment to enable on startup
 
     # ------------------------------------------------------------------
     # Wiring
     # ------------------------------------------------------------------
     def _connect_signals(self):
         # sidebar
-        self._sidebar.progress_btn.clicked.connect(self._show_progress)
+        # self._sidebar.progress_btn.clicked.connect(self._show_progress)
         self._sidebar.theme_btn.clicked.connect(self._toggle_theme)
-        self._sidebar.exit_btn.clicked.connect(lambda: sys.exit())
+        # self._sidebar.exit_btn.clicked.connect(lambda: sys.exit())
 
         # toggle button
         self._toggle_btn.clicked.connect(self._toggle_sidebar)
@@ -194,25 +194,25 @@ class CPTracker(QWidget):
     # ------------------------------------------------------------------
     # Progress
     # ------------------------------------------------------------------
-    def _show_progress(self):
-        counts = self._habits.get_cp_with_check_marks()
-        if not counts:
-            QMessageBox.information(self, "Progress", "No data to display yet.")
-            return
-        habits      = list(counts.keys())
-        frequencies = list(counts.values())
-        plt.figure(figsize=(10, 6))
-        bars = plt.bar(habits, frequencies, color="mediumpurple", edgecolor="black")
-        for bar in bars:
-            h = bar.get_height()
-            plt.text(bar.get_x() + bar.get_width() / 2, h + 0.1,
-                     f"{int(h)}", ha="center", va="bottom", fontsize=10)
-        plt.title("Habit Completion Frequency", fontsize=16)
-        plt.xlabel("Habits", fontsize=12)
-        plt.ylabel("Check-ins", fontsize=12)
-        plt.grid(axis="y", linestyle="--", alpha=0.7)
-        plt.tight_layout()
-        plt.show()
+    # def _show_progress(self):
+    #     counts = self._habits.get_cp_with_check_marks()
+    #     if not counts:
+    #         QMessageBox.information(self, "Progress", "No data to display yet.")
+    #         return
+    #     habits      = list(counts.keys())
+    #     frequencies = list(counts.values())
+    #     plt.figure(figsize=(10, 6))
+    #     bars = plt.bar(habits, frequencies, color="mediumpurple", edgecolor="black")
+    #     for bar in bars:
+    #         h = bar.get_height()
+    #         plt.text(bar.get_x() + bar.get_width() / 2, h + 0.1,
+    #                  f"{int(h)}", ha="center", va="bottom", fontsize=10)
+    #     plt.title("Habit Completion Frequency", fontsize=16)
+    #     plt.xlabel("Habits", fontsize=12)
+    #     plt.ylabel("Check-ins", fontsize=12)
+    #     plt.grid(axis="y", linestyle="--", alpha=0.7)
+    #     plt.tight_layout()
+    #     plt.show()
 
     # ------------------------------------------------------------------
     # Toggle button factory (sits outside the sidebar in the layout)

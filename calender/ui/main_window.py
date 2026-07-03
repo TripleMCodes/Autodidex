@@ -13,6 +13,7 @@ from calender.services.session_reader import SessionReader
 from calender.services.theme_service  import ThemeService
 from calender.ui.streak_tracker       import StreakTracker
 from calender.ui.heatmap_widget import HeatmapWidget
+from calender.ui.reminder_panel import ReminderPanel
 
 
 SESSIONS_FILE = Path(__file__).parent.parent.parent / "cirillo/sessions.csv"
@@ -41,17 +42,13 @@ class CalendarHeatmap(QWidget):
         # ---- build UI ----
         layout = QVBoxLayout(self)
 
-        self._calendar = QCalendarWidget()
-        self._calendar.setGridVisible(True)
-        self._calendar.setSelectedDate(QDate(date.today()))
-        self._calendar.clicked.connect(self._on_date_selected)
-        layout.addWidget(self._calendar)
+        # self._calendar = QCalendarWidget()
+        # self._calendar.setGridVisible(True)
+        # self._calendar.setSelectedDate(QDate(date.today()))
+        # self._calendar.clicked.connect(self._on_date_selected)
+        # layout.addWidget(self._calendar)
 
-        # theme toggle
-        self._theme_btn = QPushButton("")
-        self._theme_btn.setIconSize(QSize(30, 30))
-        self._theme_btn.clicked.connect(self._toggle_theme)
-        layout.addWidget(self._theme_btn, alignment=Qt.AlignmentFlag.AlignCenter)
+       
 
         # streak range label
         first_date = self._reader.load_first_date()
@@ -65,11 +62,25 @@ class CalendarHeatmap(QWidget):
                 border: 1px solid #C5D2E0; border-radius: 8px; margin: 10px 0;
             }
         """)
-        layout.addWidget(self._label)
+        # layout.addWidget(self._label)
 
-        # heatmap (owns its own file watcher)
-        self._streak = StreakTracker(SESSIONS_FILE)
-        layout.addWidget(self._streak)
+
+
+
+
+        panel = ReminderPanel()
+        layout.addWidget(panel)
+
+
+        # theme toggle
+        self._theme_btn = QPushButton("")
+        self._theme_btn.setIconSize(QSize(30, 30))
+        self._theme_btn.clicked.connect(self._toggle_theme)
+        layout.addWidget(self._theme_btn, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        # # heatmap (owns its own file watcher)
+        # self._streak = StreakTracker(SESSIONS_FILE)
+        # layout.addWidget(self._streak)
 
         # ---- apply saved theme ----
         self._apply_current_theme()
