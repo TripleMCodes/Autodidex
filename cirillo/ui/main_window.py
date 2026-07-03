@@ -4,7 +4,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 from PySide6.QtCore import QSize, QTimer
 from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import QApplication, QHBoxLayout, QMessageBox, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QApplication, QFileDialog, QHBoxLayout, QMessageBox, QVBoxLayout, QWidget
 
 
 from cirillo.services.audio_service import AudioService
@@ -20,10 +20,10 @@ from cirillo.ui.timer_display import TimerDisplay
 
 
 SOUND_FILES = {
-    "lofi":   "cirillo/sounds/lofi.mp3",
-    "Forest": "cirillo/sounds/forestsounds.mp3",
-    "Rain":   "cirillo/sounds/25 Minutes Sound Rain Noise to SleepRelaxing Rain.mp3",
-    "Cafe":   "cirillo/sounds/25 minutes of Cafe Noise.mp3",
+    "lofi":   "sounds/lofi.mp3",
+    "Forest": "sounds/forestsounds.mp3",
+    "Rain":   "sounds/25 Minutes Sound Rain Noise to SleepRelaxing Rain.mp3",
+    "Cafe":   "sounds/25 minutes of Cafe Noise.mp3",
 }
 
 
@@ -43,7 +43,7 @@ class PomodoroGUI(QWidget):
 
         # ---- services ----
         self.audio    = AudioService()
-        self.logger   = SessionLogger(self.path / "sessions.csv")
+        self.logger   = SessionLogger(self.path.parent / "sessions.csv")
         self.themes   = ThemeService(self.path.parent.parent)
         self.reward   = RewardService(self.path.parent.parent)
         self.timer_svc = TimerService()
@@ -95,6 +95,7 @@ class PomodoroGUI(QWidget):
         self.controls.start_btn.clicked.connect(self._start_session)
         self.controls.pause_btn.clicked.connect(self._toggle_pause)
         self.controls.stop_btn.clicked.connect(self._quit_session)
+        self.controls.reward_folder_btn.clicked.connect(self._choose_reward_folder)
 
         # timer service callbacks
         self.timer_svc.on_tick = self.display.set_time
@@ -169,7 +170,7 @@ class PomodoroGUI(QWidget):
             rel = SOUND_FILES.get(sound_name)
             if rel:
                 try:
-                    self.audio.play(self.path / rel)
+                    self.audio.play(self.path.parent / rel)
                 except RuntimeError as e:
                     QMessageBox.critical(self, "Audio error", str(e))
 
@@ -185,6 +186,16 @@ class PomodoroGUI(QWidget):
         if key:
             self.reward.play(file_types[key])
         # reward.stop() is called in _on_break_complete
+
+    def _choose_reward_folder(self):
+        folder = QFileDialog.getExistingDirectory(
+            self,
+            "Select reward folder",
+            str(self.reward.search_root),
+        )
+        if folder:
+            self.reward.search_root = Path(folder)
+            self.controls.set_reward_folder_path(folder)
 
     # ------------------------------------------------------------------
     # Theme

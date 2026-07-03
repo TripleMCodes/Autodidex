@@ -2,7 +2,7 @@ from pathlib import Path
 
 from PySide6.QtCore import QSize
 from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import QComboBox, QHBoxLayout, QPushButton, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QComboBox, QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QWidget
 
 
 class Controls(QWidget):
@@ -28,6 +28,19 @@ class Controls(QWidget):
         self.reward_selector.addItems(self.REWARD_OPTIONS)
         self.reward_selector.setStyleSheet(self._combo_style())
         layout.addWidget(self.reward_selector)
+
+        # ---- reward folder selector ----
+        self.reward_folder_btn = QPushButton("Choose reward folder")
+        self.reward_folder_btn.setToolTip("Select a directory containing reward files")
+        self.reward_folder_btn.setStyleSheet(self._green_btn_style())
+        layout.addWidget(self.reward_folder_btn)
+
+        self.reward_folder_label = QLabel("Reward folder: default")
+        self.reward_folder_label.setWordWrap(True)
+        self.reward_folder_label.setStyleSheet(
+            "QLabel { color: #b9a791; font-size: 12px; margin-top: 8px; }"
+        )
+        layout.addWidget(self.reward_folder_label)
 
         # ---- buttons row ----
         btn_row = QHBoxLayout()
@@ -67,6 +80,9 @@ class Controls(QWidget):
     @property
     def reward(self) -> str:
         return self.reward_selector.currentText()
+
+    def set_reward_folder_path(self, folder_path: str):
+        self.reward_folder_label.setText(f"Reward folder:\n{folder_path}")
 
     # ------------------------------------------------------------------
     @staticmethod

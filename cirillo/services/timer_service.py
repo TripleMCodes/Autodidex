@@ -2,10 +2,11 @@ import datetime
 import logging
 from typing import Callable, Optional
 
-from PySide6.QtCore import QTimer
+from PySide6.QtCore import QTimer, Signal
 
 
 class TimerService:
+    
     """
     Pure-logic Pomodoro state machine.
 
@@ -17,6 +18,7 @@ class TimerService:
         on_work_complete()                  – work session finished
         on_break_complete()                 – break finished
     """
+
 
     def __init__(self):
         self._qtimer = QTimer()
@@ -111,3 +113,6 @@ class TimerService:
     # ------------------------------------------------------------------
     def needs_long_break(self) -> bool:
         return self.sessions_tracker % 4 == 0 and self.sessions_tracker != 0
+
+
+   

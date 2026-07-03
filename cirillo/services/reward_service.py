@@ -18,8 +18,8 @@ MEDIA_APPS = {
 class RewardService:
     """Opens a random media file for break rewards and kills it afterwards."""
 
-    def __init__(self, search_root: Path):
-        self.search_root = search_root
+    def __init__(self, search_root: Path | str):
+        self.search_root = Path(search_root)
         self.proc: subprocess.Popen | None = None
 
     # ------------------------------------------------------------------

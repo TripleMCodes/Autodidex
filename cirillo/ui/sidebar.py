@@ -26,6 +26,9 @@ class Sidebar(QWidget):
         layout.setSpacing(12)
         self.setLayout(layout)
 
+
+        
+
         # ---- study music icon label ----
         s_icon = self.base_path / "Icons/icons8-rhythm-48.png"
         self.study_music_label = QLabel(
