@@ -132,7 +132,6 @@ class NoteWorthy(QWidget):
 
         # sidebar buttons → handlers
         self._sidebar.file_btn.clicked.connect(self._open_file)
-        self._sidebar.theme_btn.clicked.connect(self._toggle_theme)
         self._sidebar.font_size_box.currentIndexChanged.connect(self._change_font_size)
         self._sidebar.save_btn.clicked.connect(self._save_file)
         # --- save shortcut ---
@@ -149,7 +148,6 @@ class NoteWorthy(QWidget):
         font_size = self._prefs.load_font_size()
         self._editor.set_font_size(font_size)
         self._sidebar.font_size_box.setCurrentText(str(font_size))
-        self._apply_current_theme()
         last_text = self._notes.load_last()
         if last_text is not None:
             self._editor.set_text(last_text)
@@ -194,7 +192,7 @@ class NoteWorthy(QWidget):
     def _change_font_size(self):
         size = int(self._sidebar.font_size_box.currentText())
         self._editor.set_font_size(size)
-        self._prefs.save(self._themes.current_mode, str(size))
+        self._prefs.save(str(size))
 
     # ------------------------------------------------------------------
     # Markdown preview
@@ -205,19 +203,19 @@ class NoteWorthy(QWidget):
     # ------------------------------------------------------------------
     # Theme
     # ------------------------------------------------------------------
-    def _toggle_theme(self):
-        self._themes.toggle()
-        self._apply_current_theme()
+    def _toggle_theme(self, mode:str = "dark"):
+        print(f"the mode is (noteworthy): {mode}")
+        self._themes.toggle(mode)
+        self._apply_theme()
         self._prefs.save(
-            self._themes.current_mode,
-            self._sidebar.font_size_box.currentText(),
+            self._sidebar.font_size_box.currentText()
         )
 
-    def _apply_current_theme(self):
+    def _apply_theme(self):
         sheet = self._themes.stylesheet()
         self.setStyleSheet(sheet)
         self._sidebar.setStyleSheet(sheet)
-        self._sidebar.theme_btn.setIcon(QIcon(self._themes.icon_path()))
+        
         
 
     # ------------------------------------------------------------------

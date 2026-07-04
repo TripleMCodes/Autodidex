@@ -16,6 +16,7 @@ from autodidex.ui.exit_button  import make_exit_button
 from calender.ui.main_window import  CalendarHeatmap
 from habit_tracker.ui.main_window import CPTracker
 from cirillo.ui.main_window import PomodoroGUI
+from note_worthy.ui.main_window import NoteWorthy
 
 
 class Autodidex(QWidget):
@@ -54,9 +55,11 @@ class Autodidex(QWidget):
         
         # Add theme signals
         self.habit_tracker = CPTracker()
-        self.change.connect(self.habit_tracker._toggle_theme)
         self.cirillo = PomodoroGUI()
+        self.note_worhty = NoteWorthy()
+        self.change.connect(self.habit_tracker._toggle_theme)
         self.change.connect(self.cirillo._toggle_theme)
+        self.change.connect(self.note_worhty._toggle_theme)
 
 
         # ---- tab widget ----

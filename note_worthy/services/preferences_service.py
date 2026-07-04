@@ -23,10 +23,10 @@ class PreferencesService:
         except (FileNotFoundError, json.JSONDecodeError, ValueError):
             return self.DEFAULT_FONT_SIZE
 
-    def save(self, theme_mode: str, font_size: str):
+    def save(self, font_size: str = 10):
         """Persist current theme mode and font size selection."""
         try:
             with open(self._path, "w") as f:
-                json.dump({"dark_mode": theme_mode, "font_size": font_size}, f)
+                json.dump({"font_size": font_size}, f)
         except OSError as e:
             logging.warning(f"PreferencesService: could not save config: {e}")

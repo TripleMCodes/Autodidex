@@ -34,9 +34,7 @@ class Sidebar(QWidget):
             btn.setToolTip(tooltip)
             return btn
 
-        self.file_btn    = _btn("Icons/icons8-new-document-48.png", "open file")
-        self.theme_btn   = _btn("Icons/icons8-dark-mode-48.png",    "theme")
-        self.theme_btn.setIconSize(QSize(30, 30))
+        self.file_btn    = _btn("Icons/icons8-new-document-48.png", "open file")                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
 
         self.font_size_box = QComboBox()
         self.font_size_box.addItems(self.FONT_SIZES)
@@ -50,7 +48,6 @@ class Sidebar(QWidget):
 
         widgets = [
             self.file_btn,
-            self.theme_btn,
             self.font_size_box,
             self.save_btn,
             self.md_btn,
