@@ -68,8 +68,6 @@ class MainWindow(QMainWindow):
         else:
             self._show_onload()
 
-        self._apply_theme()
-
     # ------------------------------------------------------------------
     # Screen transitions
     # ------------------------------------------------------------------
@@ -87,7 +85,6 @@ class MainWindow(QMainWindow):
         )
         self._connect_dashboard_signals()
         self.setCentralWidget(self._panel)
-        self._apply_theme()
 
         # populate subjects and initial badge list
         self._panel.subject_combo.addItems(sorted(self._user.initialize_subjects()))
@@ -95,7 +92,6 @@ class MainWindow(QMainWindow):
             self._on_subject_changed(0)
 
     def _connect_dashboard_signals(self):
-        self._panel.theme_btn.clicked.connect(self._toggle_theme)
         self._panel.subject_combo.currentIndexChanged.connect(self._on_subject_changed)
         self._panel.store_combo.currentIndexChanged.connect(self._on_store_selection_changed)
         self._panel.buy_btn.clicked.connect(self._on_buy)
@@ -163,20 +159,12 @@ class MainWindow(QMainWindow):
     # ------------------------------------------------------------------
     # Theme
     # ------------------------------------------------------------------
-    def _toggle_theme(self):
-        self._themes.toggle()
+    def _toggle_theme(self, mode:str = "dark"):
+        print(f"the mode is (dashboard): {mode}")
+        self._themes.toggle(mode)
         self._apply_theme()
 
     def _apply_theme(self):
         self.setStyleSheet(self._themes.stylesheet())
-        if hasattr(self, "_panel"):
-            self._panel.theme_btn.setIcon(QIcon(self._themes.icon_path()))
 
 
-# ------------------------------------------------------------------
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = MainWindow()
-    window.resize(400, 600)
-    window.show()
-    sys.exit(app.exec())

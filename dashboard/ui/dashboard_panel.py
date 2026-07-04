@@ -44,13 +44,6 @@ class DashboardPanel(QWidget):
         label_row.addWidget(self.dashboard_label, alignment=Qt.AlignmentFlag.AlignCenter)
         layout.addLayout(label_row)
 
-        # ---- theme toggle ----
-        header_row = QHBoxLayout()
-        self.theme_btn = QPushButton("")
-        self.theme_btn.setIconSize(QSize(30, 30))
-        header_row.addWidget(self.theme_btn, alignment=Qt.AlignmentFlag.AlignCenter)
-        layout.addLayout(header_row)
-
         # ---- stat labels ----
         n_icon = self._path / "Icons/icons8-name-64.png"
         self.name_label = self._icon_label(n_icon, user.name, "Name")
