@@ -45,15 +45,6 @@ class CalendarHeatmap(QWidget):
         panel = ReminderPanel()
         layout.addWidget(panel)
 
-        # theme toggle
-        self._theme_btn = QPushButton("")
-        self._theme_btn.setIconSize(QSize(30, 30))
-        self._theme_btn.clicked.connect(self._toggle_theme)
-        layout.addWidget(self._theme_btn, alignment=Qt.AlignmentFlag.AlignCenter)
-
-        # ---- apply saved theme ----
-        self._apply_current_theme()
-
     # ------------------------------------------------------------------
     def _on_date_selected(self, qdate: QDate):
         """Show the session count for the clicked day."""
@@ -72,22 +63,11 @@ class CalendarHeatmap(QWidget):
             )
 
     # ------------------------------------------------------------------
-    def _toggle_theme(self):
-        self._themes.toggle()
-        self._apply_current_theme()
+    def _toggle_theme(self, mode:str = "dark"):
+        print(f"the theme is (calander): {mode}")
+        self._themes.toggle(mode)
+        self._apply_theme()
 
-    def _apply_current_theme(self):
+    def _apply_theme(self):
         self.setStyleSheet(self._themes.stylesheet())
-        self._theme_btn.setIcon(QIcon(self._themes.icon_path()))
-
-
-    def test_sig(self):
-        print("this worked")
-
-
-# ------------------------------------------------------------------
-if __name__ == "__main__":
-    app = QApplication([])
-    window = CalendarHeatmap()
-    window.show()
-    sys.exit(app.exec())
+        

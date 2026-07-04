@@ -57,9 +57,11 @@ class Autodidex(QWidget):
         self.habit_tracker = CPTracker()
         self.cirillo = PomodoroGUI()
         self.note_worhty = NoteWorthy()
+        self.cal = CalendarHeatmap()
         self.change.connect(self.habit_tracker._toggle_theme)
         self.change.connect(self.cirillo._toggle_theme)
         self.change.connect(self.note_worhty._toggle_theme)
+        self.change.connect(self.cal._toggle_theme)
 
 
         # ---- tab widget ----
