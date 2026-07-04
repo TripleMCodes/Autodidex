@@ -57,11 +57,6 @@ class Sidebar(QWidget):
         self.volume_slider.setValue(50)
         self.volume_slider.setStyleSheet(self._slider_style())
 
-        # ---- theme toggle ----
-        self.theme_btn = QPushButton("")
-        self.theme_btn.setIconSize(QSize(30, 30))
-        self.theme_btn.setStyleSheet("")
-
        
         # ---- assemble ----
         for w in (
@@ -69,7 +64,6 @@ class Sidebar(QWidget):
             self.sound_selector,
             self.volume_label,
             self.volume_slider,
-            self.theme_btn,
         ):
             layout.addWidget(w)
         layout.addStretch()

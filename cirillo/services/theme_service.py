@@ -19,32 +19,15 @@ class ThemeService:
         self.base_path = base_path
         self._themes = Themes()
         self._cache = DictionaryCache()
-
-        # Resolve stylesheet strings (cache-first, then DB)
         self.stylesheets: dict[str, Optional[str]] = {}
-        for mode in self.CYCLE:
-            cached = self._cache.get(mode)
-            if cached:
-                self.stylesheets[mode] = cached
-            else:
-                sheet = self._themes.get_theme_mode(mode)
-                self._cache.set(mode, sheet)
-                self.stylesheets[mode] = sheet
-
-        # Current mode (cache-first, then DB)
-        self.current_mode: str = self._cache.get("theme") or self._themes.get_chosen_theme()
-
+        
     # ------------------------------------------------------------------
     def stylesheet(self, mode: Optional[str] = None) -> str:
         """Return the stylesheet for *mode* (defaults to current mode)."""
         return self.stylesheets.get(mode or self.current_mode, "")
 
-    def icon_path(self, mode: Optional[str] = None) -> str:
-        rel = self.ICONS.get(mode or self.current_mode, "")
-        return str(self.base_path / rel)
-
-    def toggle(self) -> str:
+    def toggle(self, mode:str = "dark") -> str:
         """Advance to the next mode and return its name."""
-        idx = self.CYCLE.index(self.current_mode)
+        idx = self.CYCLE.index(mode)
         self.current_mode = self.CYCLE[(idx + 1) % len(self.CYCLE)]
         return self.current_mode

@@ -1,7 +1,7 @@
 import sys
 from pathlib import Path
 
-import matplotlib.pyplot as plt
+
 from PySide6.QtCore import QSize, QTimer
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QApplication, QFileDialog, QHBoxLayout, QMessageBox, QVBoxLayout, QWidget
@@ -77,8 +77,6 @@ class PomodoroGUI(QWidget):
         # ---- wire signals ----
         self._connect_signals()
 
-        # ---- apply saved theme ----
-        self._apply_current_theme()
 
     # ------------------------------------------------------------------
     # Signal wiring
@@ -87,9 +85,6 @@ class PomodoroGUI(QWidget):
         # sidebar
         self.sidebar.sound_selector.currentTextChanged.connect(self._on_sound_changed)
         self.sidebar.volume_slider.valueChanged.connect(self.audio.set_volume)
-        # self.sidebar.progress_btn.clicked.connect(self._plot_progress)
-        self.sidebar.theme_btn.clicked.connect(self._toggle_theme)
-        # self.sidebar.exit_btn.clicked.connect(lambda: sys.exit())
 
         # controls
         self.controls.start_btn.clicked.connect(self._start_session)
@@ -103,7 +98,7 @@ class PomodoroGUI(QWidget):
         self.timer_svc.on_break_complete = self._on_break_complete
 
     # ------------------------------------------------------------------
-    # Session flow``
+    # Session flow
     # ------------------------------------------------------------------
     def _start_session(self):
         self.timer_svc.start_work(self.display.work_duration)
@@ -200,35 +195,13 @@ class PomodoroGUI(QWidget):
     # ------------------------------------------------------------------
     # Theme
     # ------------------------------------------------------------------
-    def _toggle_theme(self):
-        self.themes.toggle()
-        self._apply_current_theme()
+    def _toggle_theme(self, mode: str = "dark"):
+        print(f"the mode is {mode}")
+        self.themes.toggle(mode)
+        self._apply_theme()
 
-    def _apply_current_theme(self):
+    def _apply_theme(self):
         self.setStyleSheet(self.themes.stylesheet())
-        self.sidebar.theme_btn.setIcon(QIcon(self.themes.icon_path()))
-
-    # ------------------------------------------------------------------
-    # Progress plot
-    # ------------------------------------------------------------------
-    # def _plot_progress(self):
-    #     data = self.logger.load_all()
-    #     if not data:
-    #         QMessageBox.information(self, "Notification", "No data to plot.")
-    #         return
-    #     dates   = sorted(data)
-    #     counts  = [data[d] for d in dates]
-    #     plt.figure(figsize=(12, 6))
-    #     plt.plot(dates, counts, marker="o", linestyle="-", color="teal")
-    #     plt.fill_between(dates, counts, color="teal", alpha=0.1)
-    #     plt.title("📈 Study Sessions Over Time", fontsize=16)
-    #     plt.xlabel("Date", fontsize=12)
-    #     plt.ylabel("Sessions", fontsize=12)
-    #     plt.grid(True, linestyle="--", alpha=0.6)
-    #     plt.tight_layout()
-    #     plt.xticks(rotation=45)
-    #     plt.show()
-
 
 # ------------------------------------------------------------------
 if __name__ == "__main__":

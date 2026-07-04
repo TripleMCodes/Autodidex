@@ -28,7 +28,7 @@ class ThemeService:
     def stylesheet(self, mode: Optional[str] = None) -> str:
         return self.stylesheets.get(mode or self.current_mode, "")
 
-    def toggle(self, mode: str = "") -> str:
+    def toggle(self, mode: str = "dark") -> str:
         """Advance to the next mode and return its name."""
         print(f"the mode is {mode}")
         idx = self.CYCLE.index(mode)
