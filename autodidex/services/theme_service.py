@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Optional
 
 from autodidex_cache import DictionaryCache
-from themes_db import Themes
+from autodidex_services.themes_db import Themes
 
 
 class ThemeService:

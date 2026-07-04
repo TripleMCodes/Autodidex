@@ -218,6 +218,7 @@ class NoteWorthy(QWidget):
         self.setStyleSheet(sheet)
         self._sidebar.setStyleSheet(sheet)
         self._sidebar.theme_btn.setIcon(QIcon(self._themes.icon_path()))
+        
 
     # ------------------------------------------------------------------
     # Sidebar toggle

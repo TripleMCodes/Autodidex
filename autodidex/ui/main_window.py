@@ -1,7 +1,7 @@
 import sys
 from pathlib import Path
 
-from PySide6.QtCore import QSize, Qt
+from PySide6.QtCore import QSize, Qt, Signal
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
     QApplication, QMessageBox, QTabWidget, QVBoxLayout, QWidget,
@@ -13,9 +13,13 @@ from autodidex.services.session_watcher import SessionWatcher
 
 from autodidex.ui.settings_tab import SettingsTab, ABOUT_TEXT
 from autodidex.ui.exit_button  import make_exit_button
+from calender.ui.main_window import  CalendarHeatmap
+from habit_tracker.ui.main_window import CPTracker
 
 
 class Autodidex(QWidget):
+
+    change = Signal(str)
     """
     Thin orchestration shell for the Autodidex tab container.
 
@@ -42,6 +46,13 @@ class Autodidex(QWidget):
         self._settings = SettingsTab(self._path)
         self._settings.theme_btn.clicked.connect(self._toggle_theme)
         self._settings.about_btn.clicked.connect(self._show_about)
+
+
+        # self._cal = CalendarHeatmap()
+        # self.change.connect(self._cal.test_sig)
+
+        self.habit_tracker = CPTracker()
+        self.change.connect(self.habit_tracker._toggle_theme)
 
         # ---- tab widget ----
         self._tabs = QTabWidget()
@@ -81,6 +92,7 @@ class Autodidex(QWidget):
     def _toggle_theme(self):
         self._themes.toggle()
         self._apply_theme()
+        self.change.emit(self._themes.current_mode)
 
     def _apply_theme(self):
         """Apply current theme to the shell and all child tab widgets."""
@@ -94,6 +106,7 @@ class Autodidex(QWidget):
         for widget in self._tab_widgets:
             if hasattr(widget, "_apply_current_theme"):
                 widget._apply_current_theme()
+        self.change.emit(self._themes.current_mode)
 
     # ------------------------------------------------------------------
     # Session watcher callback
@@ -107,8 +120,8 @@ class Autodidex(QWidget):
         if dashboard:
             dashboard._bank.wallet = 3
         # Uncomment to also refresh the dashboard UI after awarding:
-        # if dashboard and hasattr(dashboard, "_on_db_ui_update"):
-            # dashboard._on_db_ui_update()
+        if dashboard and hasattr(dashboard, "_on_db_ui_update"):
+            dashboard._on_db_ui_update()
 
     # ------------------------------------------------------------------
     # About

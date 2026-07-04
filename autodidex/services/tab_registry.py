@@ -52,12 +52,17 @@ def build_tab_definitions(base_path: Path, settings_widget: QWidget) -> list[Tab
         from autodidex_progress.ui.main_window import ProgressWindow
         return ProgressWindow()
 
+    def _browser():
+        from browser.ui.browser_widget import BrowserWidget
+        return BrowserWidget()
+
     return [
         TabDefinition("Dashboard",    "icons8-dashboard-64.png",   _dashboard),
         TabDefinition("Habit Tracker","icons8-to-do-list-64.png",  _habit_tracker),
         TabDefinition("Cirillo",      "icons8-pomodoro-50.png",    _cirillo),
         TabDefinition("NoteWorthy",   "icons8-notebook-64.png",    _noteworthy),
         TabDefinition("Calendar",     "icons8-calendar-64.png",    _calendar),
+        TabDefinition("Browser",      "icons8-browser-64.png",     _browser),
         TabDefinition("Progress", "icons8-progress-64.png", _progress),
         TabDefinition("Settings",     "icons8-settings-64.png",    lambda: settings_widget),
         TabDefinition("Space Invader","ufo.png", _space_invader),

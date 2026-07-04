@@ -2,7 +2,7 @@ import logging
 import sys
 from pathlib import Path
 
-# import matplotlib.pyplot as plt
+
 from PySide6.QtCore import QSize
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
@@ -48,14 +48,8 @@ class CPTracker(QWidget):
         # ---- build layout ----
         self._root = QHBoxLayout(self)
 
-        self._sidebar = Sidebar(self._path)
-
-        self._toggle_btn = self._make_toggle_btn()
-
         self._table = HabitTable(self._path)
 
-        self._root.addWidget(self._sidebar)
-        self._root.addWidget(self._toggle_btn)
         self._root.addWidget(self._table)
         self.setLayout(self._root)
 
@@ -69,13 +63,6 @@ class CPTracker(QWidget):
     # Wiring
     # ------------------------------------------------------------------
     def _connect_signals(self):
-        # sidebar
-        # self._sidebar.progress_btn.clicked.connect(self._show_progress)
-        self._sidebar.theme_btn.clicked.connect(self._toggle_theme)
-        # self._sidebar.exit_btn.clicked.connect(lambda: sys.exit())
-
-        # toggle button
-        self._toggle_btn.clicked.connect(self._toggle_sidebar)
 
         # table signals
         self._table.checkbox_toggled.connect(self._on_checkbox_toggled)
@@ -98,8 +85,7 @@ class CPTracker(QWidget):
             states = self._habits.get_checkbox_states()
             self._table.apply_checkbox_states(states)
             self._table.enable_checkbox_save = True
-        self._apply_current_theme()
-
+       
     # ------------------------------------------------------------------
     # Habit CRUD
     # ------------------------------------------------------------------
@@ -170,50 +156,16 @@ class CPTracker(QWidget):
         habits = self._habits.get_habits()
         self._counter = self._table.populate_habits(habits)
 
-    def _toggle_sidebar(self):
-        menu_icon = self._path / "Icons/icons8-menu-48.png"
-        x_icon    = self._path / "Icons/icons8-close-64.png"
-        if self._sidebar.isVisible():
-            self._sidebar.hide()
-            self._toggle_btn.setIcon(QIcon(str(menu_icon)))
-        else:
-            self._sidebar.show()
-            self._toggle_btn.setIcon(QIcon(str(x_icon)))
-
     # ------------------------------------------------------------------
     # Theme
     # ------------------------------------------------------------------
-    def _toggle_theme(self):
-        self._themes.toggle()
-        self._apply_current_theme()
+    def _toggle_theme(self, mode:str = ""):
+        self._themes.toggle(mode)
+        self._apply_theme()
 
-    def _apply_current_theme(self):
+    def _apply_theme(self):
         self.setStyleSheet(self._themes.stylesheet())
-        self._sidebar.theme_btn.setIcon(QIcon(self._themes.icon_path()))
-
-    # ------------------------------------------------------------------
-    # Progress
-    # ------------------------------------------------------------------
-    # def _show_progress(self):
-    #     counts = self._habits.get_cp_with_check_marks()
-    #     if not counts:
-    #         QMessageBox.information(self, "Progress", "No data to display yet.")
-    #         return
-    #     habits      = list(counts.keys())
-    #     frequencies = list(counts.values())
-    #     plt.figure(figsize=(10, 6))
-    #     bars = plt.bar(habits, frequencies, color="mediumpurple", edgecolor="black")
-    #     for bar in bars:
-    #         h = bar.get_height()
-    #         plt.text(bar.get_x() + bar.get_width() / 2, h + 0.1,
-    #                  f"{int(h)}", ha="center", va="bottom", fontsize=10)
-    #     plt.title("Habit Completion Frequency", fontsize=16)
-    #     plt.xlabel("Habits", fontsize=12)
-    #     plt.ylabel("Check-ins", fontsize=12)
-    #     plt.grid(axis="y", linestyle="--", alpha=0.7)
-    #     plt.tight_layout()
-    #     plt.show()
-
+        
     # ------------------------------------------------------------------
     # Toggle button factory (sits outside the sidebar in the layout)
     # ------------------------------------------------------------------

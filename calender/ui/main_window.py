@@ -81,6 +81,10 @@ class CalendarHeatmap(QWidget):
         self._theme_btn.setIcon(QIcon(self._themes.icon_path()))
 
 
+    def test_sig(self):
+        print("this worked")
+
+
 # ------------------------------------------------------------------
 if __name__ == "__main__":
     app = QApplication([])
