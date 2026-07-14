@@ -42,4 +42,8 @@ class ProgressWindow(QWidget):
         
         layout.addWidget(self._streak)
 
+        self.load_progress()
+
+    def load_progress(self):
+        print(f"self._habits is: {self._habits}")
         self._habit_chart.load_from(self._habits)

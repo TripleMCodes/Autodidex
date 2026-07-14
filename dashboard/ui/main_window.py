@@ -141,12 +141,14 @@ class MainWindow(QMainWindow):
     # ------------------------------------------------------------------
     def _on_new_cp(self):
         """Called when update.txt changes — a new cerebral pursuit was added."""
+        print(f"new cp added (dashboard)")
         self._user.refresh_subjects()
         if hasattr(self, "_panel"):
             self._panel.subject_combo.clear()
             self._panel.subject_combo.addItems(
                 sorted(set(self._user.initialize_subjects()))
             )
+        
 
     def _on_db_ui_update(self):
         """Called when update_db_ui.txt changes — checkbox states changed."""

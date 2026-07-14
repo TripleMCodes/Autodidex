@@ -55,6 +55,18 @@ def build_tab_definitions(base_path: Path, settings_widget: QWidget) -> list[Tab
     def _browser():
         from browser.ui.browser_widget import BrowserWidget
         return BrowserWidget()
+    
+    # habit = _habit_tracker()
+    # dashboard = _dashboard()
+    # cirillo = _cirillo()
+    # noteworthy = _noteworthy()
+    # calendar = _calendar()
+    # progress = _progress()
+    # browser = _browser()
+    # space_invader = _space_invader()
+
+    # habit.new_cp.connect(dashboard._on_new_cp)
+
 
     return [
         TabDefinition("Dashboard",    "icons8-dashboard-64.png",   _dashboard),
@@ -67,3 +79,4 @@ def build_tab_definitions(base_path: Path, settings_widget: QWidget) -> list[Tab
         TabDefinition("Settings",     "icons8-settings-64.png",    lambda: settings_widget),
         TabDefinition("Space Invader","ufo.png", _space_invader),
     ]
+

@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 
 
-from PySide6.QtCore import QSize
+from PySide6.QtCore import QSize, Signal
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
     QApplication, QHBoxLayout, QInputDialog,
@@ -18,6 +18,10 @@ from habit_tracker.ui.sidebar import Sidebar
 from habit_tracker.ui.habit_table import HabitTable
 
 class CPTracker(QWidget):
+
+    new_cp = Signal()
+    check = Signal()
+
     """
     Thin orchestration shell.
 
@@ -102,8 +106,12 @@ class CPTracker(QWidget):
         self._table.table.setItem(self._counter, 0, QTableWidgetItem(text))
         self._counter += 1
         self._table.clear_input()
+        # Emit signal before showing modal so listeners can update promptly
+        print("CPTracker: emitting new_cp signal for habit '%s'", text)
+        self.new_cp.emit()
+        # self._triggers.notify_dashboard()
+        print("new cp added (cp tracker)")
         QMessageBox.information(self, "Successful", msg["message"])
-        self._triggers.notify_dashboard()
 
     def _edit_subject(self, row: int, old_subject: str):
         new_subject, ok = QInputDialog.getText(
@@ -148,6 +156,7 @@ class CPTracker(QWidget):
         logging.debug(msg)
         QMessageBox.information(self, "Message", msg["message"])
         self._triggers.notify_db_ui()
+        self.check.emit()
 
     # ------------------------------------------------------------------
     # UI helpers

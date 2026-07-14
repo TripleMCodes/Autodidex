@@ -1,4 +1,5 @@
 import sys
+import logging
 from pathlib import Path
 
 from PySide6.QtCore import QSize, Qt, Signal
@@ -18,6 +19,7 @@ from habit_tracker.ui.main_window import CPTracker
 from cirillo.ui.main_window import PomodoroGUI
 from note_worthy.ui.main_window import NoteWorthy
 from dashboard.ui.main_window import MainWindow
+from autodidex_progress.ui.main_window import ProgressWindow
 
 
 class Autodidex(QWidget):
@@ -54,34 +56,65 @@ class Autodidex(QWidget):
         # self._cal = CalendarHeatmap()
         # self.change.connect(self._cal.test_sig)
         
-        # Add theme signals
-        self.habit_tracker = CPTracker()
-        self.cirillo = PomodoroGUI()
-        self.note_worhty = NoteWorthy()
-        self.cal = CalendarHeatmap()
-        self.dashboard = MainWindow()
-        self.change.connect(self.habit_tracker._toggle_theme)
-        self.change.connect(self.cirillo._toggle_theme)
-        self.change.connect(self.note_worhty._toggle_theme)
-        self.change.connect(self.cal._toggle_theme)
-        self.change.connect(self.dashboard._toggle_theme)
-
-
-        # ---- tab widget ----
+# ---- tab widget ----
         self._tabs = QTabWidget()
         self._tabs.setTabPosition(QTabWidget.West)
         self._tabs.tabBar().setIconSize(QSize(36, 36))
 
         # ---- register tabs from registry (single source of truth) ----
         self._tab_widgets: list[QWidget] = []
+        self.habit_tracker: CPTracker | None = None
+        self.cirillo: PomodoroGUI | None = None
+        self.note_worhty: NoteWorthy | None = None
+        self.cal: CalendarHeatmap | None = None
+        self.dashboard: MainWindow | None = None
+        self.progress: ProgressWindow | None = None
+
         for tab_def in build_tab_definitions(self._path, self._settings):
             widget = tab_def.widget_factory()
             self._tab_widgets.append(widget)
+
+            if isinstance(widget, CPTracker):
+                self.habit_tracker = widget
+                print('progress window is present')
+            elif isinstance(widget, PomodoroGUI):
+                self.cirillo = widget
+            elif isinstance(widget, NoteWorthy):
+                self.note_worhty = widget
+            elif isinstance(widget, CalendarHeatmap):
+                self.cal = widget
+            elif isinstance(widget, MainWindow):
+                self.dashboard = widget
+            elif isinstance(widget, ProgressWindow):
+                print('progress window is present')
+                self.progress = widget
+
             icon_path = self._path / "Icons" / tab_def.icon_filename
             self._tabs.addTab(widget, QIcon(str(icon_path)), "")
             self._tabs.setTabToolTip(
                 self._tabs.count() - 1, tab_def.tooltip
             )
+
+        # Add theme signals to the actual tab widgets that were created
+        if self.habit_tracker is not None:
+            self.change.connect(self.habit_tracker._toggle_theme)
+        if self.cirillo is not None:
+            self.change.connect(self.cirillo._toggle_theme)
+        if self.note_worhty is not None:
+            self.change.connect(self.note_worhty._toggle_theme)
+        if self.cal is not None:
+            self.change.connect(self.cal._toggle_theme)
+        if self.dashboard is not None:
+            self.change.connect(self.dashboard._toggle_theme)
+
+        # Signals between apps using the actual tab instances
+        if self.habit_tracker is not None and self.dashboard is not None:
+            self.habit_tracker.new_cp.connect(self.dashboard._on_new_cp)
+            print("Autodidex: connected habit_tracker.new_cp -> dashboard._on_new_cp")
+        if self.habit_tracker is not None and self.progress is not None:
+            self.habit_tracker.check.connect(self.progress.load_progress)
+            print("Autodidex: connected habit_tracker.new_cp -> progress.load_progress")
+        
 
         # ---- exit button ----
         exit_btn = make_exit_button(self._path)
