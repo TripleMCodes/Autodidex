@@ -127,6 +127,8 @@ class PomodoroGUI(QWidget):
     def _on_break_complete(self):
         """Called by TimerService when a break ends."""
         self.reward.stop()
+        print(f"the sessions are (this run) {self.timer_svc.sessions_this_run}")
+        print(f"the sessions are (tracker) {self.timer_svc.sessions_tracker}")
         QMessageBox.information(self, "Break Over", "Time to get back to work!")
         self._start_session()
 
@@ -141,6 +143,7 @@ class PomodoroGUI(QWidget):
         QMessageBox.information(self, "Goodbye!", f"You completed {self._current_sessions} session(s).")
 
     def _toggle_pause(self):
+       
         if not self.timer_svc.is_running():
             QMessageBox.warning(self, "Warning", "Pomodoro session hasn't started yet.")
             return

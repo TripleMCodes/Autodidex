@@ -147,6 +147,7 @@ class CPTracker(QWidget):
             return
         QMessageBox.information(self, "Deleted", msg.get("message", "Subject deleted"))
         self._refresh_table()
+        self.new_cp.emit() # Refresh tables in dashboard
 
     # ------------------------------------------------------------------
     # Checkbox

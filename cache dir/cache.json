@@ -1,12 +1,14 @@
 {
     "cp_streak": {
-        "Mathematics": 5,
-        "Freelance": 3,
-        "M-Prosody": 1,
+        "Mathematics": 7,
+        "DSA": 7,
+        "Freelance": 7,
+        "M-Prosody": 7,
+        "Linguistics": 2,
+        "mathematics": 2,
         "origin story": 2,
-        "physics": 2,
-        "Awaken Me": 2,
-        "new sub": 3
+        "writing": 4,
+        "physics": 2
     },
     "overall_level": 4,
     "badges": [
