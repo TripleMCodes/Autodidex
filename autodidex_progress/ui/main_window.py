@@ -1,10 +1,10 @@
 from pathlib import Path
 
-from PySide6.QtCore import QSize
+from PySide6.QtCore import QSize, Qt
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
     QApplication, QHBoxLayout, QInputDialog,
-    QMessageBox, QVBoxLayout, QWidget,
+    QMessageBox, QVBoxLayout, QWidget, QLabel,
 )
 
 from habit_tracker.ui.habit_chart import HabitBarChartWidget
@@ -33,10 +33,20 @@ class ProgressWindow(QWidget):
 
         # ---- build UI ----
         layout = QVBoxLayout(self)
+        heat_map_label = QLabel("Pomodoro Sessions' Heatmap")
+        heat_map_label.setAlignment(Qt.AlignCenter)
+        heat_map_label.setStyleSheet(
+            "font-size: 13px;"
+            "font-weight: bold;"
+            
+            "margin-top: 6px;"
+            "margin-bottom: 4px;"
+        )
 
         # habit chart
         self._habit_chart = HabitBarChartWidget()
         layout.addWidget(self._habit_chart)
+        layout.addWidget(heat_map_label, alignment=Qt.AlignCenter)
         self._streak = StreakTracker(SESSIONS_FILE)
         # heatmap (owns its own file watcher)
         
