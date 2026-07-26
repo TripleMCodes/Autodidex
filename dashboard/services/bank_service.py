@@ -5,7 +5,7 @@ from typing import Optional
 
 from autodidex_cache import DictionaryCache
 from dash_board_db import Dashboard
-from cp_tracker_db import Cp_tracker
+from autodidex_services.cp_tracker_db import Cp_tracker
 
 
 class BankService:

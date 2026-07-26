@@ -8,7 +8,7 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtGui import QShortcut, QKeySequence
 
-from lyric_n_summarization_ui import LyricsSummarizationUi
+# from lyric_n_summarization_ui import LyricsSummarizationUi
 
 from note_worthy.services.definition_service  import DefinitionService
 from note_worthy.services.note_service        import NoteService

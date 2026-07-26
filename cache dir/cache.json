@@ -1,34 +1,41 @@
 {
     "cp_streak": {
-        "Mathematics": 7,
-        "DSA": 7,
-        "Freelance": 7,
-        "M-Prosody": 7,
-        "Linguistics": 2,
-        "mathematics": 2,
-        "origin story": 2,
-        "writing": 4,
-        "physics": 2
+        "Mathematics": 2
     },
     "overall_level": 4,
     "badges": [
+        "\ud83c\udf96\ufe0f Level 5 Unlocked",
         "\ud83d\udd30Genesis",
+        "\ud83c\udfaf Every Ten Counts",
+        "\ud83d\udc8e Every Tenth Tier counts",
         "\ud83c\udfc6 1K Subject XP Master"
     ],
     "cp_badges": {
+        "physics": [
+            "\ud83c\udfc6 1K Subject XP Master"
+        ],
+        "mathematics": [
+            "\ud83c\udfc6 1K Subject XP Master"
+        ],
+        "writing": [
+            "\ud83c\udfc6 1K Subject XP Master"
+        ],
         "Linguistics": [
-            "\ud83c\udfc6 1K Subject XP Master"
-        ],
-        "DSA": [
-            "\ud83c\udfc6 1K Subject XP Master"
-        ],
-        "M-Prosody": [
             "\ud83c\udfc6 1K Subject XP Master"
         ],
         "Mathematics": [
             "\ud83c\udfc6 1K Subject XP Master"
         ],
+        "origin story": [
+            "\ud83c\udfc6 1K Subject XP Master"
+        ],
         "Freelance": [
+            "\ud83c\udfc6 1K Subject XP Master"
+        ],
+        "M-Prosody": [
+            "\ud83c\udfc6 1K Subject XP Master"
+        ],
+        "DSA": [
             "\ud83c\udfc6 1K Subject XP Master"
         ]
     },
