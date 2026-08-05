@@ -10,7 +10,7 @@ logging.basicConfig(level=logging.DEBUG)
 class Cp_tracker():
 
     def __init__(self):
-        self.db_path = Path(__file__).parent.parent / "autodidex.db"
+        self.db_path = Path(__file__).parent / "autodidex.db"
         self.conn = sqlite3.connect(self.db_path)
         self.conn_cursor = self.conn.cursor()
         self.table_name_one = "cerebral_pursuits"

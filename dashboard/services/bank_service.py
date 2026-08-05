@@ -5,7 +5,7 @@ from typing import Optional
 
 from autodidex_cache import DictionaryCache
 from dash_board_db import Dashboard
-from autodidex_services.cp_tracker_db import Cp_tracker
+from cp_tracker_db import Cp_tracker
 
 
 class BankService:
@@ -72,6 +72,8 @@ class BankService:
 
         for subject, streak in current_data.items():
             cached_streak = cached.get(subject, 0)
+            print(f"the cached streak is: {cached_streak}")
+            print(f"the streak is: {streak}")
             if cached_streak < streak:
                 xp = streak * self.XP_PER_CHECKBOX
                 self._dashboard.add_total_xp(xp)

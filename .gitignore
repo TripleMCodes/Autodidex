@@ -12,7 +12,6 @@ test_file.py
 c_sidebar.py
 calander.py
 color.css
-cp_tracker_db.py
 flashcards.py
 game_sys.py
 game_sys2.py
@@ -32,3 +31,9 @@ study_alg.py
 v_tabs.py
 todo.txt
 signal_and_slots_pract
+/_archive/
+todo.txt
+Autodidex.spec
+autodidex.sqbpro
+autodidexii.sqbpro
+update.txt

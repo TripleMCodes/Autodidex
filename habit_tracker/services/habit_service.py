@@ -2,7 +2,7 @@ import datetime
 import logging
 from typing import Optional
 
-from autodidex_services.cp_tracker_db import Cp_tracker
+from cp_tracker_db import Cp_tracker
 
 
 class HabitService:
